@@ -1,0 +1,31 @@
+{
+  "name": "sidetrack",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/pg": "^8.10.2",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.4",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.33.0"
+  },
+  "dependencies": {
+    "@effect/data": "^0.16.0",
+    "@effect/io": "^0.35.1",
+    "dotenv-cli": "^7.2.1",
+    "graphile-migrate": "^1.4.1",
+    "pg": "^8.11.1"
+  },
+  "scripts": {
+    "db-commit": "dotenv graphile-migrate commit",
+    "db-reset": "dotenv -- graphile-migrate reset --erase",
+    "db-reset-commit": "pnpm db-reset && pnpm db-commit",
+    "db-uncommit": "dotenv graphile-migrate uncommit",
+    "db-watch": "dotenv graphile-migrate watch",
+    "test": "dotenv -- vitest --config ./vitest.config.ts"
+  }
+}
