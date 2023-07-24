@@ -7,8 +7,7 @@ import { Sidetrack } from "../src";
 describe("jobs", () => {
   it("accepts a query adapter", async () => {
     const pool = new Pool({
-      connectionString:
-        "postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable",
+      connectionString: process.env.DATABASE_URL,
     });
 
     const sidetrack = new Sidetrack({
@@ -21,8 +20,7 @@ describe("jobs", () => {
         },
       ],
       databaseOptions: {
-        connectionString:
-          "postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable",
+        connectionString: process.env.DATABASE_URL,
       },
       customAdapter: {
         execute: async (query, params) => {
@@ -32,7 +30,7 @@ describe("jobs", () => {
         },
       },
     });
-    sidetrack.start();
+    await sidetrack.start();
 
     // insert a job API
     const insertedId = await sidetrack.insert(
@@ -60,12 +58,11 @@ describe("jobs", () => {
         },
       ],
       databaseOptions: {
-        connectionString:
-          "postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable",
+        connectionString: process.env.DATABASE_URL,
       },
     });
 
-    sidetrack.start();
+    await sidetrack.start();
 
     // insert a job API
     const insertedId = await sidetrack.insert(
@@ -87,7 +84,7 @@ describe("jobs", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack2 = new Sidetrack({
+    const sidetrack = new Sidetrack({
       queues: [
         {
           name: "test",
@@ -97,30 +94,29 @@ describe("jobs", () => {
         },
       ],
       databaseOptions: {
-        connectionString:
-          "postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable",
+        connectionString: process.env.DATABASE_URL,
       },
     });
 
-    sidetrack2.start();
+    await sidetrack.start();
 
     // insert a job API
-    const insertedId = await sidetrack2.insert("test", { id: "hello fail" });
+    const insertedId = await sidetrack.insert("test", { id: "hello fail" });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    expect((await sidetrack2.getJob(insertedId)).status).toBe("failed");
+    expect((await sidetrack.getJob(insertedId)).status).toBe("failed");
 
     expect(insertedId).toBeGreaterThan(0);
 
-    await sidetrack2.cleanup();
+    await sidetrack.cleanup();
   });
 
   it("job gets retried", async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack2 = new Sidetrack({
+    const sidetrack = new Sidetrack({
       queues: [
         {
           name: "test",
@@ -130,15 +126,14 @@ describe("jobs", () => {
         },
       ],
       databaseOptions: {
-        connectionString:
-          "postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable",
+        connectionString: process.env.DATABASE_URL,
       },
     });
 
-    sidetrack2.start();
+    await sidetrack.start();
 
     // insert a job API
-    const insertedId = await sidetrack2.insert(
+    const insertedId = await sidetrack.insert(
       "test",
       { id: "hello fail" },
       { maxAttempts: 2 }
@@ -146,16 +141,16 @@ describe("jobs", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    expect((await sidetrack2.getJob(insertedId)).status).toBe("retrying");
+    expect((await sidetrack.getJob(insertedId)).status).toBe("retrying");
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const job = await sidetrack2.getJob(insertedId);
+    const job = await sidetrack.getJob(insertedId);
     expect(job.status).toBe("failed");
     expect(job.current_attempt).toBe(2);
 
     expect(insertedId).toBeGreaterThan(0);
 
-    await sidetrack2.cleanup();
+    await sidetrack.cleanup();
   });
 });

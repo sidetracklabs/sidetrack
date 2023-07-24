@@ -5,6 +5,7 @@ import * as Duration from "@effect/data/Duration";
 import { pipe } from "@effect/data/Function";
 import * as FiberId from "@effect/io/Fiber/Id";
 import * as Fiber from "@effect/io/Fiber";
+import pg_migrate from "node-pg-migrate";
 
 interface QueryAdapter {
   execute: (query: string, params?: any[]) => Promise<{ rows: any[] }>;
@@ -95,6 +96,13 @@ export class Sidetrack {
         },
       };
     }
+
+    await pg_migrate({
+      databaseUrl: this.databaseOptions.connectionString,
+      migrationsTable: "sidetrack_migrations",
+      dir: "migrations",
+      direction: "up",
+    });
 
     return this.startPolling();
   }
