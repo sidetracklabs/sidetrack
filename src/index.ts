@@ -86,6 +86,26 @@ export class Sidetrack {
     ).rows[0].id;
   }
 
+  async cancel(jobId: string) {
+    // TODO can you cancel a completed job?
+    // TODO do we actually interupt the running promise
+    return (
+      await this.queryAdapter.execute(
+        `UPDATE sidetrack_jobs SET status = 'cancelled' WHERE id = $1`,
+        [jobId],
+      )
+    ).rows[0];
+  }
+
+  async delete(jobId: string) {
+    // TODO can you delete a running job?
+    return (
+      await this.queryAdapter.execute(`DELETE FROM sidetrack_jobs WHERE id = $1`, [
+        jobId,
+      ])
+    ).rows[0];
+  }
+
   async start() {
     if (!this.queryAdapter) {
       this.pool = new Pool(this.databaseOptions);

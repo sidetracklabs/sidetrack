@@ -6,7 +6,7 @@ exports.up = (pgm) => {
   pgm.sql(`CREATE TYPE sidetrack_job_status_enum AS ENUM (
     'scheduled',
     'running',
-    'canceled',
+    'cancelled',
     'failed',
     'retrying',
     'completed'
