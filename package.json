@@ -8,6 +8,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/pg": "^8.10.2",
+    "prettier": "^3.0.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.4",
     "vite-tsconfig-paths": "^4.2.0",
@@ -28,6 +29,7 @@
     "db-uncommit": "dotenv graphile-migrate uncommit",
     "db-watch": "dotenv graphile-migrate watch",
     "test": "dotenv -- vitest --config ./vitest.config.ts",
-    "migrate": "node-pg-migrate"
+    "migrate": "node-pg-migrate",
+    "format": "prettier --write ."
   }
 }

@@ -61,7 +61,7 @@ export class Sidetrack {
     return (
       await this.queryAdapter.execute(
         `SELECT * FROM sidetrack_jobs WHERE id = $1`,
-        [jobId]
+        [jobId],
       )
     ).rows[0];
   }
@@ -69,7 +69,7 @@ export class Sidetrack {
   async insert(
     queueName: string,
     payload: Record<string, unknown>,
-    options?: InsertOptions
+    options?: InsertOptions,
   ) {
     // TODO the return value should not be casted, otherwise it will truncate at 2 billion
     return (
@@ -81,7 +81,7 @@ export class Sidetrack {
 		current_attempt,
 		max_attempts
 	      ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING id::integer`,
-        [queueName, payload, options?.maxAttempts ?? 1]
+        [queueName, payload, options?.maxAttempts ?? 1],
       )
     ).rows[0].id;
   }
@@ -136,8 +136,8 @@ export class Sidetrack {
 				id
 			FROM
 				next_jobs
-		) RETURNING *`
-        )
+		) RETURNING *`,
+        ),
       )
 
         .pipe(Effect.map((a) => a.rows))
@@ -145,9 +145,9 @@ export class Sidetrack {
         .pipe(
           Effect.flatMap((a) =>
             Effect.promise(() =>
-              Promise.all(a.map((job) => this.runHandler(job)))
-            )
-          )
+              Promise.all(a.map((job) => this.runHandler(job))),
+            ),
+          ),
         )
         // Decrease polling time potentially?
         .pipe(Effect.repeat(Schedule.spaced(Duration.millis(500))))
@@ -155,9 +155,9 @@ export class Sidetrack {
         .pipe(Effect.forkDaemon)
         .pipe(
           Effect.flatMap((fiber) =>
-            Effect.sync(() => (this.pollingFiber = fiber))
-          )
-        )
+            Effect.sync(() => (this.pollingFiber = fiber)),
+          ),
+        ),
     );
   }
 
@@ -179,9 +179,9 @@ export class Sidetrack {
           Effect.promise(() =>
             this.queryAdapter.execute(
               `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
-              [job.id]
-            )
-          )
+              [job.id],
+            ),
+          ),
         ),
         Effect.catchTag("HandlerError", (handlerError) =>
           Effect.sync(() => console.log("AM I HANDLING ERROR")).pipe(
@@ -200,9 +200,9 @@ export class Sidetrack {
                         //       TODO make sure we handle cases where this is not an Error, and also not serializable?
                         JSON.stringify(
                           handlerError.error,
-                          Object.getOwnPropertyNames(handlerError.error)
+                          Object.getOwnPropertyNames(handlerError.error),
                         ),
-                      ]
+                      ],
                     );
                   } else {
                     return this.queryAdapter.execute(
@@ -216,9 +216,9 @@ export class Sidetrack {
                         //       TODO make sure we handle cases where this is not an Error, and also not serializable?
                         JSON.stringify(
                           handlerError.error,
-                          Object.getOwnPropertyNames(handlerError.error)
+                          Object.getOwnPropertyNames(handlerError.error),
                         ),
-                      ]
+                      ],
                     );
                   }
                 },
@@ -226,11 +226,11 @@ export class Sidetrack {
                   console.log("UPDATING THE JOB TABLE FAILED", e);
                   return e;
                 },
-              })
-            )
-          )
-        )
-      )
+              }),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

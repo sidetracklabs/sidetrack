@@ -36,7 +36,7 @@ describe("jobs", () => {
     const insertedId = await sidetrack.insert(
       "test",
       { id: "hello success" },
-      { maxAttempts: 2 }
+      { maxAttempts: 2 },
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -68,7 +68,7 @@ describe("jobs", () => {
     const insertedId = await sidetrack.insert(
       "test",
       { id: "hello success" },
-      { maxAttempts: 2 }
+      { maxAttempts: 2 },
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -136,7 +136,7 @@ describe("jobs", () => {
     const insertedId = await sidetrack.insert(
       "test",
       { id: "hello fail" },
-      { maxAttempts: 2 }
+      { maxAttempts: 2 },
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
