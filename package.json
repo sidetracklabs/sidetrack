@@ -6,8 +6,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-git"
+    }
+  },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.7",
+    "@commitlint/config-conventional": "^17.6.7",
     "@types/pg": "^8.10.2",
+    "commitizen": "^4.3.0",
+    "cz-git": "^1.7.0",
+    "husky": "^8.0.3",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.4",
