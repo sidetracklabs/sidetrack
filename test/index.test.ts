@@ -183,12 +183,49 @@ describe("jobs", () => {
 
     expect((await sidetrack.getJob(insertedId)).status).toBe("retrying");
 
-    await sidetrack.cancel(insertedId)
+    await sidetrack.cancel(insertedId);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    
+
     const job = await sidetrack.getJob(insertedId);
     expect(job.status).toBe("cancelled");
     expect(job.current_attempt).toBe(1);
+    await sidetrack.cleanup();
+  });
+
+  it("job gets deleted", async () => {
+    // // 1 . define queue and function to call, (and queue opts?)
+    const sidetrack = new Sidetrack({
+      queues: [
+        {
+          name: "test",
+          handler: async (payload) => {
+            throw new Error("Hello failed");
+          },
+        },
+      ],
+      databaseOptions: {
+        connectionString: process.env.DATABASE_URL,
+      },
+    });
+
+    await sidetrack.start();
+
+    // insert a job API
+    const insertedId = await sidetrack.insert(
+      "test",
+      { id: "hello fail" },
+      { maxAttempts: 2 },
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    expect((await sidetrack.getJob(insertedId)).status).toBe("retrying");
+
+    await sidetrack.delete(insertedId);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const job = await sidetrack.getJob(insertedId);
+    expect(job).toBeUndefined();
     await sidetrack.cleanup();
   });
 });
