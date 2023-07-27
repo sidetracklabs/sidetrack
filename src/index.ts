@@ -3,17 +3,25 @@ import * as Effect from "@effect/io/Effect";
 import * as Schedule from "@effect/io/Schedule";
 import * as Duration from "@effect/data/Duration";
 import { pipe } from "@effect/data/Function";
-import * as FiberId from "@effect/io/Fiber/Id";
 import * as Fiber from "@effect/io/Fiber";
 import pg_migrate from "node-pg-migrate";
 import { fromIterable } from "@effect/data/ReadonlyRecord";
+import SidetrackJobs from "./models/public/SidetrackJobs";
 
 interface QueryAdapter {
-  execute: (query: string, params?: any[]) => Promise<{ rows: any[] }>;
+  execute: <ResultRow>(
+    query: string,
+    params?: any[],
+  ) => Promise<{ rows: ResultRow[] }>;
 }
 
 export const makePgAdapter = (pgClient: Pool | Client): QueryAdapter => ({
-  execute: (query, params) => pgClient.query(query, params),
+  execute: async (query, params) => {
+    const result = await pgClient.query(query, params);
+    return {
+      rows: result.rows,
+    };
+  },
 });
 
 // TODO how to infer the payload type, make it generic?
@@ -43,6 +51,14 @@ class HandlerError {
   constructor(readonly error: unknown) {}
 }
 
+const runMigrations = async (connectionString: string) =>
+  pg_migrate({
+    databaseUrl: connectionString,
+    migrationsTable: "sidetrack_migrations",
+    dir: "migrations",
+    direction: "up",
+  });
+
 export class Sidetrack {
   queryAdapter: QueryAdapter;
   pool: Pool | undefined;
@@ -59,7 +75,13 @@ export class Sidetrack {
     });
     this.databaseOptions = options.databaseOptions;
     this.pool = undefined;
-    this.queryAdapter = options.customAdapter;
+    this.queryAdapter = options.customAdapter ?? {
+      execute: async (_query, _params) => {
+        throw new Error(
+          "Query adapter not found: You must run the start() function before using sidetrack, or pass in a custom adapter.",
+        );
+      },
+    };
   }
 
   async getJob(jobId: string, options?: { adapter?: QueryAdapter }) {
@@ -78,7 +100,9 @@ export class Sidetrack {
   ) {
     // TODO the return value should not be casted, otherwise it will truncate at 2 billion
     return (
-      await (options?.adapter || this.queryAdapter).execute(
+      await (options?.adapter || this.queryAdapter).execute<
+        Pick<SidetrackJobs, "id">
+      >(
         `INSERT INTO sidetrack_jobs (
 		status,
 		queue,
@@ -123,12 +147,8 @@ export class Sidetrack {
       };
     }
 
-    await pg_migrate({
-      databaseUrl: this.databaseOptions.connectionString,
-      migrationsTable: "sidetrack_migrations",
-      dir: "migrations",
-      direction: "up",
-    });
+    // TODO migrations can't be performed with a custom adapter currently
+    await runMigrations(this.databaseOptions.connectionString);
 
     return this.startPolling();
   }
@@ -147,7 +167,7 @@ export class Sidetrack {
 			(status = 'scheduled' or status = 'retrying')
 			AND scheduled_at <= NOW()
 		ORDER BY
-			scheduled_at 
+			scheduled_at
     FOR UPDATE SKIP LOCKED
 	)
 	UPDATE
@@ -228,7 +248,7 @@ export class Sidetrack {
                     );
 
                     return this.queryAdapter.execute(
-                      `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors = 
+                      `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                         (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
@@ -244,7 +264,7 @@ export class Sidetrack {
                     );
                   } else {
                     return this.queryAdapter.execute(
-                      `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors = 
+                      `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                           (CASE
                           WHEN errors IS NULL THEN '[]'::JSONB
                           ELSE errors
@@ -294,7 +314,7 @@ export class Sidetrack {
               status != 'running'
               AND id = $1
             ORDER BY
-              scheduled_at 
+              scheduled_at
               FOR UPDATE
               SKIP LOCKED
           )
@@ -346,7 +366,7 @@ export class Sidetrack {
                 options?.runScheduled ? "" : "AND scheduled_at <= NOW()"
               } AND queue = $1
             ORDER BY
-              scheduled_at 
+              scheduled_at
               FOR UPDATE
               SKIP LOCKED
           )
