@@ -18,6 +18,7 @@
     "commitizen": "^4.3.0",
     "cz-git": "^1.7.0",
     "husky": "^8.0.3",
+    "kanel": "^3.4.3",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.4",
@@ -40,6 +41,7 @@
     "db-watch": "dotenv graphile-migrate watch",
     "test": "dotenv -- vitest --config ./vitest.config.ts",
     "migrate": "node-pg-migrate",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "generate-db-models": "dotenv kanel"
   }
 }

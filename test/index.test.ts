@@ -143,15 +143,14 @@ describe("jobs", () => {
 
     expect((await sidetrack.getJob(insertedId)).status).toBe("retrying");
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await sidetrack.cleanup();
 
+    await sidetrack.runJob(insertedId);
     const job = await sidetrack.getJob(insertedId);
     expect(job.status).toBe("failed");
     expect(job.current_attempt).toBe(2);
 
     expect(insertedId).toBeGreaterThan(0);
-
-    await sidetrack.cleanup();
   });
 
   it("job gets cancelled", async () => {
@@ -227,5 +226,38 @@ describe("jobs", () => {
     const job = await sidetrack.getJob(insertedId);
     expect(job).toBeUndefined();
     await sidetrack.cleanup();
+  });
+
+  it("run job works", async () => {
+    // // 1 . define queue and function to call, (and queue opts?)
+    const sidetrack = new Sidetrack({
+      queues: [
+        {
+          name: "test",
+          handler: async (payload) => {
+            console.log("hello");
+          },
+        },
+      ],
+      databaseOptions: {
+        connectionString: process.env.DATABASE_URL,
+      },
+    });
+
+    await sidetrack.start();
+    await sidetrack.cleanup();
+
+    // insert a job API
+    const insertedId = await sidetrack.insert(
+      "test",
+      { id: "hello fail" },
+      { maxAttempts: 2 },
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    expect((await sidetrack.getJob(insertedId)).status).toBe("scheduled"); // running
+
+    await sidetrack.runJob(insertedId);
+    expect((await sidetrack.getJob(insertedId)).status).toBe("completed");
   });
 });

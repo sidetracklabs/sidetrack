@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, Client } from "pg";
 import * as Effect from "@effect/io/Effect";
 import * as Schedule from "@effect/io/Schedule";
 import * as Duration from "@effect/data/Duration";
@@ -6,17 +6,22 @@ import { pipe } from "@effect/data/Function";
 import * as FiberId from "@effect/io/Fiber/Id";
 import * as Fiber from "@effect/io/Fiber";
 import pg_migrate from "node-pg-migrate";
+import { fromIterable } from "@effect/data/ReadonlyRecord";
 
 interface QueryAdapter {
   execute: (query: string, params?: any[]) => Promise<{ rows: any[] }>;
 }
+
+export const makePgAdapter = (pgClient: Pool | Client): QueryAdapter => ({
+  execute: (query, params) => pgClient.query(query, params),
+});
 
 // TODO how to infer the payload type, make it generic?
 interface InsertOptions {
   scheduledAt?: Date;
   // TODO this might be a queue-level setting instead of a job-level setting
   maxAttempts?: number;
-  customAdapter?: QueryAdapter;
+  adapter?: QueryAdapter;
 }
 
 interface Queue {
@@ -57,9 +62,9 @@ export class Sidetrack {
     this.queryAdapter = options.customAdapter;
   }
 
-  async getJob(jobId: string) {
+  async getJob(jobId: string, options?: { adapter?: QueryAdapter }) {
     return (
-      await this.queryAdapter.execute(
+      await (options?.adapter || this.queryAdapter).execute(
         `SELECT * FROM sidetrack_jobs WHERE id = $1`,
         [jobId],
       )
@@ -73,10 +78,10 @@ export class Sidetrack {
   ) {
     // TODO the return value should not be casted, otherwise it will truncate at 2 billion
     return (
-      await this.queryAdapter.execute(
+      await (options?.adapter || this.queryAdapter).execute(
         `INSERT INTO sidetrack_jobs (
 		status,
-		queue_name,
+		queue,
 		payload,
 		current_attempt,
 		max_attempts
@@ -86,23 +91,24 @@ export class Sidetrack {
     ).rows[0].id;
   }
 
-  async cancel(jobId: string) {
+  async cancel(jobId: string, options?: { adapter?: QueryAdapter }) {
     // TODO can you cancel a completed job?
     // TODO do we actually interupt the running promise
     return (
-      await this.queryAdapter.execute(
+      await (options?.adapter || this.queryAdapter).execute(
         `UPDATE sidetrack_jobs SET status = 'cancelled' WHERE id = $1`,
         [jobId],
       )
     ).rows[0];
   }
 
-  async delete(jobId: string) {
+  async delete(jobId: string, options?: { adapter?: QueryAdapter }) {
     // TODO can you delete a running job?
     return (
-      await this.queryAdapter.execute(`DELETE FROM sidetrack_jobs WHERE id = $1`, [
-        jobId,
-      ])
+      await (options?.adapter || this.queryAdapter).execute(
+        `DELETE FROM sidetrack_jobs WHERE id = $1`,
+        [jobId],
+      )
     ).rows[0];
   }
 
@@ -141,9 +147,8 @@ export class Sidetrack {
 			(status = 'scheduled' or status = 'retrying')
 			AND scheduled_at <= NOW()
 		ORDER BY
-			scheduled_at FOR
-		UPDATE
-			SKIP LOCKED
+			scheduled_at 
+    FOR UPDATE SKIP LOCKED
 	)
 	UPDATE
 		sidetrack_jobs
@@ -160,12 +165,12 @@ export class Sidetrack {
         ),
       )
 
-        .pipe(Effect.map((a) => a.rows))
+        .pipe(Effect.map((result) => result.rows))
         // TODO this probably needs to be forked so it doesn't block the polling
         .pipe(
-          Effect.flatMap((a) =>
+          Effect.flatMap((result) =>
             Effect.promise(() =>
-              Promise.all(a.map((job) => this.runHandler(job))),
+              Promise.all(result.map((job) => this.runHandler(job))),
             ),
           ),
         )
@@ -182,15 +187,16 @@ export class Sidetrack {
   }
 
   async cleanup() {
-    if (this.pollingFiber)
+    if (this.pollingFiber) {
       return Effect.runPromise(Fiber.interrupt(this.pollingFiber));
+    }
   }
 
   async runHandler(job: any) {
-    Effect.runPromise(
+    return Effect.runPromise(
       pipe(
         Effect.tryPromise({
-          try: () => this.queues[job.queue_name].handler(job.payload),
+          try: () => this.queues[job.queue].handler(job.payload),
           catch: (e) => {
             return new HandlerError(e);
           },
@@ -209,8 +215,20 @@ export class Sidetrack {
               Effect.tryPromise({
                 try: () => {
                   if (job.current_attempt + 1 < job.max_attempts) {
+                    // Exponential backoff with jitter
+                    // Based of the historic Resque/Sidekiq algorithm
+
+                    const backoff = Math.trunc(
+                      Math.pow(job.current_attempt + 1, 4) +
+                        15 +
+                        // Number between 1 and 30
+                        Math.floor(Math.random() * (30 - 1 + 1) + 1) *
+                          job.current_attempt +
+                        1,
+                    );
+
                     return this.queryAdapter.execute(
-                      `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '2 seconds', current_attempt = current_attempt + 1, errors = 
+                      `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors = 
                         (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
@@ -249,6 +267,140 @@ export class Sidetrack {
               }),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /**
+   * ==================
+   * Test Utilities
+   * ==================
+   */
+
+  // TODO potentially return job info?
+  async runJob(jobId: string, options?: { adapter?: QueryAdapter }) {
+    // mark as running, and then run job.
+    return Effect.runPromise(
+      Effect.promise(() =>
+        // TODO type a sidetrack job table (or generate the types from the database)
+        (options?.adapter || this.queryAdapter).execute(
+          `WITH next_jobs AS (
+            SELECT
+              id
+            FROM
+              sidetrack_jobs
+            WHERE
+              status != 'running'
+              AND id = $1
+            ORDER BY
+              scheduled_at 
+              FOR UPDATE
+              SKIP LOCKED
+          )
+          UPDATE
+            sidetrack_jobs
+          SET
+            status = 'running',
+            attempted_at = NOW()
+          WHERE
+            id IN (
+              SELECT
+                id
+              FROM
+                next_jobs
+            ) RETURNING *`,
+          [jobId],
+        ),
+      )
+
+        .pipe(Effect.map((result) => result.rows))
+        // TODO this probably needs to be forked so it doesn't block the polling
+        .pipe(
+          Effect.flatMap((result) =>
+            Effect.promise(() =>
+              Promise.all(result.map((job) => this.runHandler(job))),
+            ),
+          ),
+        ),
+    );
+  }
+
+  async runQueue(
+    queue: string,
+    options?: { runScheduled?: boolean; adapter?: QueryAdapter },
+  ) {
+    // mark as running, and then run job.
+    return Effect.runPromise(
+      Effect.promise(() =>
+        // TODO type a sidetrack job table (or generate the types from the database)
+        this.queryAdapter.execute(
+          `WITH next_jobs AS (
+            SELECT
+              id
+            FROM
+              sidetrack_jobs
+            WHERE
+              (status != 'running')
+              ${
+                options?.runScheduled ? "" : "AND scheduled_at <= NOW()"
+              } AND queue = $1
+            ORDER BY
+              scheduled_at 
+              FOR UPDATE
+              SKIP LOCKED
+          )
+          UPDATE
+            sidetrack_jobs
+          SET
+            status = 'running',
+            attempted_at = NOW()
+          WHERE
+            id IN (
+              SELECT
+                id
+              FROM
+                next_jobs
+            ) RETURNING *`,
+        ),
+      )
+
+        .pipe(Effect.map((result) => result.rows))
+        // TODO this probably needs to be forked so it doesn't block the polling
+        .pipe(
+          Effect.flatMap((result) =>
+            Effect.promise(() =>
+              Promise.all(result.map((job) => this.runHandler(job))),
+            ),
+          ),
+        ),
+    );
+  }
+
+  async list_jobs(options?: { queue?: string; adapter?: QueryAdapter }) {
+    // get jobs
+    return Effect.runPromise(
+      Effect.promise(() =>
+        (options?.adapter || this.queryAdapter).execute(
+          `SELECT * FROM sidetrack_jobs ${
+            options?.queue ? "WHERE queue = $1" : ""
+          }}`,
+          options?.queue ? [options?.queue] : undefined,
+        ),
+      ).pipe(Effect.map((result) => result.rows)),
+    );
+  }
+
+  async list_job_statuses(options?: { adapter?: QueryAdapter }) {
+    // get jobs and group by status
+    return Effect.runPromise(
+      Effect.promise(() =>
+        (options?.adapter || this.queryAdapter).execute(
+          `SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`,
+        ),
+      ).pipe(
+        Effect.map((result) =>
+          fromIterable(result.rows, (row) => [row.status, row.count]),
         ),
       ),
     );
