@@ -15,6 +15,7 @@
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
     "@types/pg": "^8.10.2",
+    "@vitest/coverage-v8": "^0.33.0",
     "commitizen": "^4.3.0",
     "cz-git": "^1.7.0",
     "husky": "^8.0.3",
@@ -29,17 +30,12 @@
     "@effect/data": "^0.16.0",
     "@effect/io": "^0.35.1",
     "dotenv-cli": "^7.2.1",
-    "graphile-migrate": "^1.4.1",
     "node-pg-migrate": "^6.2.2",
     "pg": "^8.11.1"
   },
   "scripts": {
-    "db-commit": "dotenv graphile-migrate commit",
-    "db-reset": "dotenv -- graphile-migrate reset --erase",
-    "db-reset-commit": "pnpm db-reset && pnpm db-commit",
-    "db-uncommit": "dotenv graphile-migrate uncommit",
-    "db-watch": "dotenv graphile-migrate watch",
-    "test": "dotenv -- vitest --config ./vitest.config.ts",
+    "test": "vitest --config ./vitest.config.ts",
+    "coverage": "vitest --config ./vitest.config.ts --coverage",
     "migrate": "node-pg-migrate",
     "format": "prettier --write .",
     "generate-db-models": "dotenv kanel"

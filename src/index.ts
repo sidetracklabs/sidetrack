@@ -7,6 +7,7 @@ import * as Fiber from "@effect/io/Fiber";
 import pg_migrate from "node-pg-migrate";
 import { fromIterable } from "@effect/data/ReadonlyRecord";
 import SidetrackJobs from "./models/public/SidetrackJobs";
+import SidetrackJobStatusEnum from "./models/public/SidetrackJobStatusEnum";
 
 interface QueryAdapter {
   execute: <ResultRow>(
@@ -32,18 +33,18 @@ interface InsertOptions {
   adapter?: QueryAdapter;
 }
 
-interface Queue {
-  name: string;
-  handler: (payload: any) => Promise<any>;
-  options?: never;
-}
+// interface Queue<Name, Payload> {
+//   name: Name;
+//   handler: (payload: Payload) => Promise<any>;
+//   options?: never;
+// }
 
-interface SidetrackOptions {
-  queues: Queue[];
+interface SidetrackOptions<Queues extends Record<string, unknown>> {
+  queues: Queues;
   databaseOptions: {
     connectionString: string;
   };
-  customAdapter?: QueryAdapter;
+  queryAdapter?: QueryAdapter;
 }
 
 class HandlerError {
@@ -59,23 +60,38 @@ const runMigrations = async (connectionString: string) =>
     direction: "up",
   });
 
-export class Sidetrack {
+type SidetrackQueues<
+  Name extends string,
+  Payload extends Record<string, unknown>,
+> = {
+  [key in Name]: {
+    handler: (payload: Payload) => any;
+    options?: never;
+  };
+};
+
+export class Sidetrack<
+  Name extends string,
+  Payload extends Record<string, unknown>,
+  Queues extends SidetrackQueues<Name, Payload>,
+> {
   queryAdapter: QueryAdapter;
   pool: Pool | undefined;
-  queues = {} as Record<string, Omit<Queue, "name">>;
-  databaseOptions: SidetrackOptions["databaseOptions"];
+  queues = {} as any; // ;
+  databaseOptions: { connectionString: string };
   pollingFiber: Fiber.Fiber<any, any> | undefined;
 
-  constructor(options: SidetrackOptions) {
-    options.queues.map((queue) => {
-      this.queues[queue.name] = {
-        handler: queue.handler,
-        options: queue.options,
-      };
-    });
+  constructor(options: SidetrackOptions<Queues>) {
+    this.queues = options.queues;
+    // options.queues.map((queue) => {
+    //   this.queues[queue.name] = {
+    //     handler: queue.handler,
+    //     options: queue.options,
+    //   };
+    // });
     this.databaseOptions = options.databaseOptions;
     this.pool = undefined;
-    this.queryAdapter = options.customAdapter ?? {
+    this.queryAdapter = options.queryAdapter ?? {
       execute: async (_query, _params) => {
         throw new Error(
           "Query adapter not found: You must run the start() function before using sidetrack, or pass in a custom adapter.",
@@ -84,9 +100,12 @@ export class Sidetrack {
     };
   }
 
-  async getJob(jobId: string, options?: { adapter?: QueryAdapter }) {
+  async getJob(
+    jobId: string,
+    options?: { adapter?: QueryAdapter },
+  ): Promise<SidetrackJobs> {
     return (
-      await (options?.adapter || this.queryAdapter).execute(
+      await (options?.adapter || this.queryAdapter).execute<SidetrackJobs>(
         `SELECT * FROM sidetrack_jobs WHERE id = $1`,
         [jobId],
       )
@@ -94,25 +113,23 @@ export class Sidetrack {
   }
 
   async insert(
-    queueName: string,
-    payload: Record<string, unknown>,
+    queueName: Name,
+    payload: Payload,
     options?: InsertOptions,
-  ) {
+  ): Promise<SidetrackJobs> {
     // TODO the return value should not be casted, otherwise it will truncate at 2 billion
     return (
-      await (options?.adapter || this.queryAdapter).execute<
-        Pick<SidetrackJobs, "id">
-      >(
+      await (options?.adapter || this.queryAdapter).execute<SidetrackJobs>(
         `INSERT INTO sidetrack_jobs (
 		status,
 		queue,
 		payload,
 		current_attempt,
 		max_attempts
-	      ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING id::integer`,
+	      ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING *`,
         [queueName, payload, options?.maxAttempts ?? 1],
       )
-    ).rows[0].id;
+    ).rows[0];
   }
 
   async cancel(jobId: string, options?: { adapter?: QueryAdapter }) {
@@ -157,7 +174,7 @@ export class Sidetrack {
     return Effect.runPromise(
       Effect.promise(() =>
         // TODO type a sidetrack job table (or generate the types from the database)
-        this.queryAdapter.execute(
+        this.queryAdapter.execute<SidetrackJobs>(
           `WITH next_jobs AS (
 		SELECT
 			id
@@ -304,7 +321,7 @@ export class Sidetrack {
     return Effect.runPromise(
       Effect.promise(() =>
         // TODO type a sidetrack job table (or generate the types from the database)
-        (options?.adapter || this.queryAdapter).execute(
+        (options?.adapter || this.queryAdapter).execute<SidetrackJobs>(
           `WITH next_jobs AS (
             SELECT
               id
@@ -354,7 +371,7 @@ export class Sidetrack {
     return Effect.runPromise(
       Effect.promise(() =>
         // TODO type a sidetrack job table (or generate the types from the database)
-        this.queryAdapter.execute(
+        this.queryAdapter.execute<SidetrackJobs>(
           `WITH next_jobs AS (
             SELECT
               id
@@ -401,7 +418,7 @@ export class Sidetrack {
     // get jobs
     return Effect.runPromise(
       Effect.promise(() =>
-        (options?.adapter || this.queryAdapter).execute(
+        (options?.adapter || this.queryAdapter).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs ${
             options?.queue ? "WHERE queue = $1" : ""
           }}`,
@@ -415,9 +432,10 @@ export class Sidetrack {
     // get jobs and group by status
     return Effect.runPromise(
       Effect.promise(() =>
-        (options?.adapter || this.queryAdapter).execute(
-          `SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`,
-        ),
+        (options?.adapter || this.queryAdapter).execute<{
+          status: SidetrackJobStatusEnum;
+          count: string;
+        }>(`SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`),
       ).pipe(
         Effect.map((result) =>
           fromIterable(result.rows, (row) => [row.status, row.count]),
