@@ -128,6 +128,8 @@ export function makeLayer<
 }): Layer.Layer<never, never, SidetrackService<Queues>> {
   // TODO we might need to accept this service tag as an argument because it might be unique
   return Layer.sync(createSidetrackService<Queues>(), () => {
+    // TODO remove unnecessary console.logs and replace with proper code
+
     const queues = options.queues;
     const databaseOptions = options.databaseOptions;
     const pool = new Pool(databaseOptions);
@@ -145,9 +147,10 @@ export function makeLayer<
     // );
     // },
     // };
-    const pollingFiber = Ref.unsafeMake<Option.Option<Fiber.Fiber<any, any>>>(
-      Option.none(),
-    );
+    /**
+     * This is meant to be the fiber that's running the polling loop, we will terminate this upon cleanup
+     */
+    const pollingFiber = Ref.unsafeMake<Fiber.Fiber<any, any>>(Fiber.unit);
 
     const startPolling = () =>
       Effect.promise(() =>
@@ -192,11 +195,7 @@ export function makeLayer<
         .pipe(Effect.repeat(Schedule.spaced(Duration.millis(500))))
         .pipe(Effect.catchAllCause(Effect.logError))
         .pipe(Effect.forkDaemon)
-        .pipe(
-          Effect.flatMap((fiber) =>
-            Ref.update(pollingFiber, () => Option.some(fiber)),
-          ),
-        );
+        .pipe(Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)));
 
     const start = () =>
       // TODO migrations can't be performed with a custom adapter currently
@@ -225,92 +224,88 @@ export function makeLayer<
 
     const cleanup = () =>
       Ref.get(pollingFiber).pipe(
-        Effect.flatMap((fiberOption) =>
-          Option.match(fiberOption, {
-            onNone: () => Effect.unit,
-            onSome: (fiber) => Fiber.interrupt(fiber),
-          }),
-        ),
+        Effect.flatMap((fiber) => Fiber.interrupt(fiber)),
       );
 
     const runHandler = (job: SidetrackJobs) =>
-      pipe(
-        Effect.tryPromise({
-          try: () => queues[job.queue].handler(job.payload as Queues[string]),
-          catch: (e) => {
-            return new HandlerError(e);
-          },
-        }),
-        Effect.flatMap(() =>
-          Effect.promise(() =>
-            queryAdapter.execute(
-              `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
-              [job.id],
+      Effect.tryPromise({
+        try: () => queues[job.queue].handler(job.payload as Queues[string]),
+        catch: (e) => {
+          return new HandlerError(e);
+        },
+      })
+        .pipe(
+          Effect.flatMap(() =>
+            Effect.promise(() =>
+              queryAdapter.execute(
+                `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
+                [job.id],
+              ),
             ),
           ),
-        ),
-        Effect.catchTag("HandlerError", (handlerError) =>
-          Effect.sync(() => console.log("AM I HANDLING ERROR")).pipe(
-            Effect.flatMap(() =>
-              Effect.tryPromise({
-                try: () => {
-                  if (job.current_attempt + 1 < job.max_attempts) {
-                    // Exponential backoff with jitter
-                    // Based of the historic Resque/Sidekiq algorithm
+        )
+        .pipe(
+          Effect.catchTag("HandlerError", (handlerError) =>
+            Effect.sync(() => console.log("AM I HANDLING ERROR")).pipe(
+              Effect.flatMap(() =>
+                Effect.tryPromise({
+                  try: () => {
+                    if (job.current_attempt + 1 < job.max_attempts) {
+                      // Exponential backoff with jitter
+                      // Based of the historic Resque/Sidekiq algorithm
 
-                    const backoff = Math.trunc(
-                      Math.pow(job.current_attempt + 1, 4) +
-                        15 +
-                        // Number between 1 and 30
-                        Math.floor(Math.random() * (30 - 1 + 1) + 1) *
-                          job.current_attempt +
-                        1,
-                    );
+                      const backoff = Math.trunc(
+                        Math.pow(job.current_attempt + 1, 4) +
+                          15 +
+                          // Number between 1 and 30
+                          Math.floor(Math.random() * (30 - 1 + 1) + 1) *
+                            job.current_attempt +
+                          1,
+                      );
 
-                    return queryAdapter.execute(
-                      `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
+                      return queryAdapter.execute(
+                        `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
                               ELSE errors
                           END) || $2::jsonb WHERE id = $1`,
-                      [
-                        job.id,
-                        //       TODO make sure we handle cases where this is not an Error, and also not serializable?
-                        JSON.stringify(
-                          handlerError.error,
-                          Object.getOwnPropertyNames(handlerError.error),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return queryAdapter.execute(
-                      `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
+                        [
+                          job.id,
+                          //       TODO make sure we handle cases where this is not an Error, and also not serializable?
+                          JSON.stringify(
+                            handlerError.error,
+                            Object.getOwnPropertyNames(handlerError.error),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return queryAdapter.execute(
+                        `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
                         END) || $2::jsonb WHERE id = $1`,
-                      [
-                        job.id,
-                        //       TODO make sure we handle cases where this is not an Error, and also not serializable?
-                        JSON.stringify(
-                          handlerError.error,
-                          Object.getOwnPropertyNames(handlerError.error),
-                        ),
-                      ],
-                    );
-                  }
-                },
-                catch: (e) => {
-                  // TODO return proper error
-                  console.log("UPDATING THE JOB TABLE FAILED", e);
-                  return e;
-                },
-              }),
+                        [
+                          job.id,
+                          //       TODO make sure we handle cases where this is not an Error, and also not serializable?
+                          JSON.stringify(
+                            handlerError.error,
+                            Object.getOwnPropertyNames(handlerError.error),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                  catch: (e) => {
+                    // TODO return proper error
+                    console.log("UPDATING THE JOB TABLE FAILED", e);
+                    return e;
+                  },
+                }),
+              ),
             ),
           ),
-        ),
-      );
-
+        );
     const insertJob = <K extends keyof Queues>(
       queueName: K,
       payload: Queues[K],

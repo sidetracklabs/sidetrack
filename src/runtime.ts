@@ -12,7 +12,7 @@ export const makeAppRuntime = <R, E, A>(layer: Layer.Layer<R, E, A>) =>
       Layer.buildWithScope(scope)(layer),
     );
     const runtime = yield* $(
-      pipe(Effect.runtime<A>(), Effect.provideContext(ctx)),
+      Effect.runtime<A>().pipe(Effect.provideContext(ctx)),
     );
 
     return {
