@@ -13,7 +13,7 @@ exports.up = (pgm) => {
 );
 
 CREATE TABLE sidetrack_jobs (
-    id bigserial PRIMARY KEY,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     status sidetrack_job_status_enum NOT NULL,
     queue text NOT NULL,
     payload jsonb NOT NULL,

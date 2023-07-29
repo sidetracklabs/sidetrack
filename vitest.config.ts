@@ -10,6 +10,7 @@ export default defineConfig(() => {
     plugins: [tsconfigPaths()],
     test: {
       include: ["./test/**/*.test.ts"],
+      setupFiles: ["./test/setup.ts"],
     },
   };
 });

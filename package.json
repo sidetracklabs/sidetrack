@@ -34,9 +34,9 @@
     "pg": "^8.11.1"
   },
   "scripts": {
-    "test": "vitest --config ./vitest.config.ts",
+    "test": "dotenv vitest --config ./vitest.config.ts",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
-    "migrate": "node-pg-migrate",
+    "migrate": "dotenv node-pg-migrate up",
     "format": "prettier --write .",
     "generate-db-models": "dotenv kanel"
   }
