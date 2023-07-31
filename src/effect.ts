@@ -14,6 +14,8 @@ import { fromIterable } from "@effect/data/ReadonlyRecord";
 import SidetrackJobStatusEnum from "./models/public/SidetrackJobStatusEnum";
 import * as Ref from "@effect/io/Ref";
 import * as Option from "@effect/data/Option";
+
+// TODO review this interface and check if everything looks right
 export interface SidetrackService<
   Queues extends Record<string, Record<string, unknown>>,
 > {
@@ -154,7 +156,6 @@ export function makeLayer<
 
     const startPolling = () =>
       Effect.promise(() =>
-        // TODO type a sidetrack job table (or generate the types from the database)
         queryAdapter.execute<SidetrackJobs>(
           `WITH next_jobs AS (
         SELECT
@@ -183,7 +184,7 @@ export function makeLayer<
         ),
       )
         .pipe(Effect.map((result) => result.rows))
-        // TODO this probably needs to be forked so it doesn't block the polling
+        // TODO should this be forked so it doesn't block the polling?
         .pipe(
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => runHandler(job), {
@@ -250,6 +251,7 @@ export function makeLayer<
               Effect.flatMap(() =>
                 Effect.tryPromise({
                   try: () => {
+                    // TODO we shouldn't return the result of this query directly
                     if (job.current_attempt + 1 < job.max_attempts) {
                       // Exponential backoff with jitter
                       // Based of the historic Resque/Sidekiq algorithm
@@ -297,7 +299,7 @@ export function makeLayer<
                     }
                   },
                   catch: (e) => {
-                    // TODO return proper error
+                    // TODO return proper error or throw
                     console.log("UPDATING THE JOB TABLE FAILED", e);
                     return e;
                   },
@@ -335,7 +337,6 @@ export function makeLayer<
     const runJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
       // mark as running, and then run job.
       Effect.promise(() =>
-        // TODO type a sidetrack job table (or generate the types from the database)
         (options?.adapter || queryAdapter).execute<SidetrackJobs>(
           `WITH next_jobs AS (
               SELECT
@@ -367,7 +368,6 @@ export function makeLayer<
       )
 
         .pipe(Effect.map((result) => result.rows))
-        // TODO this probably needs to be forked so it doesn't block the polling
         .pipe(
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => runHandler(job), {
@@ -382,7 +382,6 @@ export function makeLayer<
     ) =>
       // mark as running, and then run job.
       Effect.promise(() =>
-        // TODO type a sidetrack job table (or generate the types from the database)
         queryAdapter.execute<SidetrackJobs>(
           `WITH next_jobs AS (
               SELECT
