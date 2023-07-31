@@ -19,7 +19,7 @@ export interface SidetrackService<
   Queues extends Record<string, Record<string, unknown>>,
 > {
   start: () => Effect.Effect<never, never, void>;
-  cleanup: () => Effect.Effect<never, never, Exit.Exit<any, any> | void>;
+  cleanup: () => Effect.Effect<never, never, void>;
   cancelJob: (
     jobId: string,
     options?: {
@@ -124,9 +124,7 @@ export function makeLayer<
         return { rows: queryResult?.rows ?? ([] as any[]) };
       },
     };
-    const pollingFiber = Ref.unsafeMake<Option.Option<Fiber.Fiber<any, any>>>(
-      Option.none(),
-    );
+    const pollingFiber = Ref.unsafeMake<Fiber.Fiber<any, any>>(Fiber.unit);
 
     const startPolling = () =>
       Effect.promise(() =>
@@ -176,11 +174,7 @@ export function makeLayer<
         .pipe(Effect.repeat(Schedule.spaced(Duration.millis(500))))
         .pipe(Effect.catchAllCause(Effect.logError))
         .pipe(Effect.forkDaemon)
-        .pipe(
-          Effect.flatMap((fiber) =>
-            Ref.update(pollingFiber, () => Option.some(fiber)),
-          ),
-        );
+        .pipe(Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)));
 
     const start = () =>
       // TODO migrations can't be performed with a custom adapter currently
@@ -205,14 +199,9 @@ export function makeLayer<
       ).pipe(Effect.asUnit);
 
     const cleanup = () =>
-      Ref.get(pollingFiber).pipe(
-        Effect.flatMap((fiberOption) =>
-          Option.match(fiberOption, {
-            onNone: () => Effect.unit,
-            onSome: (fiber) => Fiber.interrupt(fiber),
-          }),
-        ),
-      );
+      Ref.get(pollingFiber)
+        .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
+        .pipe(Effect.asUnit);
 
     const runHandler = (job: SidetrackJobs) =>
       Effect.tryPromise({

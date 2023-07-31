@@ -1,7 +1,6 @@
 import * as Layer from "@effect/io/Layer";
 import * as Scope from "@effect/io/Scope";
 import * as Effect from "@effect/io/Effect";
-import { pipe } from "@effect/data/Function";
 import * as Context from "@effect/data/Context";
 import * as Exit from "@effect/io/Exit";
 
