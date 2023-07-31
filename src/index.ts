@@ -1,17 +1,18 @@
 import * as Effect from "@effect/io/Effect";
-import * as Runtime from "@effect/io/Runtime";
 import * as Fiber from "@effect/io/Fiber";
-import SidetrackJobs from "./models/public/SidetrackJobs";
-import { QueryAdapter } from "./adapter";
-import { Pool } from "pg";
 import * as Layer from "@effect/io/Layer";
+import * as Runtime from "@effect/io/Runtime";
+import { Pool } from "pg";
+
+import { QueryAdapter } from "./adapter";
 import {
+  createSidetrackServiceTag,
+  makeLayer,
   SidetrackInsertOption,
   SidetrackQueues,
   SidetrackService,
-  createSidetrackServiceTag,
-  makeLayer,
 } from "./effect";
+import SidetrackJobs from "./models/public/SidetrackJobs";
 import { makeAppRuntime } from "./runtime";
 
 export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
@@ -19,7 +20,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   pool: Pool | undefined;
   queues = {} as SidetrackQueues<Queues>;
   databaseOptions: { connectionString: string };
-  pollingFiber: Fiber.Fiber<any, any> | undefined;
+  pollingFiber: Fiber.Fiber<unknown, unknown> | undefined;
   sidetrackService = createSidetrackServiceTag<Queues>();
   sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
   runtimeHandler: {
@@ -32,11 +33,11 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   ) => Promise<A>;
 
   constructor(options: {
-    queues: SidetrackQueues<Queues>;
     databaseOptions: {
       connectionString: string;
     };
     queryAdapter?: QueryAdapter;
+    queues: SidetrackQueues<Queues>;
   }) {
     this.sidetrackLayer = makeLayer(options);
 
@@ -51,12 +52,14 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     // TODO should we keep this in here? Node specific
     const cleanup = () => Effect.runPromise(this.runtimeHandler.close);
     // TODO should we keep this in here? Node specific
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     process.on("beforeExit", cleanup);
 
     this.queues = options.queues;
     this.databaseOptions = options.databaseOptions;
     this.pool = undefined;
     this.queryAdapter = options.queryAdapter ?? {
+      // eslint-disable-next-line @typescript-eslint/require-await
       execute: async (_query, _params) => {
         throw new Error(
           "Query adapter not found: You must run the start() function before using sidetrack, or pass in a custom adapter.",
@@ -132,7 +135,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
 
   async runQueue<K extends keyof Queues>(
     queue: K,
-    options?: { runScheduled?: boolean; adapter?: QueryAdapter },
+    options?: { adapter?: QueryAdapter; runScheduled?: boolean },
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -142,8 +145,8 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   }
 
   async listJobs<K extends keyof Queues>(options?: {
-    queue?: K | K[];
     adapter?: QueryAdapter;
+    queue?: K | K[];
   }) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>

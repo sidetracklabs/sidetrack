@@ -1,0 +1,17 @@
+# everything else?
+*
+!*.cjs
+!*.mjs
+!*.js
+!*.jsx
+!*.ts
+!*.tsx
+!*.json
+!*.css
+!*.scss
+!*.md
+!*.yml
+!*.html
+!*/
+**/generated/**
+node_modules

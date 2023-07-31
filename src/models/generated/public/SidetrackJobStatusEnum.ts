@@ -3,12 +3,12 @@
 
 /** Represents the enum public.sidetrack_job_status_enum */
 enum SidetrackJobStatusEnum {
-  scheduled = "scheduled",
-  running = "running",
-  cancelled = "cancelled",
-  failed = "failed",
-  retrying = "retrying",
-  completed = "completed",
-}
+  scheduled = 'scheduled',
+  running = 'running',
+  cancelled = 'cancelled',
+  failed = 'failed',
+  retrying = 'retrying',
+  completed = 'completed',
+};
 
 export default SidetrackJobStatusEnum;

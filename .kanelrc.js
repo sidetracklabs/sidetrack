@@ -5,7 +5,7 @@ const { resolveType } = require("kanel");
 module.exports = {
   connection: { connectionString: process.env.DATABASE_URL },
   preDeleteOutputFolder: true,
-  outputPath: "./src/models",
+  outputPath: "./src/models/generated",
   generateIdentifierType: (c, d, config) => {
     // Id columns are already prefixed with the table name, so we don't need to add it here
     const name = "Id";

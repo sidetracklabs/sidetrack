@@ -1,0 +1,70 @@
+{
+  // This helps turn off rules that may conflict with prettier, we don't use it for anything else
+  "extends": ["prettier"],
+  "ignorePatterns": ["**/migrations/**", "**/models/**", "**/generated/**"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "plugins": ["sort-keys"],
+      "rules": {
+        "sort-keys": "off", // disable default eslint sort-keys
+        "sort-keys/sort-keys-fix": "error"
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@typescript-eslint/strict"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      },
+      "plugins": ["simple-import-sort", "import", "typescript-sort-keys"],
+      "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off", // this rule just isn't useful for us right now
+        "@typescript-eslint/no-unnecessary-condition": "off", // this rule just isn't useful for us right now
+        "@typescript-eslint/restrict-plus-operands": "off", // this rule just isn't useful for us right now
+        "@typescript-eslint/restrict-template-expressions": "off", // this rule just isn't useful for us right now
+        // "@typescript-eslint/promise-function-async": "error",
+        "@typescript-eslint/sort-type-constituents": "error",
+        "import/first": "error",
+        "import/newline-after-import": "error",
+        "import/no-duplicates": "error",
+        "simple-import-sort/exports": "error",
+        "simple-import-sort/imports": "error",
+        "typescript-sort-keys/interface": "error",
+        "@typescript-eslint/ban-ts-comment": [
+          "error",
+          {
+            "minimumDescriptionLength": 3,
+            "ts-check": false,
+            "ts-expect-error": "allow-with-description"
+          }
+        ],
+        "@typescript-eslint/consistent-type-definitions": [
+          "error",
+          "interface"
+        ],
+        "@typescript-eslint/consistent-type-imports": "off",
+        "@typescript-eslint/no-throw-literal": "off",
+        // This is already managed by typescript itself
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/switch-exhaustiveness-check": "error",
+        "@typescript-eslint/unbound-method": "off",
+        "eqeqeq": "error",
+        "no-extra-bind": "error",
+        "no-fallthrough": "error",
+        "no-invalid-regexp": "error",
+        "no-invalid-this": "error",
+        "no-return-assign": "error",
+        "no-self-compare": "error",
+        "no-useless-concat": "error",
+        "no-useless-return": "error"
+      }
+    }
+  ],
+  "root": true
+}
