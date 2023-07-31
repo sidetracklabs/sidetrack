@@ -9,7 +9,7 @@ import {
   SidetrackInsertOption,
   SidetrackQueues,
   SidetrackService,
-  createSidetrackService,
+  createSidetrackServiceTag,
   makeLayer,
 } from "./effect";
 import { makeAppRuntime } from "./runtime";
@@ -20,7 +20,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   queues = {} as SidetrackQueues<Queues>;
   databaseOptions: { connectionString: string };
   pollingFiber: Fiber.Fiber<any, any> | undefined;
-  sidetrackService = createSidetrackService<Queues>();
+  sidetrackService = createSidetrackServiceTag<Queues>();
   sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
   runtimeHandler: {
     close: Effect.Effect<never, never, void>;
@@ -122,7 +122,6 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
    * ==================
    */
 
-  // TODO potentially return job info?
   async runJob(jobId: string, options?: { adapter?: QueryAdapter }) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -143,7 +142,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   }
 
   async listJobs<K extends keyof Queues>(options?: {
-    queue?: K;
+    queue?: K | K[];
     adapter?: QueryAdapter;
   }) {
     return this.customRunPromise(

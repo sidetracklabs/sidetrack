@@ -23,9 +23,10 @@ CREATE TABLE sidetrack_jobs (
     inserted_at timestamptz NOT NULL DEFAULT now(),
     scheduled_at timestamptz NOT NULL DEFAULT now(),
     attempted_at timestamptz,
-    canceled_at timestamptz,
+    cancelled_at timestamptz,
     failed_at timestamptz,
-    completed_at timestamptz
+    completed_at timestamptz,
+    CHECK (current_attempt <= max_attempts)
 );
 
 -- TODO these need to be updated

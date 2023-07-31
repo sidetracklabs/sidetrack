@@ -1,4 +1,4 @@
-import { beforeAll } from "vitest";
+import { afterEach, beforeAll } from "vitest";
 import { runMigrations } from "../src/migrations";
 
 beforeAll(async () => {

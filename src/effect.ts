@@ -15,7 +15,6 @@ import SidetrackJobStatusEnum from "./models/public/SidetrackJobStatusEnum";
 import * as Ref from "@effect/io/Ref";
 import * as Option from "@effect/data/Option";
 
-// TODO review this interface and check if everything looks right
 export interface SidetrackService<
   Queues extends Record<string, Record<string, unknown>>,
 > {
@@ -26,13 +25,13 @@ export interface SidetrackService<
     options?: {
       adapter?: QueryAdapter;
     },
-  ) => Effect.Effect<never, never, unknown>;
+  ) => Effect.Effect<never, never, void>;
   deleteJob: (
     jobId: string,
     options?: {
       adapter?: QueryAdapter;
     },
-  ) => Effect.Effect<never, never, unknown>;
+  ) => Effect.Effect<never, never, void>;
   insertJob: <K extends keyof Queues>(
     queueName: K,
     payload: Queues[K],
@@ -49,30 +48,18 @@ export interface SidetrackService<
     options?: {
       adapter?: QueryAdapter;
     },
-  ) => Effect.Effect<
-    never,
-    unknown,
-    {
-      rows: unknown[];
-    }[]
-  >;
+  ) => Effect.Effect<never, unknown, void>;
   runQueue: <K extends keyof Queues>(
     queue: K,
     options?: {
       runScheduled?: boolean;
       adapter?: QueryAdapter;
     },
-  ) => Effect.Effect<
-    never,
-    unknown,
-    {
-      rows: unknown[];
-    }[]
-  >;
+  ) => Effect.Effect<never, unknown, void>;
   listJobs: <K extends keyof Queues>(
     options?:
       | {
-          queue?: K | undefined;
+          queue?: K | K[] | undefined;
           adapter?: QueryAdapter | undefined;
         }
       | undefined,
@@ -84,8 +71,6 @@ export interface SidetrackService<
 
 export interface SidetrackInsertOption {
   scheduledAt?: Date;
-  // TODO this might be a queue-level setting instead of a job-level setting
-  maxAttempts?: number;
   adapter?: QueryAdapter;
 }
 
@@ -97,12 +82,12 @@ export interface SidetrackOptions<Queues extends Record<string, unknown>> {
   queryAdapter?: QueryAdapter;
 }
 
-class HandlerError {
-  readonly _tag = "HandlerError";
+class SidetrackHandlerError {
+  readonly _tag = "SidetrackHandlerError";
   constructor(readonly error: unknown) {}
 }
 
-export const createSidetrackService = <
+export const createSidetrackServiceTag = <
   Queues extends Record<string, Record<string, unknown>>,
 >() =>
   Context.Tag<SidetrackService<Queues>>(
@@ -113,9 +98,10 @@ export type SidetrackQueues<
   Queues extends Record<string, Record<string, unknown>>,
 > = {
   [K in keyof Queues]: {
-    // TODO return type shouldn't be any
-    handler: (payload: Queues[K]) => any;
-    options?: never;
+    handler: (payload: Queues[K]) => Promise<unknown>;
+    options?: {
+      maxAttempts?: number;
+    };
   };
 };
 
@@ -128,10 +114,7 @@ export function makeLayer<
   };
   queryAdapter?: QueryAdapter;
 }): Layer.Layer<never, never, SidetrackService<Queues>> {
-  // TODO we might need to accept this service tag as an argument because it might be unique
-  return Layer.sync(createSidetrackService<Queues>(), () => {
-    // TODO remove unnecessary console.logs and replace with proper code
-
+  return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
     const queues = options.queues;
     const databaseOptions = options.databaseOptions;
     const pool = new Pool(databaseOptions);
@@ -141,18 +124,9 @@ export function makeLayer<
         return { rows: queryResult?.rows ?? ([] as any[]) };
       },
     };
-    // let pool: Pool | undefined = undefined;
-    // let queryAdapter = options.queryAdapter ?? {
-    // execute: async (_query, _params) => {
-    // throw new Error(
-    // "Query adapter not found: You must run the start() function before using sidetrack, or pass in a custom adapter.",
-    // );
-    // },
-    // };
-    /**
-     * This is meant to be the fiber that's running the polling loop, we will terminate this upon cleanup
-     */
-    const pollingFiber = Ref.unsafeMake<Fiber.Fiber<any, any>>(Fiber.unit);
+    const pollingFiber = Ref.unsafeMake<Option.Option<Fiber.Fiber<any, any>>>(
+      Option.none(),
+    );
 
     const startPolling = () =>
       Effect.promise(() =>
@@ -184,19 +158,29 @@ export function makeLayer<
         ),
       )
         .pipe(Effect.map((result) => result.rows))
-        // TODO should this be forked so it doesn't block the polling?
         .pipe(
           Effect.flatMap((result) =>
-            Effect.forEach(result, (job) => runHandler(job), {
-              concurrency: "unbounded",
-            }),
+            Effect.forEach(
+              result,
+              (job) =>
+                runHandler(job)
+                  .pipe(Effect.catchAllCause(Effect.logError))
+                  .pipe(Effect.forkDaemon),
+              {
+                concurrency: "unbounded",
+              },
+            ),
           ),
         )
         // Decrease polling time potentially?
         .pipe(Effect.repeat(Schedule.spaced(Duration.millis(500))))
         .pipe(Effect.catchAllCause(Effect.logError))
         .pipe(Effect.forkDaemon)
-        .pipe(Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)));
+        .pipe(
+          Effect.flatMap((fiber) =>
+            Ref.update(pollingFiber, () => Option.some(fiber)),
+          ),
+        );
 
     const start = () =>
       // TODO migrations can't be performed with a custom adapter currently
@@ -205,34 +189,36 @@ export function makeLayer<
       ).pipe(Effect.flatMap(() => startPolling()));
 
     const cancelJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
-      // TODO can you cancel a completed job?
-      // TODO do we actually interupt the running promise
       Effect.promise(() =>
         (options?.adapter || queryAdapter).execute(
-          `UPDATE sidetrack_jobs SET status = 'cancelled' WHERE id = $1`,
+          `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
           [jobId],
         ),
-      ).pipe(Effect.map((result) => result.rows[0]));
+      ).pipe(Effect.asUnit);
 
     const deleteJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
-      // TODO can you delete a running job?
       Effect.promise(() =>
         (options?.adapter || queryAdapter).execute(
           `DELETE FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
-      ).pipe(Effect.map((result) => result.rows[0]));
+      ).pipe(Effect.asUnit);
 
     const cleanup = () =>
       Ref.get(pollingFiber).pipe(
-        Effect.flatMap((fiber) => Fiber.interrupt(fiber)),
+        Effect.flatMap((fiberOption) =>
+          Option.match(fiberOption, {
+            onNone: () => Effect.unit,
+            onSome: (fiber) => Fiber.interrupt(fiber),
+          }),
+        ),
       );
 
     const runHandler = (job: SidetrackJobs) =>
       Effect.tryPromise({
         try: () => queues[job.queue].handler(job.payload as Queues[string]),
         catch: (e) => {
-          return new HandlerError(e);
+          return new SidetrackHandlerError(e);
         },
       })
         .pipe(
@@ -246,68 +232,58 @@ export function makeLayer<
           ),
         )
         .pipe(
-          Effect.catchTag("HandlerError", (handlerError) =>
-            Effect.sync(() => console.log("AM I HANDLING ERROR")).pipe(
-              Effect.flatMap(() =>
-                Effect.tryPromise({
-                  try: () => {
-                    // TODO we shouldn't return the result of this query directly
-                    if (job.current_attempt + 1 < job.max_attempts) {
-                      // Exponential backoff with jitter
-                      // Based of the historic Resque/Sidekiq algorithm
+          Effect.catchTag("SidetrackHandlerError", (handlerError) =>
+            Effect.promise(() => {
+              if (job.current_attempt + 1 < job.max_attempts) {
+                // Exponential backoff with jitter
+                // Based of the historic Resque/Sidekiq algorithm
 
-                      const backoff = Math.trunc(
-                        Math.pow(job.current_attempt + 1, 4) +
-                          15 +
-                          // Number between 1 and 30
-                          Math.floor(Math.random() * (30 - 1 + 1) + 1) *
-                            job.current_attempt +
-                          1,
-                      );
+                const backoff = Math.trunc(
+                  Math.pow(job.current_attempt + 1, 4) +
+                    15 +
+                    // Number between 1 and 30
+                    Math.floor(Math.random() * (30 - 1 + 1) + 1) *
+                      job.current_attempt +
+                    1,
+                );
 
-                      return queryAdapter.execute(
-                        `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
+                return queryAdapter.execute(
+                  `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
                               ELSE errors
                           END) || $2::jsonb WHERE id = $1`,
-                        [
-                          job.id,
-                          //       TODO make sure we handle cases where this is not an Error, and also not serializable?
-                          JSON.stringify(
-                            handlerError.error,
-                            Object.getOwnPropertyNames(handlerError.error),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return queryAdapter.execute(
-                        `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
+                  [
+                    job.id,
+                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                    JSON.stringify(
+                      handlerError.error,
+                      Object.getOwnPropertyNames(handlerError.error),
+                    ),
+                  ],
+                );
+              } else {
+                return queryAdapter.execute(
+                  `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
                         END) || $2::jsonb WHERE id = $1`,
-                        [
-                          job.id,
-                          //       TODO make sure we handle cases where this is not an Error, and also not serializable?
-                          JSON.stringify(
-                            handlerError.error,
-                            Object.getOwnPropertyNames(handlerError.error),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                  catch: (e) => {
-                    // TODO return proper error or throw
-                    console.log("UPDATING THE JOB TABLE FAILED", e);
-                    return e;
-                  },
-                }),
-              ),
-            ),
+                  [
+                    job.id,
+                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                    JSON.stringify(
+                      handlerError.error,
+                      Object.getOwnPropertyNames(handlerError.error),
+                    ),
+                  ],
+                );
+              }
+            }),
           ),
-        );
+        )
+        .pipe(Effect.asUnit);
+
     const insertJob = <K extends keyof Queues>(
       queueName: K,
       payload: Queues[K],
@@ -322,7 +298,7 @@ export function makeLayer<
       current_attempt,
       max_attempts
           ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING *`,
-          [queueName, payload, options?.maxAttempts ?? 1],
+          [queueName, payload, queues[queueName].options?.maxAttempts ?? 1],
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
 
@@ -335,16 +311,15 @@ export function makeLayer<
       ).pipe(Effect.map((result) => result.rows[0]));
 
     const runJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
-      // mark as running, and then run job.
       Effect.promise(() =>
         (options?.adapter || queryAdapter).execute<SidetrackJobs>(
-          `WITH next_jobs AS (
+          `WITH next_job AS (
               SELECT
                 id
               FROM
                 sidetrack_jobs
               WHERE
-                status != 'running'
+                (status = 'scheduled' or status = 'retrying')
                 AND id = $1
               ORDER BY
                 scheduled_at
@@ -361,26 +336,19 @@ export function makeLayer<
                 SELECT
                   id
                 FROM
-                  next_jobs
+                  next_job
               ) RETURNING *`,
           [jobId],
         ),
       )
 
-        .pipe(Effect.map((result) => result.rows))
-        .pipe(
-          Effect.flatMap((result) =>
-            Effect.forEach(result, (job) => runHandler(job), {
-              concurrency: "unbounded",
-            }),
-          ),
-        );
+        .pipe(Effect.map((result) => result.rows[0]))
+        .pipe(Effect.flatMap((job) => runHandler(job)));
 
     const runQueue = <K extends keyof Queues>(
       queue: K,
       options?: { runScheduled?: boolean; adapter?: QueryAdapter },
     ) =>
-      // mark as running, and then run job.
       Effect.promise(() =>
         queryAdapter.execute<SidetrackJobs>(
           `WITH next_jobs AS (
@@ -389,7 +357,7 @@ export function makeLayer<
               FROM
                 sidetrack_jobs
               WHERE
-                (status != 'running')
+              (status = 'scheduled' or status = 'retrying')
                 ${
                   options?.runScheduled ? "" : "AND scheduled_at <= NOW()"
                 } AND queue = $1
@@ -415,24 +383,28 @@ export function makeLayer<
       )
 
         .pipe(Effect.map((result) => result.rows))
-        // TODO this probably needs to be forked so it doesn't block the polling
         .pipe(
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => runHandler(job), {
               concurrency: "unbounded",
             }),
           ),
-        );
+        )
+        .pipe(Effect.asUnit);
 
     const listJobs = <K extends keyof Queues>(options?: {
-      queue?: K;
+      queue?: K | K[];
       adapter?: QueryAdapter;
     }) =>
       // get jobs
       Effect.promise(() =>
         (options?.adapter || queryAdapter).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs ${
-            options?.queue ? "WHERE queue = $1" : ""
+            options?.queue
+              ? typeof options.queue === "string"
+                ? "WHERE queue = $1"
+                : "WHERE queue = ANY($1)"
+              : ""
           }`,
           options?.queue ? [options?.queue] : undefined,
         ),

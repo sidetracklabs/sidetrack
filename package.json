@@ -33,6 +33,7 @@
     "node-pg-migrate": "^6.2.2",
     "pg": "^8.11.1"
   },
+
   "scripts": {
     "test": "dotenv vitest --config ./vitest.config.ts",
     "coverage": "vitest --config ./vitest.config.ts --coverage",

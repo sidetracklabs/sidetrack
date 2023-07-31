@@ -27,7 +27,7 @@ export default interface SidetrackJobs {
 
   attempted_at: Date | null;
 
-  canceled_at: Date | null;
+  cancelled_at: Date | null;
 
   failed_at: Date | null;
 
@@ -36,7 +36,7 @@ export default interface SidetrackJobs {
 
 /** Represents the initializer for the table public.sidetrack_jobs */
 export interface SidetrackJobsInitializer {
-  /** Default value: nextval('sidetrack_jobs_id_seq'::regclass) */
+  /** Default value: gen_random_uuid() */
   id?: Id;
 
   status: SidetrackJobStatusEnum;
@@ -59,7 +59,7 @@ export interface SidetrackJobsInitializer {
 
   attempted_at?: Date | null;
 
-  canceled_at?: Date | null;
+  cancelled_at?: Date | null;
 
   failed_at?: Date | null;
 
@@ -88,7 +88,7 @@ export interface SidetrackJobsMutator {
 
   attempted_at?: Date | null;
 
-  canceled_at?: Date | null;
+  cancelled_at?: Date | null;
 
   failed_at?: Date | null;
 
