@@ -1,4 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"]
+  "extends": ["config:base", "schedule:weekly", ":pinOnlyDevDependencies"],
+  "automerge": true,
+  "automergeType": "pr",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dependency Dashboard",
+  "major": { "draftPR": true },
+  "packageRules": [
+    { "groupName": "effect", "matchPackagePrefixes": "@effect/" },
+    {
+      "groupName": "all patches",
+      "groupSlug": "all-patch",
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["patch"]
+    }
+  ],
+  "platformAutomerge": true
 }
