@@ -1,5 +1,7 @@
+import { MigrationBuilder } from "@sidetrack/pg-migrate";
+
 export default {
-  up: async (pgm) => {
+  up: async (pgm: MigrationBuilder) => {
     pgm.sql(`CREATE TYPE sidetrack_job_status_enum AS ENUM (
       'scheduled',
       'running',
@@ -33,6 +35,6 @@ export default {
 
   CREATE INDEX sidetrack_jobs_scheduled_at_idx ON sidetrack_jobs(scheduled_at);`);
   },
-  down: async (_pgm) => {},
+  down: async (_pgm: MigrationBuilder) => {},
   name: "1",
 };
