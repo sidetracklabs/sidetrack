@@ -14,6 +14,10 @@
       "outputs": [],
       "cache": true
     },
+    "lint-fix": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "test": {
       "dependsOn": [],
       "outputs": []

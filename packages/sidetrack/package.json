@@ -27,7 +27,8 @@
     "coverage": "vitest --config ./vitest.config.ts --coverage",
     "format": "prettier --write .",
     "generate-db-models": "dotenv kanel",
-    "lint": "eslint --fix . && prettier --write .",
+    "lint": "eslint . && prettier --check .",
+    "lint-fix": "eslint --fix . && prettier --write .",
     "migrate": "dotenv sidetrack-pg-migrate up",
     "test": "dotenv vitest --config ./vitest.config.ts",
     "typecheck": "tsc --noEmit"
