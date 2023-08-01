@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: "Start setting up postgres container"
+        run: |
+          # start preparing the postgres container, if you run tests too soon, it will fail
+          docker run -d -p 5432:5432 -e POSTGRES_DB=sidetrack -e POSTGRES_PASSWORD=password postgres:14-alpine
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -29,6 +34,8 @@ jobs:
 
       - name: Build, lint and type-check
         run: pnpm turbo build lint typecheck test
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable
 
       - name: Check workspaces
         run: pnpm manypkg check
