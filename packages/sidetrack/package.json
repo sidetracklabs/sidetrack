@@ -2,7 +2,8 @@
   "name": "@sidetrack/sidetrack",
   "version": "0.0.2",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "keywords": [
     "background",
