@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@effect/data": "^0.16.0",
-    "@effect/io": "^0.35.1",
+    "@effect/io": "^0.37.0",
     "@sidetrack/pg-migrate": "^0.0.1",
     "dotenv-cli": "^7.2.1",
     "pg": "^8.11.1"
