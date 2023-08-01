@@ -1,6 +1,9 @@
 {
   "name": "@sidetrack/sidetrack",
   "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "background",
     "jobs",
