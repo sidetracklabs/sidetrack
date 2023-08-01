@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["*.ts", "src", "test"],
+  "include": ["*.ts", "*.mts", "src", "test"],
   "exclude": ["dist"],
   "compilerOptions": {
     "declaration": false,

@@ -38,12 +38,12 @@
     "@effect/data": "^0.16.0",
     "@effect/io": "^0.35.1",
     "@sidetrack/pg-migrate": "^0.0.1",
-    "dotenv-cli": "^7.2.1",
     "pg": "^8.11.1"
   },
   "devDependencies": {
     "@types/pg": "^8.10.2",
     "@vitest/coverage-v8": "^0.34.0",
+    "dotenv-cli": "^7.2.1",
     "kanel": "^3.4.3",
     "vite": "^4.4.4",
     "vite-tsconfig-paths": "^4.2.0",
