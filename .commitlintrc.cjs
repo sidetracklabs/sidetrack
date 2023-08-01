@@ -1,5 +1,4 @@
 // Default template copied from: https://cz-git.qbb.sh/config/
-const { execSync } = require("child_process");
 
 /** @type {import('cz-git').UserConfig} */
 module.exports = {

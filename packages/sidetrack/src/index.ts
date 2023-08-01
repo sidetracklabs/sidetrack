@@ -8,12 +8,11 @@ import { QueryAdapter } from "./adapter";
 import {
   createSidetrackServiceTag,
   makeLayer,
-  SidetrackInsertOption,
-  SidetrackQueues,
   SidetrackService,
 } from "./effect";
 import SidetrackJobs from "./models/public/SidetrackJobs";
 import { makeAppRuntime } from "./runtime";
+import { SidetrackInsertOption, SidetrackQueues } from "./types";
 
 export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   queryAdapter: QueryAdapter;
@@ -163,3 +162,6 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     );
   }
 }
+
+export * from "./adapter";
+export * from "./types";

@@ -4,7 +4,7 @@
   "ignorePatterns": ["**/migrations/**", "**/models/**", "**/generated/**"],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": ["*.ts", "*.tsx", "*.mts", "*.js", "*.jsx"],
       "plugins": ["sort-keys"],
       "rules": {
         "sort-keys": "off", // disable default eslint sort-keys
@@ -12,7 +12,7 @@
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": ["*.ts", "*.tsx", "*.mts"],
       "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",

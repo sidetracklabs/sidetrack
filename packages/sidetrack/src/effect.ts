@@ -12,6 +12,11 @@ import { QueryAdapter } from "./adapter";
 import { runMigrations } from "./migrations";
 import SidetrackJobs from "./models/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/public/SidetrackJobStatusEnum";
+import {
+  SidetrackHandlerError,
+  SidetrackInsertOption,
+  SidetrackQueues,
+} from "./types";
 
 export interface SidetrackService<
   Queues extends Record<string, Record<string, unknown>>,
@@ -67,41 +72,12 @@ export interface SidetrackService<
   start: () => Effect.Effect<never, never, void>;
 }
 
-export interface SidetrackInsertOption {
-  adapter?: QueryAdapter;
-  scheduledAt?: Date;
-}
-
-export interface SidetrackOptions<Queues extends Record<string, unknown>> {
-  databaseOptions: {
-    connectionString: string;
-  };
-  queryAdapter?: QueryAdapter;
-  queues: Queues;
-}
-
-class SidetrackHandlerError {
-  readonly _tag = "SidetrackHandlerError";
-  constructor(readonly error: unknown) {}
-}
-
 export const createSidetrackServiceTag = <
   Queues extends Record<string, Record<string, unknown>>,
 >() =>
   Context.Tag<SidetrackService<Queues>>(
     Symbol.for("@sidetracklabs/sidetrack/effect/service"),
   );
-
-export type SidetrackQueues<
-  Queues extends Record<string, Record<string, unknown>>,
-> = {
-  [K in keyof Queues]: {
-    handler: (payload: Queues[K]) => Promise<unknown>;
-    options?: {
-      maxAttempts?: number;
-    };
-  };
-};
 
 export function makeLayer<
   Queues extends Record<string, Record<string, unknown>>,

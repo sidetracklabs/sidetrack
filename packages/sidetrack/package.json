@@ -1,0 +1,47 @@
+{
+  "name": "@sidetrack/sidetrack",
+  "version": "0.0.1",
+  "keywords": [
+    "background",
+    "jobs",
+    "queue",
+    "worker",
+    "postgresql",
+    "postgres",
+    "tasks",
+    "typescript",
+    "effect",
+    "database"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sidetracklabs/sidetrack",
+    "directory": "packages/sidetrack"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "coverage": "vitest --config ./vitest.config.ts --coverage",
+    "format": "prettier --write .",
+    "generate-db-models": "dotenv kanel",
+    "lint": "eslint --fix . && prettier --write .",
+    "migrate": "dotenv node-pg-migrate up",
+    "test": "dotenv vitest --config ./vitest.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@effect/data": "^0.16.0",
+    "@effect/io": "^0.35.1",
+    "dotenv-cli": "^7.2.1",
+    "node-pg-migrate": "^6.2.2",
+    "pg": "^8.11.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.2",
+    "@vitest/coverage-v8": "^0.33.0",
+    "kanel": "^3.4.3",
+    "vite": "^4.4.4",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.33.0"
+  }
+}
