@@ -28,15 +28,15 @@
     "format": "prettier --write .",
     "generate-db-models": "dotenv kanel",
     "lint": "eslint --fix . && prettier --write .",
-    "migrate": "dotenv node-pg-migrate up",
+    "migrate": "dotenv sidetrack-pg-migrate up",
     "test": "dotenv vitest --config ./vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@effect/data": "^0.16.0",
     "@effect/io": "^0.35.1",
+    "@sidetrack/pg-migrate": "^0.0.1",
     "dotenv-cli": "^7.2.1",
-    "node-pg-migrate": "^6.2.2",
     "pg": "^8.11.1"
   },
   "devDependencies": {

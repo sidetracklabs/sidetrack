@@ -164,4 +164,5 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
 }
 
 export * from "./adapter";
+export { runMigrations } from "./migrations";
 export * from "./types";
