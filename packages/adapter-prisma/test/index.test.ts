@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { Sidetrack } from "@sidetrack/sidetrack";
+import { SidetrackTest } from "@sidetrack/sidetrack";
 import { describe, expect, it } from "vitest";
 
 import { makePrismaAdapter } from "../src";
@@ -9,7 +9,7 @@ import { PrismaClient } from "./prisma/generated";
 
 describe("jobs", () => {
   it("insert and run works with prisma adapter", async () => {
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
       databaseOptions: {
@@ -63,7 +63,7 @@ describe("jobs", () => {
   });
 
   it("retry, cancel, delete works with prisma adapter", async () => {
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
       databaseOptions: {
@@ -144,7 +144,7 @@ describe("jobs", () => {
   });
 
   it("list job works", async () => {
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       one: { id: string };
       two: { id: string };
     }>({

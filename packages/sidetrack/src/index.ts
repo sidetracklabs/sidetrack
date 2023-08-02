@@ -24,11 +24,11 @@ import {
 } from "./types";
 
 /**
- * Main class that contains all the methods for interacting with Sidetrack
+ * Main class that contains all the primary methods for interacting with Sidetrack
  */
 export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
-  private sidetrackService = createSidetrackServiceTag<Queues>();
+  protected sidetrackService = createSidetrackServiceTag<Queues>();
   /** @internal */
   private sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
   /** @internal */
@@ -39,7 +39,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
   private runtime: Runtime.Runtime<SidetrackService<Queues>>;
   /** @internal */
-  private customRunPromise: <R extends SidetrackService<Queues>, E, A>(
+  protected customRunPromise: <R extends SidetrackService<Queues>, E, A>(
     self: Effect.Effect<R, E, A>,
   ) => Promise<A>;
 
@@ -117,13 +117,15 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
       Effect.flatMap(this.sidetrackService, (service) => service.stop()),
     );
   }
+}
 
-  /**
-   * ==================
-   * Test Utilities
-   * ==================
-   */
-
+/**
+ * Test utility class that extends Sidetrack to also include some utilities you would only use in tests
+ * For example, see the list and run methods
+ */
+export class SidetrackTest<
+  Queues extends SidetrackQueuesGenericType,
+> extends Sidetrack<Queues> {
   /**
    * Test utility to get a list of jobs
    */

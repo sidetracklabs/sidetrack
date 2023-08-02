@@ -2,7 +2,7 @@
 import pg from "pg";
 import { describe, expect, it } from "vitest";
 
-import { Sidetrack } from "../src";
+import { SidetrackTest } from "../src";
 
 // TODO configure with global setup later: https://vitest.dev/config/#globalsetup
 
@@ -12,7 +12,7 @@ describe("jobs", () => {
       connectionString: process.env["DATABASE_URL"],
     });
 
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       test: { id: string };
       wallet: { amount: number };
     }>({
@@ -48,7 +48,7 @@ describe("jobs", () => {
   });
 
   it("run job succeeds", async () => {
-    const sidetrack = new Sidetrack({
+    const sidetrack = new SidetrackTest({
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
@@ -68,7 +68,7 @@ describe("jobs", () => {
   });
 
   it("run job fails", async () => {
-    const sidetrack = new Sidetrack({
+    const sidetrack = new SidetrackTest({
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
@@ -88,7 +88,7 @@ describe("jobs", () => {
 
   it("job gets retried", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack({
+    const sidetrack = new SidetrackTest({
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
@@ -113,7 +113,7 @@ describe("jobs", () => {
 
   it("job gets cancelled", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack({
+    const sidetrack = new SidetrackTest({
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
@@ -141,7 +141,7 @@ describe("jobs", () => {
 
   it("job gets deleted", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack({
+    const sidetrack = new SidetrackTest({
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
@@ -167,7 +167,7 @@ describe("jobs", () => {
 
   it("run job works", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
       databaseOptions: {
@@ -193,7 +193,7 @@ describe("jobs", () => {
 
   it("run queue works", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
       databaseOptions: {
@@ -219,7 +219,7 @@ describe("jobs", () => {
 
   it("list job works", async () => {
     // // 1 . define queue and function to call, (and queue opts?)
-    const sidetrack = new Sidetrack<{
+    const sidetrack = new SidetrackTest<{
       one: { id: string };
       two: { id: string };
     }>({
