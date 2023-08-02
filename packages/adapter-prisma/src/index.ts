@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Prisma } from "@prisma/client";
 import type { SidetrackQueryAdapter } from "@sidetrack/sidetrack";
 import { validate as validateUuid } from "uuid";
 
@@ -23,10 +21,7 @@ const replaceTextWithUUID = (
 // Prisma exports this as a generated type, which we don't generate in this project
 // so we're creating an interface that only uses the function we need
 interface PrismaClient {
-  $queryRawUnsafe<T = unknown>(
-    query: string,
-    ...values: any[]
-  ): Prisma.PrismaPromise<T>;
+  $queryRawUnsafe<T = unknown>(query: string, ...values: unknown[]): Promise<T>;
 }
 
 export const makePrismaAdapter: (
