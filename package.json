@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "changeset": "changeset",
-    "release": "pnpm run build && changeset version && changeset publish",
+    "release": "pnpm run build && changeset publish",
     "build": "turbo --filter \"./packages/*\" build",
     "dev": "turbo --filter \"./packages/*\" dev",
     "format": "prettier --write .",
