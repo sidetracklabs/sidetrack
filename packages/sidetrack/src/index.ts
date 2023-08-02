@@ -1,43 +1,34 @@
 import * as Effect from "@effect/io/Effect";
-import * as Fiber from "@effect/io/Fiber";
 import * as Layer from "@effect/io/Layer";
 import * as Runtime from "@effect/io/Runtime";
-import { Pool } from "pg";
 
-import { QueryAdapter } from "./adapter";
+import { SidetrackQueryAdapter } from "./adapter";
 import {
   createSidetrackServiceTag,
   makeLayer,
   SidetrackService,
 } from "./effect";
-import SidetrackJobs from "./models/public/SidetrackJobs";
+import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import { makeAppRuntime } from "./runtime";
-import { SidetrackInsertOption, SidetrackQueues } from "./types";
+import {
+  SidetrackInsertJobOptions,
+  SidetrackOptions,
+  SidetrackQueuesGenericType,
+} from "./types";
 
-export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
-  queryAdapter: QueryAdapter;
-  pool: Pool | undefined;
-  queues = {} as SidetrackQueues<Queues>;
-  databaseOptions: { connectionString: string };
-  pollingFiber: Fiber.Fiber<unknown, unknown> | undefined;
-  sidetrackService = createSidetrackServiceTag<Queues>();
-  sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
-  runtimeHandler: {
+export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
+  private sidetrackService = createSidetrackServiceTag<Queues>();
+  private sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
+  private runtimeHandler: {
     close: Effect.Effect<never, never, void>;
     runtime: Runtime.Runtime<SidetrackService<Queues>>;
   };
-  runtime: Runtime.Runtime<SidetrackService<Queues>>;
-  customRunPromise: <R extends SidetrackService<Queues>, E, A>(
+  private runtime: Runtime.Runtime<SidetrackService<Queues>>;
+  private customRunPromise: <R extends SidetrackService<Queues>, E, A>(
     self: Effect.Effect<R, E, A>,
   ) => Promise<A>;
 
-  constructor(options: {
-    databaseOptions: {
-      connectionString: string;
-    };
-    queryAdapter?: QueryAdapter;
-    queues: SidetrackQueues<Queues>;
-  }) {
+  constructor(options: SidetrackOptions<Queues>) {
     this.sidetrackLayer = makeLayer(options);
 
     this.runtimeHandler = Effect.runSync(makeAppRuntime(this.sidetrackLayer));
@@ -53,23 +44,11 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     // TODO should we keep this in here? Node specific
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     process.on("beforeExit", cleanup);
-
-    this.queues = options.queues;
-    this.databaseOptions = options.databaseOptions;
-    this.pool = undefined;
-    this.queryAdapter = options.queryAdapter ?? {
-      // eslint-disable-next-line @typescript-eslint/require-await
-      execute: async (_query, _params) => {
-        throw new Error(
-          "Query adapter not found: You must run the start() function before using sidetrack, or pass in a custom adapter.",
-        );
-      },
-    };
   }
 
   async getJob(
     jobId: string,
-    options?: { adapter?: QueryAdapter },
+    options?: { queryAdapter?: SidetrackQueryAdapter },
   ): Promise<SidetrackJobs> {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -81,7 +60,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   async insert<K extends keyof Queues>(
     queueName: K,
     payload: Queues[K],
-    options?: SidetrackInsertOption,
+    options?: SidetrackInsertJobOptions,
   ): Promise<SidetrackJobs> {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -90,7 +69,10 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     );
   }
 
-  async cancelJob(jobId: string, options?: { adapter?: QueryAdapter }) {
+  async cancelJob(
+    jobId: string,
+    options?: { queryAdapter?: SidetrackQueryAdapter },
+  ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.cancelJob(jobId, options),
@@ -98,7 +80,10 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     );
   }
 
-  async deleteJob(jobId: string, options?: { adapter?: QueryAdapter }) {
+  async deleteJob(
+    jobId: string,
+    options?: { queryAdapter?: SidetrackQueryAdapter },
+  ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.deleteJob(jobId, options),
@@ -124,7 +109,10 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
    * ==================
    */
 
-  async runJob(jobId: string, options?: { adapter?: QueryAdapter }) {
+  async runJob(
+    jobId: string,
+    options?: { queryAdapter?: SidetrackQueryAdapter },
+  ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.runJob(jobId, options),
@@ -134,7 +122,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
 
   async runQueue<K extends keyof Queues>(
     queue: K,
-    options?: { adapter?: QueryAdapter; runScheduled?: boolean },
+    options?: { queryAdapter?: SidetrackQueryAdapter; runScheduled?: boolean },
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -144,7 +132,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
   }
 
   async listJobs<K extends keyof Queues>(options?: {
-    adapter?: QueryAdapter;
+    queryAdapter?: SidetrackQueryAdapter;
     queue?: K | K[];
   }) {
     return this.customRunPromise(
@@ -154,7 +142,7 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
     );
   }
 
-  async listJobStatuses(options?: { adapter?: QueryAdapter }) {
+  async listJobStatuses(options?: { queryAdapter?: SidetrackQueryAdapter }) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.listJobStatuses(options),
@@ -166,3 +154,4 @@ export class Sidetrack<Queues extends Record<string, Record<string, unknown>>> {
 export * from "./adapter";
 export { runMigrations } from "./migrations";
 export * from "./types";
+export { SidetrackJobs };

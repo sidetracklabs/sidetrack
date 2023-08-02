@@ -8,91 +8,75 @@ import * as Ref from "@effect/io/Ref";
 import * as Schedule from "@effect/io/Schedule";
 import { Pool } from "pg";
 
-import { QueryAdapter } from "./adapter";
+import { SidetrackQueryAdapter } from "./adapter";
 import { runMigrations } from "./migrations";
-import SidetrackJobs from "./models/public/SidetrackJobs";
-import SidetrackJobStatusEnum from "./models/public/SidetrackJobStatusEnum";
+import SidetrackJobs from "./models/generated/public/SidetrackJobs";
+import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import {
+  SidetrackCancelJobOptions,
+  SidetrackDeleteJobOptions,
+  SidetrackGetJobOptions,
   SidetrackHandlerError,
-  SidetrackInsertOption,
-  SidetrackQueues,
+  SidetrackInsertJobOptions,
+  SidetrackJobWithPayload,
+  SidetrackListJobsOptions,
+  SidetrackOptions,
+  SidetrackQueuesGenericType,
+  SidetrackRunJobOptions,
+  SidetrackRunQueueOptions,
 } from "./types";
 
-export interface SidetrackService<
-  Queues extends Record<string, Record<string, unknown>>,
-> {
+export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   cancelJob: (
     jobId: string,
-    options?: {
-      adapter?: QueryAdapter;
-    },
+    options?: SidetrackCancelJobOptions,
   ) => Effect.Effect<never, never, void>;
   cleanup: () => Effect.Effect<never, never, void>;
   deleteJob: (
     jobId: string,
-    options?: {
-      adapter?: QueryAdapter;
-    },
+    options?: SidetrackDeleteJobOptions,
   ) => Effect.Effect<never, never, void>;
   getJob: (
     jobId: string,
-    options?: {
-      adapter?: QueryAdapter;
-    },
+    options?: SidetrackGetJobOptions,
   ) => Effect.Effect<never, never, SidetrackJobs>;
   insertJob: <K extends keyof Queues>(
     queueName: K,
     payload: Queues[K],
-    options?: SidetrackInsertOption,
+    options?: SidetrackInsertJobOptions,
   ) => Effect.Effect<never, never, SidetrackJobs>;
   listJobStatuses: (options?: {
-    adapter?: QueryAdapter;
+    queryAdapter?: SidetrackQueryAdapter;
   }) => Effect.Effect<never, never, Record<string, string>>;
   listJobs: <K extends keyof Queues>(
-    options?:
-      | {
-          adapter?: QueryAdapter | undefined;
-          queue?: K | K[] | undefined;
-        }
-      | undefined,
+    options?: SidetrackListJobsOptions<Queues, K> | undefined,
   ) => Effect.Effect<never, never, SidetrackJobs[]>;
   runJob: (
     jobId: string,
-    options?: {
-      adapter?: QueryAdapter;
-    },
+    options?: SidetrackRunJobOptions,
   ) => Effect.Effect<never, unknown, void>;
   runQueue: <K extends keyof Queues>(
     queue: K,
-    options?: {
-      adapter?: QueryAdapter;
-      runScheduled?: boolean;
-    },
+    options?: SidetrackRunQueueOptions,
   ) => Effect.Effect<never, unknown, void>;
   start: () => Effect.Effect<never, never, void>;
 }
 
 export const createSidetrackServiceTag = <
-  Queues extends Record<string, Record<string, unknown>>,
+  Queues extends SidetrackQueuesGenericType,
 >() =>
   Context.Tag<SidetrackService<Queues>>(
     Symbol.for("@sidetracklabs/sidetrack/effect/service"),
   );
 
-export function makeLayer<
-  Queues extends Record<string, Record<string, unknown>>,
->(options: {
-  databaseOptions: {
-    connectionString: string;
-  };
-  queryAdapter?: QueryAdapter;
-  queues: SidetrackQueues<Queues>;
-}): Layer.Layer<never, never, SidetrackService<Queues>> {
+export function makeLayer<Queues extends SidetrackQueuesGenericType>(
+  layerOptions: SidetrackOptions<Queues>,
+): Layer.Layer<never, never, SidetrackService<Queues>> {
   return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
-    const queues = options.queues;
-    const databaseOptions = options.databaseOptions;
-    const pool = new Pool(databaseOptions);
-    const queryAdapter: QueryAdapter = options.queryAdapter ?? {
+    const queues = layerOptions.queues;
+    const databaseOptions = layerOptions.databaseOptions;
+    const pool = databaseOptions ? new Pool(databaseOptions) : undefined;
+    const queryAdapter: SidetrackQueryAdapter = layerOptions.queryAdapter ?? {
       execute: async <ResultRow>(query: string, params?: unknown[]) => {
         const queryResult = await pool?.query(query, params);
         return { rows: (queryResult?.rows ?? []) as ResultRow[] };
@@ -154,21 +138,33 @@ export function makeLayer<
 
     const start = () =>
       // TODO migrations can't be performed with a custom adapter currently
-      Effect.promise(() =>
-        runMigrations(databaseOptions.connectionString),
-      ).pipe(Effect.flatMap(() => startPolling()));
+      {
+        if (!databaseOptions?.connectionString)
+          return Effect.dieMessage(
+            "No connection string provided, cannot run sidetrack migrations",
+          );
+        return Effect.promise(() =>
+          runMigrations(databaseOptions.connectionString),
+        ).pipe(Effect.flatMap(() => startPolling()));
+      };
 
-    const cancelJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
+    const cancelJob = (
+      jobId: string,
+      options?: { queryAdapter?: SidetrackQueryAdapter },
+    ) =>
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute(
+        (options?.queryAdapter || queryAdapter).execute(
           `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
           [jobId],
         ),
       ).pipe(Effect.asUnit);
 
-    const deleteJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
+    const deleteJob = (
+      jobId: string,
+      options?: { queryAdapter?: SidetrackQueryAdapter },
+    ) =>
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute(
+        (options?.queryAdapter || queryAdapter).execute(
           `DELETE FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
@@ -179,17 +175,23 @@ export function makeLayer<
         .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
         .pipe(Effect.asUnit);
 
-    const runHandler = (job: SidetrackJobs) =>
+    const runHandler = (
+      job: SidetrackJobs,
+      options?: { queryAdapter?: SidetrackQueryAdapter },
+    ) =>
       Effect.tryPromise({
         catch: (e) => {
           return new SidetrackHandlerError(e);
         },
-        try: () => queues[job.queue].handler(job.payload as Queues[string]),
+        try: () =>
+          queues[job.queue].handler(
+            job as SidetrackJobWithPayload<Queues[string]>,
+          ),
       })
         .pipe(
           Effect.flatMap(() =>
             Effect.promise(() =>
-              queryAdapter.execute(
+              (options?.queryAdapter ?? queryAdapter).execute(
                 `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
                 [job.id],
               ),
@@ -212,7 +214,7 @@ export function makeLayer<
                     1,
                 );
 
-                return queryAdapter.execute(
+                return (options?.queryAdapter ?? queryAdapter).execute(
                   `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
@@ -228,7 +230,7 @@ export function makeLayer<
                   ],
                 );
               } else {
-                return queryAdapter.execute(
+                return (options?.queryAdapter ?? queryAdapter).execute(
                   `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
@@ -252,10 +254,10 @@ export function makeLayer<
     const insertJob = <K extends keyof Queues>(
       queueName: K,
       payload: Queues[K],
-      options?: SidetrackInsertOption,
+      options?: SidetrackInsertJobOptions,
     ) =>
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute<SidetrackJobs>(
+        (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `INSERT INTO sidetrack_jobs (
       status,
       queue,
@@ -267,17 +269,23 @@ export function makeLayer<
         ),
       ).pipe(Effect.map((result) => result.rows[0]!));
 
-    const getJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
+    const getJob = (
+      jobId: string,
+      options?: { queryAdapter?: SidetrackQueryAdapter },
+    ) =>
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute<SidetrackJobs>(
+        (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
 
-    const runJob = (jobId: string, options?: { adapter?: QueryAdapter }) =>
+    const runJob = (
+      jobId: string,
+      options?: { queryAdapter?: SidetrackQueryAdapter },
+    ) =>
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute<SidetrackJobs>(
+        (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `WITH next_job AS (
               SELECT
                 id
@@ -308,14 +316,17 @@ export function makeLayer<
       )
 
         .pipe(Effect.map((result) => result.rows[0]))
-        .pipe(Effect.flatMap((job) => runHandler(job)));
+        .pipe(Effect.flatMap((job) => runHandler(job, options)));
 
     const runQueue = <K extends keyof Queues>(
       queue: K,
-      options?: { adapter?: QueryAdapter; runScheduled?: boolean },
+      options?: {
+        queryAdapter?: SidetrackQueryAdapter;
+        runScheduled?: boolean;
+      },
     ) =>
       Effect.promise(() =>
-        queryAdapter.execute<SidetrackJobs>(
+        (options?.queryAdapter ?? queryAdapter).execute<SidetrackJobs>(
           `WITH next_jobs AS (
               SELECT
                 id
@@ -350,7 +361,7 @@ export function makeLayer<
         .pipe(Effect.map((result) => result.rows))
         .pipe(
           Effect.flatMap((result) =>
-            Effect.forEach(result, (job) => runHandler(job), {
+            Effect.forEach(result, (job) => runHandler(job, options), {
               concurrency: "unbounded",
             }),
           ),
@@ -358,12 +369,12 @@ export function makeLayer<
         .pipe(Effect.asUnit);
 
     const listJobs = <K extends keyof Queues>(options?: {
-      adapter?: QueryAdapter | undefined;
+      queryAdapter?: SidetrackQueryAdapter | undefined;
       queue?: K | K[] | undefined;
     }) =>
       // get jobs
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute<SidetrackJobs>(
+        (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs ${
             options?.queue
               ? typeof options.queue === "string"
@@ -375,10 +386,12 @@ export function makeLayer<
         ),
       ).pipe(Effect.map((result) => result.rows));
 
-    const listJobStatuses = (options?: { adapter?: QueryAdapter }) =>
+    const listJobStatuses = (options?: {
+      queryAdapter?: SidetrackQueryAdapter;
+    }) =>
       // get jobs and group by status
       Effect.promise(() =>
-        (options?.adapter || queryAdapter).execute<{
+        (options?.queryAdapter || queryAdapter).execute<{
           count: string;
           status: SidetrackJobStatusEnum;
         }>(`SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`),

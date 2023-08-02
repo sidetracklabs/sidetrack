@@ -54,8 +54,9 @@ describe("jobs", () => {
       },
       queues: {
         test: {
-          handler: async (payload) => {
-            return payload;
+          handler: async (job) => {
+            expect(job.status).toBe("running");
+            expect(job.payload).toMatchObject({ id: "hello success" });
           },
         },
       },
