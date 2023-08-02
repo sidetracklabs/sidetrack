@@ -20,6 +20,7 @@ import {
   SidetrackInsertJobOptions,
   SidetrackJobWithPayload,
   SidetrackListJobsOptions,
+  SidetrackListJobStatusesOptions,
   SidetrackOptions,
   SidetrackQueuesGenericType,
   SidetrackRunJobOptions,
@@ -31,7 +32,6 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     jobId: string,
     options?: SidetrackCancelJobOptions,
   ) => Effect.Effect<never, never, void>;
-  cleanup: () => Effect.Effect<never, never, void>;
   deleteJob: (
     jobId: string,
     options?: SidetrackDeleteJobOptions,
@@ -45,21 +45,40 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     payload: Queues[K],
     options?: SidetrackInsertJobOptions,
   ) => Effect.Effect<never, never, SidetrackJobs>;
-  listJobStatuses: (options?: {
-    queryAdapter?: SidetrackQueryAdapter;
-  }) => Effect.Effect<never, never, Record<string, string>>;
+  /**
+   * Test utility to get a list of job statuses and their counts
+   */
+  listJobStatuses: (
+    options?: SidetrackListJobStatusesOptions,
+  ) => Effect.Effect<never, never, Record<string, string>>;
+  /**
+   * Test utility to get a list of jobs
+   */
   listJobs: <K extends keyof Queues>(
     options?: SidetrackListJobsOptions<Queues, K> | undefined,
   ) => Effect.Effect<never, never, SidetrackJobs[]>;
+  /**
+   * Test utility to run a job manually without polling
+   */
   runJob: (
     jobId: string,
     options?: SidetrackRunJobOptions,
   ) => Effect.Effect<never, unknown, void>;
+  /**
+   * Test utility to run all jobs in a queue manually without polling
+   */
   runQueue: <K extends keyof Queues>(
     queue: K,
     options?: SidetrackRunQueueOptions,
   ) => Effect.Effect<never, unknown, void>;
+  /**
+   * Automatically run migrations and start polling the DB for jobs
+   */
   start: () => Effect.Effect<never, never, void>;
+  /**
+   * Turn off polling
+   */
+  stop: () => Effect.Effect<never, never, void>;
 }
 
 export const createSidetrackServiceTag = <
@@ -148,10 +167,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ).pipe(Effect.flatMap(() => startPolling()));
       };
 
-    const cancelJob = (
-      jobId: string,
-      options?: { queryAdapter?: SidetrackQueryAdapter },
-    ) =>
+    const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute(
           `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
@@ -159,10 +175,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.asUnit);
 
-    const deleteJob = (
-      jobId: string,
-      options?: { queryAdapter?: SidetrackQueryAdapter },
-    ) =>
+    const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute(
           `DELETE FROM sidetrack_jobs WHERE id = $1`,
@@ -170,7 +183,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.asUnit);
 
-    const cleanup = () =>
+    const stop = () =>
       Ref.get(pollingFiber)
         .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
         .pipe(Effect.asUnit);
@@ -269,10 +282,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.map((result) => result.rows[0]!));
 
-    const getJob = (
-      jobId: string,
-      options?: { queryAdapter?: SidetrackQueryAdapter },
-    ) =>
+    const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs WHERE id = $1`,
@@ -280,10 +290,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
 
-    const runJob = (
-      jobId: string,
-      options?: { queryAdapter?: SidetrackQueryAdapter },
-    ) =>
+    const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
           `WITH next_job AS (
@@ -320,10 +327,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const runQueue = <K extends keyof Queues>(
       queue: K,
-      options?: {
-        queryAdapter?: SidetrackQueryAdapter;
-        runScheduled?: boolean;
-      },
+      options?: SidetrackRunQueueOptions,
     ) =>
       Effect.promise(() =>
         (options?.queryAdapter ?? queryAdapter).execute<SidetrackJobs>(
@@ -335,7 +339,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
               WHERE
               (status = 'scheduled' or status = 'retrying')
                 ${
-                  options?.runScheduled ? "" : "AND scheduled_at <= NOW()"
+                  options?.includeFutureJobs ? "" : "AND scheduled_at <= NOW()"
                 } AND queue = $1
               ORDER BY
                 scheduled_at
@@ -368,10 +372,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         )
         .pipe(Effect.asUnit);
 
-    const listJobs = <K extends keyof Queues>(options?: {
-      queryAdapter?: SidetrackQueryAdapter | undefined;
-      queue?: K | K[] | undefined;
-    }) =>
+    const listJobs = <K extends keyof Queues>(
+      options?: SidetrackListJobsOptions<Queues, K>,
+    ) =>
       // get jobs
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute<SidetrackJobs>(
@@ -386,9 +389,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.map((result) => result.rows));
 
-    const listJobStatuses = (options?: {
-      queryAdapter?: SidetrackQueryAdapter;
-    }) =>
+    const listJobStatuses = (options?: SidetrackListJobStatusesOptions) =>
       // get jobs and group by status
       Effect.promise(() =>
         (options?.queryAdapter || queryAdapter).execute<{
@@ -403,7 +404,6 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     return {
       cancelJob,
-      cleanup,
       deleteJob,
       getJob,
       insertJob,
@@ -412,6 +412,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       runJob,
       runQueue,
       start,
+      stop,
     };
   });
 }

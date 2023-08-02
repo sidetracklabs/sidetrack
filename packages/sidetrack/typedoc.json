@@ -1,6 +1,8 @@
 {
   "extends": ["../../typedoc.base.json"],
-  "entryPoints": ["src/index.ts"],
+  "entryPoints": ["src/index.ts", "src/effect.ts"],
   // Only used by docs-all script
-  "out": "./docs"
+  "out": "./docs",
+  "excludePrivate": true,
+  "excludeInternal": true
 }

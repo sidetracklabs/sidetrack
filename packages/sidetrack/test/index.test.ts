@@ -40,7 +40,7 @@ describe("jobs", () => {
     });
 
     // insert a job API
-    const job = await sidetrack.insert("test", { id: "string" });
+    const job = await sidetrack.insertJob("test", { id: "string" });
     // await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect((await sidetrack.getJob(job.id)).status).toBe("scheduled");
@@ -62,7 +62,7 @@ describe("jobs", () => {
       },
     });
     // insert a job API
-    const job = await sidetrack.insert("test", { id: "hello success" });
+    const job = await sidetrack.insertJob("test", { id: "hello success" });
     await sidetrack.runJob(job.id);
     expect((await sidetrack.getJob(job.id)).status).toBe("completed");
   });
@@ -81,7 +81,7 @@ describe("jobs", () => {
       },
     });
     // insert a job API
-    const job = await sidetrack.insert("test", { id: "hello fail" });
+    const job = await sidetrack.insertJob("test", { id: "hello fail" });
     await sidetrack.runJob(job.id);
     expect((await sidetrack.getJob(job.id)).status).toBe("failed");
   });
@@ -102,7 +102,7 @@ describe("jobs", () => {
       },
     });
     // insert a job API
-    let job = await sidetrack.insert("test", { id: "hello fail" });
+    let job = await sidetrack.insertJob("test", { id: "hello fail" });
     await sidetrack.runJob(job.id);
     expect((await sidetrack.getJob(job.id)).status).toBe("retrying");
     await sidetrack.runJob(job.id);
@@ -126,7 +126,7 @@ describe("jobs", () => {
       },
     });
     // insert a job API
-    let job = await sidetrack.insert("test", { id: "hello fail" });
+    let job = await sidetrack.insertJob("test", { id: "hello fail" });
     await sidetrack.runJob(job.id);
     const insertedAt = job.inserted_at;
     expect((await sidetrack.getJob(job.id)).status).toBe("failed");
@@ -155,7 +155,7 @@ describe("jobs", () => {
     });
 
     // insert a job API
-    let job = await sidetrack.insert("test", { id: "hello fail" });
+    let job = await sidetrack.insertJob("test", { id: "hello fail" });
     await sidetrack.runJob(job.id);
     expect((await sidetrack.getJob(job.id)).status).toBe("failed");
 
@@ -183,7 +183,7 @@ describe("jobs", () => {
     });
 
     // insert a job API
-    const job = await sidetrack.insert("test", { id: "hello fail" });
+    const job = await sidetrack.insertJob("test", { id: "hello fail" });
 
     expect((await sidetrack.getJob(job.id)).status).toBe("scheduled"); // running
 
@@ -209,7 +209,7 @@ describe("jobs", () => {
     });
 
     // insert a job API
-    const job = await sidetrack.insert("test", { id: "hello world" });
+    const job = await sidetrack.insertJob("test", { id: "hello world" });
 
     expect((await sidetrack.getJob(job.id)).status).toBe("scheduled"); // running
 
@@ -241,11 +241,11 @@ describe("jobs", () => {
     });
 
     // insert a job API
-    await sidetrack.insert("one", { id: "hello world" });
+    await sidetrack.insertJob("one", { id: "hello world" });
 
-    await sidetrack.insert("one", { id: "hello universe" });
+    await sidetrack.insertJob("one", { id: "hello universe" });
 
-    await sidetrack.insert("two", { id: "hello universe" });
+    await sidetrack.insertJob("two", { id: "hello universe" });
 
     // todo, clear db
     expect(

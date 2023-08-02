@@ -1,3 +1,3 @@
-# Documentation
+# Introduction
 
-Head over to [sidetrack.run](https://sidetrack.run)
+An internal library for running migrations in sidetrack.

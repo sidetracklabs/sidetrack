@@ -3,5 +3,7 @@
   "name": "Sidetrack",
   "entryPointStrategy": "packages",
   "includeVersion": true,
-  "out": "docs"
+  "out": "docs",
+  "theme": "sonicware",
+  "plugin": ["sonicware-tdt"]
 }

@@ -29,7 +29,7 @@ describe("jobs", () => {
 
     // insert and run job API
     const job = await transactionClient.$transaction(async (prisma) => {
-      const job = await sidetrack.insert(
+      const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
         { queryAdapter: makePrismaAdapter(prisma) },
@@ -86,7 +86,7 @@ describe("jobs", () => {
 
     // insert and run job API
     await transactionClient.$transaction(async (prisma) => {
-      const job = await sidetrack.insert(
+      const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
         { queryAdapter: makePrismaAdapter(prisma) },
@@ -152,7 +152,6 @@ describe("jobs", () => {
         connectionString: process.env["DATABASE_URL"]!,
       },
       queryAdapter: makePrismaAdapter(new PrismaClient()),
-
       queues: {
         one: {
           handler: async (payload) => {
@@ -171,19 +170,19 @@ describe("jobs", () => {
 
     // insert and run job API
     await transactionClient.$transaction(async (prisma) => {
-      await sidetrack.insert(
+      await sidetrack.insertJob(
         "one",
         { id: "hello world" },
         { queryAdapter: makePrismaAdapter(prisma) },
       );
 
-      await sidetrack.insert(
+      await sidetrack.insertJob(
         "one",
         { id: "hello universe" },
         { queryAdapter: makePrismaAdapter(prisma) },
       );
 
-      await sidetrack.insert(
+      await sidetrack.insertJob(
         "two",
         { id: "hello universe" },
         { queryAdapter: makePrismaAdapter(prisma) },

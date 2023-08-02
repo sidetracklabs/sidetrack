@@ -9,4 +9,4 @@ export const runMigrations = async (connectionString: string) =>
     direction: "up",
     migrations: [one],
     migrationsTable: "sidetrack_migrations",
-  });
+  }).then(() => {});

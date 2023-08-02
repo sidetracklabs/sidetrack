@@ -44,6 +44,7 @@
     "typescript": "^5.1.6"
   },
   "devDependencies": {
+    "sonicware-tdt": "^20.0.0",
     "typedoc": "^0.24.8"
   },
   "packageManager": "pnpm@8.6.11"

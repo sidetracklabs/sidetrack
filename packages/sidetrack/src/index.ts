@@ -2,7 +2,6 @@ import * as Effect from "@effect/io/Effect";
 import * as Layer from "@effect/io/Layer";
 import * as Runtime from "@effect/io/Runtime";
 
-import { SidetrackQueryAdapter } from "./adapter";
 import {
   createSidetrackServiceTag,
   makeLayer,
@@ -12,19 +11,34 @@ import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import { makeAppRuntime } from "./runtime";
 import {
+  SidetrackCancelJobOptions,
+  SidetrackDeleteJobOptions,
+  SidetrackGetJobOptions,
   SidetrackInsertJobOptions,
+  SidetrackListJobsOptions,
+  SidetrackListJobStatusesOptions,
   SidetrackOptions,
   SidetrackQueuesGenericType,
+  SidetrackRunJobOptions,
+  SidetrackRunQueueOptions,
 } from "./types";
 
+/**
+ * Main class that contains all the methods for interacting with Sidetrack
+ */
 export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
+  /** @internal */
   private sidetrackService = createSidetrackServiceTag<Queues>();
+  /** @internal */
   private sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
+  /** @internal */
   private runtimeHandler: {
     close: Effect.Effect<never, never, void>;
     runtime: Runtime.Runtime<SidetrackService<Queues>>;
   };
+  /** @internal */
   private runtime: Runtime.Runtime<SidetrackService<Queues>>;
+  /** @internal */
   private customRunPromise: <R extends SidetrackService<Queues>, E, A>(
     self: Effect.Effect<R, E, A>,
   ) => Promise<A>;
@@ -41,15 +55,31 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     ) => Runtime.runPromise(this.runtime)(self);
 
     // TODO should we keep this in here? Node specific
-    const cleanup = () => Effect.runPromise(this.runtimeHandler.close);
+    const runtimeCleanup = () => Effect.runPromise(this.runtimeHandler.close);
     // TODO should we keep this in here? Node specific
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    process.on("beforeExit", cleanup);
+    process.on("beforeExit", runtimeCleanup);
+  }
+
+  async cancelJob(jobId: string, options?: SidetrackCancelJobOptions) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.cancelJob(jobId, options),
+      ),
+    );
+  }
+
+  async deleteJob(jobId: string, options?: SidetrackDeleteJobOptions) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.deleteJob(jobId, options),
+      ),
+    );
   }
 
   async getJob(
     jobId: string,
-    options?: { queryAdapter?: SidetrackQueryAdapter },
+    options?: SidetrackGetJobOptions,
   ): Promise<SidetrackJobs> {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
@@ -58,7 +88,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     );
   }
 
-  async insert<K extends keyof Queues>(
+  async insertJob<K extends keyof Queues>(
     queueName: K,
     payload: Queues[K],
     options?: SidetrackInsertJobOptions,
@@ -70,37 +100,21 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     );
   }
 
-  async cancelJob(
-    jobId: string,
-    options?: { queryAdapter?: SidetrackQueryAdapter },
-  ) {
-    return this.customRunPromise(
-      Effect.flatMap(this.sidetrackService, (service) =>
-        service.cancelJob(jobId, options),
-      ),
-    );
-  }
-
-  async deleteJob(
-    jobId: string,
-    options?: { queryAdapter?: SidetrackQueryAdapter },
-  ) {
-    return this.customRunPromise(
-      Effect.flatMap(this.sidetrackService, (service) =>
-        service.deleteJob(jobId, options),
-      ),
-    );
-  }
-
+  /**
+   * Automatically run migrations and start polling the DB for jobs
+   */
   async start() {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) => service.start()),
     );
   }
 
-  async cleanup() {
+  /**
+   * Turn off polling
+   */
+  async stop() {
     return this.customRunPromise(
-      Effect.flatMap(this.sidetrackService, (service) => service.cleanup()),
+      Effect.flatMap(this.sidetrackService, (service) => service.stop()),
     );
   }
 
@@ -110,32 +124,12 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
    * ==================
    */
 
-  async runJob(
-    jobId: string,
-    options?: { queryAdapter?: SidetrackQueryAdapter },
+  /**
+   * Test utility to get a list of jobs
+   */
+  async listJobs<K extends keyof Queues>(
+    options?: SidetrackListJobsOptions<Queues, K> | undefined,
   ) {
-    return this.customRunPromise(
-      Effect.flatMap(this.sidetrackService, (service) =>
-        service.runJob(jobId, options),
-      ),
-    );
-  }
-
-  async runQueue<K extends keyof Queues>(
-    queue: K,
-    options?: { queryAdapter?: SidetrackQueryAdapter; runScheduled?: boolean },
-  ) {
-    return this.customRunPromise(
-      Effect.flatMap(this.sidetrackService, (service) =>
-        service.runQueue(queue, options),
-      ),
-    );
-  }
-
-  async listJobs<K extends keyof Queues>(options?: {
-    queryAdapter?: SidetrackQueryAdapter;
-    queue?: K | K[];
-  }) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.listJobs(options),
@@ -143,10 +137,38 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     );
   }
 
-  async listJobStatuses(options?: { queryAdapter?: SidetrackQueryAdapter }) {
+  /**
+   * Test utility to get a list of job statuses and their counts
+   */
+  async listJobStatuses(options?: SidetrackListJobStatusesOptions) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.listJobStatuses(options),
+      ),
+    );
+  }
+
+  /**
+   * Test utility to run a job manually without polling
+   */
+  async runJob(jobId: string, options?: SidetrackRunJobOptions) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.runJob(jobId, options),
+      ),
+    );
+  }
+
+  /**
+   * Test utility to run all jobs in a queue manually without polling
+   */
+  async runQueue<K extends keyof Queues>(
+    queue: K,
+    options?: SidetrackRunQueueOptions,
+  ) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.runQueue(queue, options),
       ),
     );
   }

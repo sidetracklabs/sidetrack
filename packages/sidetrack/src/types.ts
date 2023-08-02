@@ -28,13 +28,17 @@ export interface SidetrackListJobsOptions<
   queue?: K | K[] | undefined;
 }
 
+export interface SidetrackListJobStatusesOptions {
+  queryAdapter?: SidetrackQueryAdapter;
+}
+
 export interface SidetrackRunJobOptions {
   queryAdapter?: SidetrackQueryAdapter;
 }
 
 export interface SidetrackRunQueueOptions {
+  includeFutureJobs?: boolean;
   queryAdapter?: SidetrackQueryAdapter;
-  runScheduled?: boolean;
 }
 
 export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
