@@ -3,24 +3,23 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "changeset": "changeset",
-    "release": "pnpm run build && changeset publish",
     "build": "turbo --filter \"./packages/*\" build",
+    "changeset": "changeset",
     "dev": "turbo --filter \"./packages/*\" dev",
+    "docgen": "typedoc",
     "format": "prettier --write .",
     "lint": "eslint . && prettier --check .",
     "lint-fix": "eslint --fix . && prettier --write .",
-    "test": "turbo test",
-    "typecheck": "turbo typecheck",
     "postinstall-steps": "turbo --filter \"./packages/*\" postinstall-steps",
-    "docgen": "typedoc"
+    "release": "pnpm run build && changeset publish",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-git"
     }
   },
-  "packageManager": "pnpm@8.6.11",
   "dependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
@@ -46,5 +45,6 @@
   },
   "devDependencies": {
     "typedoc": "^0.24.8"
-  }
+  },
+  "packageManager": "pnpm@8.6.11"
 }

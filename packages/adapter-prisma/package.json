@@ -23,9 +23,6 @@
     "url": "https://github.com/sidetracklabs/sidetrack",
     "directory": "packages/adapter-prisma"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,12 +30,19 @@
       "require": "./dist/index.js"
     }
   },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
+    "postinstall-steps": "prisma generate --schema=./test/schema.prisma",
     "test": "dotenv vitest --config ./vitest.config.ts",
-    "typecheck": "tsc --noEmit",
-    "postinstall-steps": "prisma generate --schema=./test/schema.prisma"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "uuid": "^9.0.0"

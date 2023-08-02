@@ -22,9 +22,6 @@
     "url": "https://github.com/sidetracklabs/sidetrack",
     "directory": "packages/sidetrack"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -37,6 +34,13 @@
       "require": "./dist/effect.js"
     }
   },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
