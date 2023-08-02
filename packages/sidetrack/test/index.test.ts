@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { Pool } from "pg";
+import pg from "pg";
 import { describe, expect, it } from "vitest";
 
 import { Sidetrack } from "../src";
@@ -8,7 +8,7 @@ import { Sidetrack } from "../src";
 
 describe("jobs", () => {
   it("accepts a query adapter", async () => {
-    const pool = new Pool({
+    const pool = new pg.Pool({
       connectionString: process.env["DATABASE_URL"],
     });
 

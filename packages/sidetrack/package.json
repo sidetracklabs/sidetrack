@@ -30,12 +30,14 @@
       "types": "./dist/index.d.ts",
       "module": "./dist/index.mjs",
       "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./effect": {
       "types": "./dist/effect.d.ts",
       "module": "./dist/effect.mjs",
       "import": "./dist/effect.mjs",
+      "require": "./dist/effect.js",
       "default": "./dist/effect.js"
     }
   },

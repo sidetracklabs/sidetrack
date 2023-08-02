@@ -6,7 +6,7 @@ import * as Fiber from "@effect/io/Fiber";
 import * as Layer from "@effect/io/Layer";
 import * as Ref from "@effect/io/Ref";
 import * as Schedule from "@effect/io/Schedule";
-import { Pool } from "pg";
+import pg from "pg";
 
 import { SidetrackQueryAdapter } from "./adapter";
 import { runMigrations } from "./migrations";
@@ -75,7 +75,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
   return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
-    const pool = databaseOptions ? new Pool(databaseOptions) : undefined;
+    const pool = databaseOptions ? new pg.Pool(databaseOptions) : undefined;
     const queryAdapter: SidetrackQueryAdapter = layerOptions.queryAdapter ?? {
       execute: async <ResultRow>(query: string, params?: unknown[]) => {
         const queryResult = await pool?.query(query, params);
