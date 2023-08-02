@@ -1,7 +1,7 @@
 {
   // This helps turn off rules that may conflict with prettier, we don't use it for anything else
   "extends": ["prettier"],
-  "ignorePatterns": ["migrations", "models", "generated", "dist"],
+  "ignorePatterns": ["migrations", "models", "generated", "dist", "docs"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.mts", "*.js", "*.jsx"],
