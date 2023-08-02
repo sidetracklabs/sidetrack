@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: pnpm postinstall-steps && pnpm build
 
-      - name: Build, lint and type-check
+      - name: lint and type-check
         run: pnpm turbo lint test typecheck
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable
