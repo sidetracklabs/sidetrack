@@ -11,7 +11,8 @@
     "lint": "eslint . && prettier --check .",
     "lint-fix": "eslint --fix . && prettier --write .",
     "test": "turbo test",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "postinstall-steps": "turbo --filter \"./packages/*\" postinstall-steps"
   },
   "config": {
     "commitizen": {

@@ -36,9 +36,9 @@
   "scripts": {
     "build": "tsup",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
-    "test": "pnpm run prisma-client-gen && dotenv vitest --config ./vitest.config.ts",
+    "test": "dotenv vitest --config ./vitest.config.ts",
     "typecheck": "tsc --noEmit",
-    "prisma-client-gen": "prisma generate --schema=./test/schema.prisma"
+    "postinstall-steps": "prisma generate --schema=./test/schema.prisma"
   },
   "dependencies": {
     "uuid": "^9.0.0"
