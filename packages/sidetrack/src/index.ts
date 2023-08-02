@@ -176,7 +176,7 @@ export class SidetrackTest<
   }
 }
 
-export * from "./adapter";
+export * from "./client";
 export { runMigrations } from "./migrations";
 export * from "./types";
 export { SidetrackJobs, SidetrackJobStatusEnum };

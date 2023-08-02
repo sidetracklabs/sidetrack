@@ -1,9 +1,9 @@
 import { ClientBase } from "pg";
 
 /**
- * Query adapter for sidetrack. This allows you to use whatever database library you want as long as you conform to this interface.
+ * Database client for sidetrack. This allows you to use whatever database library you want as long as you conform to this interface.
  */
-export interface SidetrackQueryAdapter {
+export interface SidetrackDatabaseClient {
   execute: <ResultRow>(
     query: string,
     params?: unknown[],
@@ -13,9 +13,11 @@ export interface SidetrackQueryAdapter {
 /**
  *
  * @param pgClient client/pool from the node-postgres (pg) library.
- * @returns Query adapter for sidetrack.
+ * @returns Database client for sidetrack.
  */
-export const makePgAdapter = (pgClient: ClientBase): SidetrackQueryAdapter => ({
+export const makePgSidetrackClient = (
+  pgClient: ClientBase,
+): SidetrackDatabaseClient => ({
   execute: async <ResultRow>(query: string, params?: unknown[]) => {
     const result = await pgClient.query(query, params);
     return {

@@ -1,5 +1,5 @@
 {
-  "name": "@sidetrack/adapter-prisma",
+  "name": "@sidetrack/client-prisma",
   "version": "0.0.5",
   "files": [
     "dist",

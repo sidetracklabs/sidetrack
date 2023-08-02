@@ -1,4 +1,4 @@
-import type { SidetrackQueryAdapter } from "@sidetrack/sidetrack";
+import type { SidetrackDatabaseClient } from "@sidetrack/sidetrack";
 import { validate as validateUuid } from "uuid";
 
 const replaceTextWithUUID = (
@@ -27,11 +27,11 @@ interface PrismaClient {
 /**
  *
  * @param prisma A prisma client instance
- * @returns Query adapter for sidetrack.
+ * @returns Database client for sidetrack.
  */
-export const makePrismaAdapter: (
+export const makePrismaSidetrackClient: (
   prisma: PrismaClient,
-) => SidetrackQueryAdapter = (prisma: PrismaClient) => ({
+) => SidetrackDatabaseClient = (prisma: PrismaClient) => ({
   execute: async <ResultRow>(text: string, values?: unknown[]) => {
     const rows = await prisma.$queryRawUnsafe<ResultRow>(
       replaceTextWithUUID(text, values as readonly unknown[]),

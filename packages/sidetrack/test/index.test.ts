@@ -7,7 +7,7 @@ import { SidetrackTest } from "../src";
 // TODO configure with global setup later: https://vitest.dev/config/#globalsetup
 
 describe("jobs", () => {
-  it("accepts a query adapter", async () => {
+  it("accepts a database client", async () => {
     const pool = new pg.Pool({
       connectionString: process.env["DATABASE_URL"],
     });
@@ -16,14 +16,14 @@ describe("jobs", () => {
       test: { id: string };
       wallet: { amount: number };
     }>({
-      databaseOptions: {
-        connectionString: process.env["DATABASE_URL"]!,
-      },
-      queryAdapter: {
+      databaseClient: {
         execute: async <ResultRow>(query: string, params?: unknown[]) => {
           const result = await pool.query(query, params);
           return { rows: result.rows as ResultRow[] };
         },
+      },
+      databaseOptions: {
+        connectionString: process.env["DATABASE_URL"]!,
       },
       queues: {
         test: {

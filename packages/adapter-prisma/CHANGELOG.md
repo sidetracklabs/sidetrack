@@ -1,4 +1,4 @@
-# @sidetrack/adapter-prisma
+# @sidetrack/client-prisma
 
 ## 0.0.5
 

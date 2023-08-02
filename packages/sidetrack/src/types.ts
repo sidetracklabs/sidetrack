@@ -1,51 +1,51 @@
 import { JsonValue } from "type-fest";
 
-import { SidetrackQueryAdapter } from "./adapter";
+import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 
 export interface SidetrackInsertJobOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
   scheduledAt?: Date;
 }
 
 export interface SidetrackCancelJobOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
 }
 
 export interface SidetrackGetJobOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
 }
 
 export interface SidetrackDeleteJobOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
 }
 
 export interface SidetrackListJobsOptions<
   Queues extends SidetrackQueuesGenericType,
   K extends keyof Queues,
 > {
-  queryAdapter?: SidetrackQueryAdapter | undefined;
+  databaseClient?: SidetrackDatabaseClient | undefined;
   queue?: K | K[] | undefined;
 }
 
 export interface SidetrackListJobStatusesOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
 }
 
 export interface SidetrackRunJobOptions {
-  queryAdapter?: SidetrackQueryAdapter;
+  databaseClient?: SidetrackDatabaseClient;
 }
 
 export interface SidetrackRunQueueOptions {
+  databaseClient?: SidetrackDatabaseClient;
   includeFutureJobs?: boolean;
-  queryAdapter?: SidetrackQueryAdapter;
 }
 
 export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
+  databaseClient?: SidetrackDatabaseClient;
   databaseOptions?: {
     connectionString: string;
   };
-  queryAdapter?: SidetrackQueryAdapter;
   queues: SidetrackQueues<Queues>;
 }
 
