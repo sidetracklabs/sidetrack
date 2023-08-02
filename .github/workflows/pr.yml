@@ -30,12 +30,9 @@ jobs:
           cache: "pnpm"
 
       - name: Install deps
-        run: pnpm install
+        run: pnpm install && pnpm postinstall-steps
 
-      - name: Build
-        run: pnpm postinstall-steps && pnpm build
-
-      - name: lint and type-check
-        run: pnpm turbo lint test typecheck
+      - name: Build and lint and type-check
+        run: pnpm build && pnpm turbo lint test typecheck
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable

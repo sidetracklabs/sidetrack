@@ -25,10 +25,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install deps
-        run: pnpm install
-
-      - name: Run build
-        run: pnpm run build
+        run: pnpm install && pnpm postinstall-steps
 
       - name: Create Release Pull Request or Publish
         id: changesets
