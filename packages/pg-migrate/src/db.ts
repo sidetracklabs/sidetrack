@@ -48,7 +48,7 @@ const db = (
 
   const client: Client = isExternalClient
     ? (connection as Client)
-    : new Client(connection);
+    : new Client(connection as ClientConfig | string);
 
   const beforeCloseListeners: any[] = [];
 
