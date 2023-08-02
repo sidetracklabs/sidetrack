@@ -5,7 +5,7 @@
     { "repo": "sidetracklabs/sidetrack" }
   ],
   "commit": false,
-  "fixed": [["@sidetrack/sidetrack"]],
+  "fixed": [["@sidetrack/sidetrack", "@sidetrack/adapter-prisma"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",

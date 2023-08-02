@@ -133,3 +133,5 @@ dist
 dist/
 build/
 .next/
+
+**/prisma/generated/

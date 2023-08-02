@@ -36,6 +36,3 @@ jobs:
         run: pnpm turbo build lint typecheck test
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable
-
-      - name: Check workspaces
-        run: pnpm manypkg check

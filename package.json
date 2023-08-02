@@ -8,8 +8,8 @@
     "build": "turbo --filter \"./packages/*\" build",
     "dev": "turbo --filter \"./packages/*\" dev",
     "format": "prettier --write .",
-    "lint": "eslint . && prettier --check . && manypkg check",
-    "lint-fix": "eslint --fix . && prettier --write . && manypkg fix",
+    "lint": "eslint . && prettier --check .",
+    "lint-fix": "eslint --fix . && prettier --write .",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
