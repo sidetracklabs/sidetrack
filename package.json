@@ -13,6 +13,7 @@
     "postinstall-steps": "turbo --filter \"./packages/*\" postinstall-steps",
     "release": "pnpm run build && changeset publish",
     "test": "turbo test",
+    "test-ci": "turbo test-ci",
     "typecheck": "turbo typecheck"
   },
   "config": {

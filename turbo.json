@@ -22,6 +22,10 @@
       "dependsOn": [],
       "outputs": []
     },
+    "test-ci": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "typecheck": {
       "dependsOn": [],
       "outputs": [],

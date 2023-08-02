@@ -37,7 +37,8 @@
     "build": "tsup",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
     "postinstall-steps": "prisma generate --schema=./test/schema.prisma",
-    "test": "dotenv vitest --config ./vitest.config.ts",
+    "test": "dotenv -- vitest",
+    "test-ci": "dotenv -- vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

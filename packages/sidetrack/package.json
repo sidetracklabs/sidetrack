@@ -42,7 +42,8 @@
     "coverage": "vitest --config ./vitest.config.ts --coverage",
     "generate-db-models": "dotenv kanel",
     "migrate": "dotenv sidetrack-pg-migrate up",
-    "test": "dotenv vitest --config ./vitest.config.ts",
+    "test": "dotenv -- vitest",
+    "test-ci": "dotenv -- vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
