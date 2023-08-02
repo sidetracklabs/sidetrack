@@ -46,39 +46,45 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     options?: SidetrackInsertJobOptions,
   ) => Effect.Effect<never, never, SidetrackJobs>;
   /**
-   * Test utility to get a list of job statuses and their counts
-   */
-  listJobStatuses: (
-    options?: SidetrackListJobStatusesOptions,
-  ) => Effect.Effect<never, never, Record<string, string>>;
-  /**
-   * Test utility to get a list of jobs
-   */
-  listJobs: <K extends keyof Queues>(
-    options?: SidetrackListJobsOptions<Queues, K> | undefined,
-  ) => Effect.Effect<never, never, SidetrackJobs[]>;
-  /**
-   * Test utility to run a job manually without polling
-   */
-  runJob: (
-    jobId: string,
-    options?: SidetrackRunJobOptions,
-  ) => Effect.Effect<never, unknown, void>;
-  /**
-   * Test utility to run all jobs in a queue manually without polling
-   */
-  runQueue: <K extends keyof Queues>(
-    queue: K,
-    options?: SidetrackRunQueueOptions,
-  ) => Effect.Effect<never, unknown, void>;
-  /**
    * Automatically run migrations and start polling the DB for jobs
    */
   start: () => Effect.Effect<never, never, void>;
+
   /**
    * Turn off polling
    */
   stop: () => Effect.Effect<never, never, void>;
+  /**
+   * Utilities meant to be used with tests only
+   */
+  testUtils: {
+    /**
+     * Test utility to get a list of job statuses and their counts
+     */
+    listJobStatuses: (
+      options?: SidetrackListJobStatusesOptions,
+    ) => Effect.Effect<never, never, Record<string, string>>;
+    /**
+     * Test utility to get a list of jobs
+     */
+    listJobs: <K extends keyof Queues>(
+      options?: SidetrackListJobsOptions<Queues, K> | undefined,
+    ) => Effect.Effect<never, never, SidetrackJobs[]>;
+    /**
+     * Test utility to run a job manually without polling
+     */
+    runJob: (
+      jobId: string,
+      options?: SidetrackRunJobOptions,
+    ) => Effect.Effect<never, unknown, void>;
+    /**
+     * Test utility to run all jobs in a queue manually without polling
+     */
+    runQueue: <K extends keyof Queues>(
+      queue: K,
+      options?: SidetrackRunQueueOptions,
+    ) => Effect.Effect<never, unknown, void>;
+  };
 }
 
 export const createSidetrackServiceTag = <
@@ -145,7 +151,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   .pipe(Effect.catchAllCause(Effect.logError))
                   .pipe(Effect.forkDaemon),
               {
-                concurrency: "unbounded",
+                concurrency: "inherit",
               },
             ),
           ),
@@ -367,7 +373,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         .pipe(
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => runHandler(job, options), {
-              concurrency: "unbounded",
+              concurrency: "inherit",
             }),
           ),
         )
@@ -408,12 +414,14 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       deleteJob,
       getJob,
       insertJob,
-      listJobStatuses,
-      listJobs,
-      runJob,
-      runQueue,
       start,
       stop,
+      testUtils: {
+        listJobStatuses,
+        listJobs,
+        runJob,
+        runQueue,
+      },
     };
   });
 }

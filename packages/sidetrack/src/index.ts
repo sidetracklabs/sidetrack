@@ -134,7 +134,7 @@ export class SidetrackTest<
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
-        service.listJobs(options),
+        service.testUtils.listJobs(options),
       ),
     );
   }
@@ -145,7 +145,7 @@ export class SidetrackTest<
   async listJobStatuses(options?: SidetrackListJobStatusesOptions) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
-        service.listJobStatuses(options),
+        service.testUtils.listJobStatuses(options),
       ),
     );
   }
@@ -156,7 +156,7 @@ export class SidetrackTest<
   async runJob(jobId: string, options?: SidetrackRunJobOptions) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
-        service.runJob(jobId, options),
+        service.testUtils.runJob(jobId, options),
       ),
     );
   }
@@ -170,7 +170,7 @@ export class SidetrackTest<
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
-        service.runQueue(queue, options),
+        service.testUtils.runQueue(queue, options),
       ),
     );
   }
