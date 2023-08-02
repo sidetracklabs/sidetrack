@@ -1,5 +1,11 @@
 # @sidetrack/sidetrack
 
+## 0.0.4
+
+### Patch Changes
+
+- [`e5ff359`](https://github.com/sidetracklabs/sidetrack/commit/e5ff359a0bc945868b3f485e7098b892c2342337) Thanks [@aniravi24](https://github.com/aniravi24)! - Fixed node pg import
+
 ## 0.0.3
 
 ### Patch Changes
