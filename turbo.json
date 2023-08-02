@@ -26,6 +26,11 @@
       "dependsOn": [],
       "outputs": [],
       "cache": true
+    },
+    "postinstall-steps": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": true
     }
   }
 }
