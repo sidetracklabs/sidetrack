@@ -1,13 +1,7 @@
-# @sidetrack/sidetrack
+# @sidetrack/adapter-prisma
 
 ## 0.0.3
 
 ### Patch Changes
 
 - [`efb6bc7`](https://github.com/sidetracklabs/sidetrack/commit/efb6bc7b399b5b0a58457871272cc820fd70c3bd) Thanks [@aniravi24](https://github.com/aniravi24)! - Fixed a couple bugs and added the prisma adapter
-
-## 0.0.2
-
-### Patch Changes
-
-- [`864ec10`](https://github.com/sidetracklabs/sidetrack/commit/864ec10f750b186f7482647f30c0e9d56f50bd85) Thanks [@aniravi24](https://github.com/aniravi24)! - bundled migrations
