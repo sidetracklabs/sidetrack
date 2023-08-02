@@ -36,3 +36,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Generate docs
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm docgen
+
+      - name: Deploy docs to gh-pages
+        if: steps.changesets.outputs.published == 'true'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs

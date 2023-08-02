@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["packages/*"],
+  "name": "Sidetrack",
+  "entryPointStrategy": "packages",
+  "includeVersion": true,
+  "out": "docs"
+}

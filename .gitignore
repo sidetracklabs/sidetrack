@@ -135,3 +135,6 @@ build/
 .next/
 
 **/prisma/generated/
+
+# We generate and publish this in CI
+/docs

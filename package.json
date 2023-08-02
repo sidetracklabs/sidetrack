@@ -12,7 +12,8 @@
     "lint-fix": "eslint --fix . && prettier --write .",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
-    "postinstall-steps": "turbo --filter \"./packages/*\" postinstall-steps"
+    "postinstall-steps": "turbo --filter \"./packages/*\" postinstall-steps",
+    "docgen": "typedoc"
   },
   "config": {
     "commitizen": {
@@ -42,5 +43,8 @@
     "tsup": "^7.1.0",
     "turbo": "^1.10.12",
     "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "typedoc": "^0.24.8"
   }
 }

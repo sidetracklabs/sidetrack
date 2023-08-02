@@ -24,6 +24,11 @@ interface PrismaClient {
   $queryRawUnsafe<T = unknown>(query: string, ...values: unknown[]): Promise<T>;
 }
 
+/**
+ *
+ * @param prisma A prisma client instance
+ * @returns Query adapter for sidetrack.
+ */
 export const makePrismaAdapter: (
   prisma: PrismaClient,
 ) => SidetrackQueryAdapter = (prisma: PrismaClient) => ({

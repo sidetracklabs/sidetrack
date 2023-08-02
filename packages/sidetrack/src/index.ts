@@ -9,6 +9,7 @@ import {
   SidetrackService,
 } from "./effect";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
+import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import { makeAppRuntime } from "./runtime";
 import {
   SidetrackInsertJobOptions,
@@ -154,4 +155,4 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
 export * from "./adapter";
 export { runMigrations } from "./migrations";
 export * from "./types";
-export { SidetrackJobs };
+export { SidetrackJobs, SidetrackJobStatusEnum };
