@@ -1,4 +1,4 @@
-# @sidetrack/sidetrack
+# sidetrack
 
 ## 0.0.5
 

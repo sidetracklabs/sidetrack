@@ -1,4 +1,4 @@
-import { runMigrations } from "@sidetrack/sidetrack";
+import { runMigrations } from "sidetrack";
 import { beforeAll } from "vitest";
 
 beforeAll(async () => {

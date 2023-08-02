@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { SidetrackTest } from "@sidetrack/sidetrack";
+import { SidetrackTest } from "sidetrack";
 import { describe, expect, it } from "vitest";
 
 import { makePrismaSidetrackClient } from "../src";

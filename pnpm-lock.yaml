@@ -88,7 +88,7 @@ importers:
       '@prisma/client':
         specifier: 5.1.0
         version: 5.1.0(prisma@5.1.0)
-      '@sidetrack/sidetrack':
+      'sidetrack':
         specifier: workspace:*
         version: link:../sidetrack
       '@types/uuid':

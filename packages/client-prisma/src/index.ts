@@ -1,4 +1,4 @@
-import type { SidetrackDatabaseClient } from "@sidetrack/sidetrack";
+import type { SidetrackDatabaseClient } from "sidetrack";
 import { validate as validateUuid } from "uuid";
 
 const replaceTextWithUUID = (
