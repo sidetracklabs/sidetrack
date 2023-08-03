@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "No precommit checks setup yet"
+CI=true pnpm turbo build --force && CI=true pnpm turbo lint test typecheck --force
