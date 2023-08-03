@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.0.6
+
+### Patch Changes
+
+- [`08a069a`](https://github.com/sidetracklabs/sidetrack/commit/08a069a9a7859c5631f6e0eefe43ebeaa8115ca5) Thanks [@aniravi24](https://github.com/aniravi24)! - Rename runQueue to runJobs, prevent migrations from throwing an exception
+
 ## 0.0.5
 
 ### Patch Changes
