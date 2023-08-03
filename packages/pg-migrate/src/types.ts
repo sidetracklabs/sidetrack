@@ -1,4 +1,4 @@
-import {
+import type {
   ClientBase,
   ClientConfig,
   QueryArrayConfig,
@@ -10,7 +10,7 @@ import {
 import { Name } from "./operations/generalTypes";
 import * as other from "./operations/othersTypes";
 
-export { ClientConfig, ConnectionConfig } from "pg";
+export type { ClientConfig, ConnectionConfig } from "pg";
 
 // see ClientBase in @types/pg
 export interface DB {

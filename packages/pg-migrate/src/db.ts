@@ -1,7 +1,7 @@
 /*
  This file just manages the database connection and provides a query method
  */
-import pg, {
+import type {
   Client,
   ClientBase,
   ClientConfig,
@@ -10,6 +10,7 @@ import pg, {
   QueryConfig,
   QueryResult,
 } from "pg";
+import pg from "pg";
 import { inspect } from "util";
 
 import { DB, Logger } from "./types";
