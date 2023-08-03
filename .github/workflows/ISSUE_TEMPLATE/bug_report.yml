@@ -1,0 +1,53 @@
+name: Bug Report
+description: File a bug report
+title: 'issue: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: version
+    attributes:
+      label: Version Number
+      description: What's the version number?
+      placeholder: Version number.
+    validations:
+      required: true
+  - type: input
+    id: codesandbox
+    attributes:
+      label: Codesandbox/Stackblitz
+      description: Codesandbox/Stackblitz link
+#     validations:
+#       required: true
+#   TODO need to create a codesandbox template
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Steps to reproduce
+      placeholder: Tell us what you see!
+      value: |
+        1. Setup queue '...'
+        2. Run node '....'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: what-expect
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+  id: environment-info
+  attributes:
+    label: Additional Environment Information
+    description: Please tell us anything we should know about your environment. This could include Operating System, JS runtime version (Node.js, etc.)
+    render: shell
