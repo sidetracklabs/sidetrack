@@ -180,3 +180,10 @@ export * from "./client";
 export { runMigrations } from "./migrations";
 export * from "./types";
 export { SidetrackJobs, SidetrackJobStatusEnum };
+
+/**
+ * For compatibility with moduleResolution: node
+ * https://stackoverflow.com/questions/70296652/how-can-i-use-exports-in-package-json-for-nested-submodules-and-typescript
+ * Export this to use the Effect module
+ */
+export * as SidetrackEffect from "./effect";

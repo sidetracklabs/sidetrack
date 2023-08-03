@@ -48,27 +48,29 @@ const loadMigrations = (
   }
 };
 
-const lock = async (db: DBConnection): Promise<void> => {
+const lock = async (db: DBConnection): Promise<boolean> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [result] = await db.select(
     `select pg_try_advisory_lock(${PG_MIGRATE_LOCK_ID}) as "lockObtained"`,
   );
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (!result.lockObtained) {
-    throw new Error("Another migration is already running");
-  }
+  return result.lockObtained as boolean;
+  // if (!result.lockObtained) {
+  // throw new Error("Another migration is already running");
+  // }
 };
 
-const unlock = async (db: DBConnection): Promise<void> => {
+const unlock = async (db: DBConnection): Promise<boolean> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [result] = await db.select(
     `select pg_advisory_unlock(${PG_MIGRATE_LOCK_ID}) as "lockReleased"`,
   );
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (!result.lockReleased) {
-    throw new Error("Failed to release migration lock");
-  }
+  return result.lockReleased as boolean;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // if (!result.lockReleased) {
+  // throw new Error("Failed to release migration lock");
+  // }
 };
 
 const ensureMigrationsTable = async (
@@ -207,7 +209,9 @@ const getLogger = ({ log, logger, verbose }: RunnerOption): Logger => {
       };
 };
 
-export default async (options: RunnerOption): Promise<RunMigration[]> => {
+export default async (
+  options: RunnerOption,
+): Promise<RunMigration[] | "MIGRATION_ALREADY_RUNNING"> => {
   const logger = getLogger(options);
   const db = Db(
     (options as RunnerOptionClient).dbClient ||
@@ -218,7 +222,11 @@ export default async (options: RunnerOption): Promise<RunMigration[]> => {
     await db.createConnection();
 
     if (!options.noLock) {
-      await lock(db);
+      const locked = await lock(db);
+      if (!locked) {
+        logger.warn("Another migration is already running.. going to exit");
+        return "MIGRATION_ALREADY_RUNNING";
+      }
     }
 
     if (options.schema) {
@@ -292,7 +300,10 @@ export default async (options: RunnerOption): Promise<RunMigration[]> => {
     if (db.connected()) {
       if (!options.noLock) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        await unlock(db).catch((error) => logger.warn(error.message));
+        const unlocked = await unlock(db);
+        if (!unlocked) {
+          logger.warn("Failed to release migration lock");
+        }
       }
       await db.close();
     }
