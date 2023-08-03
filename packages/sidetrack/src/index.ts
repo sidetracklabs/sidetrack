@@ -20,7 +20,7 @@ import {
   SidetrackOptions,
   SidetrackQueuesGenericType,
   SidetrackRunJobOptions,
-  SidetrackRunQueueOptions,
+  SidetrackRunJobsOptions,
 } from "./types";
 
 /**
@@ -164,13 +164,12 @@ export class SidetrackTest<
   /**
    * Test utility to run all jobs in a queue manually without polling
    */
-  async runQueue<K extends keyof Queues>(
-    queue: K,
-    options?: SidetrackRunQueueOptions,
+  async runJobs<K extends keyof Queues>(
+    options?: SidetrackRunJobsOptions<Queues, K>,
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
-        service.testUtils.runQueue(queue, options),
+        service.testUtils.runJobs(options),
       ),
     );
   }

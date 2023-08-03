@@ -213,7 +213,7 @@ describe("jobs", () => {
 
     expect((await sidetrack.getJob(job.id)).status).toBe("scheduled"); // running
 
-    await sidetrack.runQueue("test");
+    await sidetrack.runJobs({ queue: "test" });
     expect((await sidetrack.getJob(job.id)).status).toBe("completed");
   });
 

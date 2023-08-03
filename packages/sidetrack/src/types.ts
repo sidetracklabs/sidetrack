@@ -36,9 +36,13 @@ export interface SidetrackRunJobOptions {
   databaseClient?: SidetrackDatabaseClient;
 }
 
-export interface SidetrackRunQueueOptions {
+export interface SidetrackRunJobsOptions<
+  Queues extends SidetrackQueuesGenericType,
+  K extends keyof Queues,
+> {
   databaseClient?: SidetrackDatabaseClient;
   includeFutureJobs?: boolean;
+  queue?: K | K[] | undefined;
 }
 
 export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {

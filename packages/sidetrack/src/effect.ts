@@ -24,7 +24,7 @@ import {
   SidetrackOptions,
   SidetrackQueuesGenericType,
   SidetrackRunJobOptions,
-  SidetrackRunQueueOptions,
+  SidetrackRunJobsOptions,
 } from "./types";
 
 export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
@@ -80,9 +80,8 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     /**
      * Test utility to run all jobs in a queue manually without polling
      */
-    runQueue: <K extends keyof Queues>(
-      queue: K,
-      options?: SidetrackRunQueueOptions,
+    runJobs: <K extends keyof Queues>(
+      options?: SidetrackRunJobsOptions<Queues, K> | undefined,
     ) => Effect.Effect<never, unknown, void>;
   };
 }
@@ -332,9 +331,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         .pipe(Effect.map((result) => result.rows[0]))
         .pipe(Effect.flatMap((job) => runHandler(job, options)));
 
-    const runQueue = <K extends keyof Queues>(
-      queue: K,
-      options?: SidetrackRunQueueOptions,
+    const runJobs = <K extends keyof Queues>(
+      options?: SidetrackRunJobsOptions<Queues, K> | undefined,
     ) =>
       Effect.promise(() =>
         (options?.databaseClient ?? databaseClient).execute<SidetrackJobs>(
@@ -345,9 +343,14 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                 sidetrack_jobs
               WHERE
               (status = 'scheduled' or status = 'retrying')
+                ${options?.includeFutureJobs ? "" : "AND scheduled_at <= NOW()"}
                 ${
-                  options?.includeFutureJobs ? "" : "AND scheduled_at <= NOW()"
-                } AND queue = $1
+                  options?.queue
+                    ? typeof options.queue === "string"
+                      ? "AND queue = $1"
+                      : "AND queue = ANY($1)"
+                    : ""
+                }
               ORDER BY
                 scheduled_at
                 FOR UPDATE
@@ -365,7 +368,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                 FROM
                   next_jobs
               ) RETURNING *`,
-          [queue],
+          options?.queue ? [options?.queue] : undefined,
         ),
       )
 
@@ -420,7 +423,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         listJobStatuses,
         listJobs,
         runJob,
-        runQueue,
+        runJobs: runJobs,
       },
     };
   });
