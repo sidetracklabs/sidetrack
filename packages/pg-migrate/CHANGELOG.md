@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.0.5
+
+### Patch Changes
+
+- [`66c694e`](https://github.com/sidetracklabs/sidetrack/commit/66c694e012c20eda2bc94c35292606d6ed534e1a) Thanks [@aniravi24](https://github.com/aniravi24)! - Attempt to change exports again
+
 ## 0.0.4
 
 ### Patch Changes

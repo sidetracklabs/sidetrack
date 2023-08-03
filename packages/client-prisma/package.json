@@ -1,6 +1,6 @@
 {
   "name": "@sidetrack/client-prisma",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "files": [
     "dist",
     "README.md"
@@ -25,7 +25,6 @@
   },
   "exports": {
     "./package.json": "./package.json",
-
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
