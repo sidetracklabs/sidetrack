@@ -1,5 +1,14 @@
 # sidetrack
 
+## 0.0.7
+
+### Patch Changes
+
+- [`afc120c`](https://github.com/sidetracklabs/sidetrack/commit/afc120caf97ba523457b659b5be1b71264f65d34) Thanks [@aniravi24](https://github.com/aniravi24)! - Support pools for custom pg client
+
+- Updated dependencies [[`845a4f0`](https://github.com/sidetracklabs/sidetrack/commit/845a4f094b821179cc0ca2dbb9ca0018822a31fd)]:
+  - @sidetrack/pg-migrate@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes

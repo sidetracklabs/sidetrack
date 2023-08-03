@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.0.4
+
+### Patch Changes
+
+- [`845a4f0`](https://github.com/sidetracklabs/sidetrack/commit/845a4f094b821179cc0ca2dbb9ca0018822a31fd) Thanks [@aniravi24](https://github.com/aniravi24)! - attempt to fix esm import issue
+
 ## 0.0.3
 
 ### Patch Changes
