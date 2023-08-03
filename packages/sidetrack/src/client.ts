@@ -1,4 +1,4 @@
-import { ClientBase } from "pg";
+import { ClientBase, Pool } from "pg";
 
 /**
  * Database client for sidetrack. This allows you to use whatever database library you want as long as you conform to this interface.
@@ -16,7 +16,7 @@ export interface SidetrackDatabaseClient {
  * @returns Database client for sidetrack.
  */
 export const makePgSidetrackClient = (
-  pgClient: ClientBase,
+  pgClient: ClientBase | Pool,
 ): SidetrackDatabaseClient => ({
   execute: async <ResultRow>(query: string, params?: unknown[]) => {
     const result = await pgClient.query(query, params);
