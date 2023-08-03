@@ -1,7 +1,7 @@
 /*
  This file just manages the database connection and provides a query method
  */
-import {
+import pg, {
   Client,
   ClientBase,
   ClientConfig,
@@ -48,7 +48,7 @@ const db = (
 
   const client: Client = isExternalClient
     ? (connection as Client)
-    : new Client(connection as ClientConfig | string);
+    : new pg.Client(connection as ClientConfig | string);
 
   const beforeCloseListeners: any[] = [];
 
