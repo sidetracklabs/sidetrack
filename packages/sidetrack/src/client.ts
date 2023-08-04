@@ -15,7 +15,7 @@ export interface SidetrackDatabaseClient {
  * @param pgClient client/pool from the node-postgres (pg) library.
  * @returns Database client for sidetrack.
  */
-export const makePgSidetrackClient = (
+export const usePg = (
   pgClient: ClientBase | Pool,
 ): SidetrackDatabaseClient => ({
   execute: async <ResultRow>(query: string, params?: unknown[]) => {

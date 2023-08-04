@@ -16,14 +16,14 @@ describe("jobs", () => {
       test: { id: string };
       wallet: { amount: number };
     }>({
-      databaseClient: {
+      databaseOptions: {
+        connectionString: process.env["DATABASE_URL"]!,
+      },
+      dbClient: {
         execute: async <ResultRow>(query: string, params?: unknown[]) => {
           const result = await pool.query(query, params);
           return { rows: result.rows as ResultRow[] };
         },
-      },
-      databaseOptions: {
-        connectionString: process.env["DATABASE_URL"]!,
       },
       queues: {
         test: {

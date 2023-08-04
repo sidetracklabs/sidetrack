@@ -100,20 +100,19 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
     const pool = databaseOptions ? new pg.Pool(databaseOptions) : undefined;
-    const databaseClient: SidetrackDatabaseClient =
-      layerOptions.databaseClient ?? {
-        execute: async <ResultRow>(query: string, params?: unknown[]) => {
-          const queryResult = await pool?.query(query, params);
-          return { rows: (queryResult?.rows ?? []) as ResultRow[] };
-        },
-      };
+    const dbClient: SidetrackDatabaseClient = layerOptions.dbClient ?? {
+      execute: async <ResultRow>(query: string, params?: unknown[]) => {
+        const queryResult = await pool?.query(query, params);
+        return { rows: (queryResult?.rows ?? []) as ResultRow[] };
+      },
+    };
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
       Fiber.unit,
     );
 
     const startPolling = () =>
       Effect.promise(() =>
-        databaseClient.execute<SidetrackJobs>(
+        dbClient.execute<SidetrackJobs>(
           `WITH next_jobs AS (
         SELECT
           id
@@ -175,7 +174,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute(
+        (options?.dbClient || dbClient).execute(
           `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
           [jobId],
         ),
@@ -183,7 +182,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute(
+        (options?.dbClient || dbClient).execute(
           `DELETE FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
@@ -196,7 +195,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const runHandler = (
       job: SidetrackJobs,
-      options?: { databaseClient?: SidetrackDatabaseClient },
+      options?: { dbClient?: SidetrackDatabaseClient },
     ) =>
       Effect.tryPromise({
         catch: (e) => {
@@ -208,7 +207,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         .pipe(
           Effect.flatMap(() =>
             Effect.promise(() =>
-              (options?.databaseClient ?? databaseClient).execute(
+              (options?.dbClient ?? dbClient).execute(
                 `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
                 [job.id],
               ),
@@ -231,7 +230,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                     1,
                 );
 
-                return (options?.databaseClient ?? databaseClient).execute(
+                return (options?.dbClient ?? dbClient).execute(
                   `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
@@ -247,7 +246,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   ],
                 );
               } else {
-                return (options?.databaseClient ?? databaseClient).execute(
+                return (options?.dbClient ?? dbClient).execute(
                   `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
@@ -274,7 +273,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       options?: SidetrackInsertJobOptions,
     ) =>
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute<SidetrackJobs>(
+        (options?.dbClient || dbClient).execute<SidetrackJobs>(
           `INSERT INTO sidetrack_jobs (
       status,
       queue,
@@ -288,7 +287,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute<SidetrackJobs>(
+        (options?.dbClient || dbClient).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
@@ -296,7 +295,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute<SidetrackJobs>(
+        (options?.dbClient || dbClient).execute<SidetrackJobs>(
           `WITH next_job AS (
               SELECT
                 id
@@ -333,7 +332,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       options?: SidetrackRunJobsOptions<Queues, K> | undefined,
     ) =>
       Effect.promise(() =>
-        (options?.databaseClient ?? databaseClient).execute<SidetrackJobs>(
+        (options?.dbClient ?? dbClient).execute<SidetrackJobs>(
           `WITH next_jobs AS (
               SELECT
                 id
@@ -385,7 +384,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
     ) =>
       // get jobs
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute<SidetrackJobs>(
+        (options?.dbClient || dbClient).execute<SidetrackJobs>(
           `SELECT * FROM sidetrack_jobs ${
             options?.queue
               ? typeof options.queue === "string"
@@ -400,7 +399,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
     const listJobStatuses = (options?: SidetrackListJobStatusesOptions) =>
       // get jobs and group by status
       Effect.promise(() =>
-        (options?.databaseClient || databaseClient).execute<{
+        (options?.dbClient || dbClient).execute<{
           count: string;
           status: SidetrackJobStatusEnum;
         }>(`SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`),

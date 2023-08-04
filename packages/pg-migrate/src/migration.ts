@@ -7,7 +7,7 @@
  */
 
 import fs from "fs";
-import mkdirp from "mkdirp";
+import { mkdirp } from "mkdirp";
 import path from "path";
 
 import { DBConnection } from "./db";

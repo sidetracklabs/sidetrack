@@ -29,9 +29,9 @@ interface PrismaClient {
  * @param prisma A prisma client instance
  * @returns Database client for sidetrack.
  */
-export const makePrismaSidetrackClient: (
+export const usePrisma: (prisma: PrismaClient) => SidetrackDatabaseClient = (
   prisma: PrismaClient,
-) => SidetrackDatabaseClient = (prisma: PrismaClient) => ({
+) => ({
   execute: async <ResultRow>(text: string, values?: unknown[]) => {
     const rows = await prisma.$queryRawUnsafe<ResultRow>(
       replaceTextWithUUID(text, values as readonly unknown[]),

@@ -2,7 +2,7 @@
 import { SidetrackTest } from "sidetrack";
 import { describe, expect, it } from "vitest";
 
-import { makePrismaSidetrackClient } from "../src";
+import { usePrisma } from "../src";
 import { PrismaClient } from "./prisma/generated";
 
 // TODO configure with global setup later: https://vitest.dev/config/#globalsetup
@@ -12,10 +12,10 @@ describe("jobs", () => {
     const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
-      databaseClient: makePrismaSidetrackClient(new PrismaClient()),
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
+      dbClient: usePrisma(new PrismaClient()),
       queues: {
         test: {
           handler: async (payload) => {
@@ -32,26 +32,26 @@ describe("jobs", () => {
       const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
-        { databaseClient: makePrismaSidetrackClient(prisma) },
+        { dbClient: usePrisma(prisma) },
       );
       expect(await sidetrack.getJob(job.id)).toBeUndefined();
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
           })
         ).id,
       ).toBe(job.id);
 
       await sidetrack.runJob(job.id, {
-        databaseClient: makePrismaSidetrackClient(prisma),
+        dbClient: usePrisma(prisma),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
           })
         ).status,
       ).toBe("completed");
@@ -66,10 +66,10 @@ describe("jobs", () => {
     const sidetrack = new SidetrackTest<{
       test: { id: string };
     }>({
-      databaseClient: makePrismaSidetrackClient(new PrismaClient()),
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
+      dbClient: usePrisma(new PrismaClient()),
       queues: {
         test: {
           handler: async (_payload) => {
@@ -89,53 +89,53 @@ describe("jobs", () => {
       const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
-        { databaseClient: makePrismaSidetrackClient(prisma) },
+        { dbClient: usePrisma(prisma) },
       );
       expect(await sidetrack.getJob(job.id)).toBeUndefined();
 
       await sidetrack.runJob(job.id, {
-        databaseClient: makePrismaSidetrackClient(prisma),
+        dbClient: usePrisma(prisma),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
           })
         ).status,
       ).toBe("retrying");
 
       await sidetrack.runJob(job.id, {
-        databaseClient: makePrismaSidetrackClient(prisma),
+        dbClient: usePrisma(prisma),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
           })
         ).status,
       ).toBe("failed");
 
       await sidetrack.cancelJob(job.id, {
-        databaseClient: makePrismaSidetrackClient(prisma),
+        dbClient: usePrisma(prisma),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
           })
         ).status,
       ).toBe("cancelled");
 
       await sidetrack.deleteJob(job.id, {
-        databaseClient: makePrismaSidetrackClient(prisma),
+        dbClient: usePrisma(prisma),
       });
 
       expect(
         await sidetrack.getJob(job.id, {
-          databaseClient: makePrismaSidetrackClient(prisma),
+          dbClient: usePrisma(prisma),
         }),
       ).toBe(undefined);
 
@@ -148,10 +148,10 @@ describe("jobs", () => {
       one: { id: string };
       two: { id: string };
     }>({
-      databaseClient: makePrismaSidetrackClient(new PrismaClient()),
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
+      dbClient: usePrisma(new PrismaClient()),
       queues: {
         one: {
           handler: async (payload) => {
@@ -173,25 +173,25 @@ describe("jobs", () => {
       await sidetrack.insertJob(
         "one",
         { id: "hello world" },
-        { databaseClient: makePrismaSidetrackClient(prisma) },
+        { dbClient: usePrisma(prisma) },
       );
 
       await sidetrack.insertJob(
         "one",
         { id: "hello universe" },
-        { databaseClient: makePrismaSidetrackClient(prisma) },
+        { dbClient: usePrisma(prisma) },
       );
 
       await sidetrack.insertJob(
         "two",
         { id: "hello universe" },
-        { databaseClient: makePrismaSidetrackClient(prisma) },
+        { dbClient: usePrisma(prisma) },
       );
 
       expect(
         (
           await sidetrack.listJobs({
-            databaseClient: makePrismaSidetrackClient(prisma),
+            dbClient: usePrisma(prisma),
             queue: ["one", "two"],
           })
         ).length,
