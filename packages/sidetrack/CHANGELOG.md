@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.0.12
+
+### Patch Changes
+
+- [`4f4e726`](https://github.com/sidetracklabs/sidetrack/commit/4f4e726f31d859b8b947afd1e2c0cc28e7d42bef) Thanks [@aniravi24](https://github.com/aniravi24)! - update README
+
 ## 0.0.11
 
 ### Patch Changes
