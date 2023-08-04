@@ -1,6 +1,6 @@
 name: Bug Report
 description: File a bug report
-title: 'issue: '
+title: "issue: "
 body:
   - type: markdown
     attributes:
@@ -19,9 +19,6 @@ body:
     attributes:
       label: Codesandbox/Stackblitz
       description: Codesandbox/Stackblitz link
-#     validations:
-#       required: true
-#   TODO need to create a codesandbox template
   - type: textarea
     id: what-happened
     attributes:
@@ -46,8 +43,8 @@ body:
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: textarea
-  id: environment-info
-  attributes:
-    label: Additional Environment Information
-    description: Please tell us anything we should know about your environment. This could include Operating System, JS runtime version (Node.js, etc.)
-    render: shell
+    id: environment-info
+    attributes:
+      label: Additional Environment Information
+      description: Please tell us anything we should know about your environment. This could include Operating System, JS runtime version (Node.js, etc.)
+      render: shell

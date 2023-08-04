@@ -1,4 +1,4 @@
-Sidetrack is a robust TypeScript-first database-backed job processing library.
+TypeScript-first job processing library, backed by Postgres.
 
 # Documentation
 
