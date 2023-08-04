@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.0.10
+
+### Patch Changes
+
+- [`01d6ae5`](https://github.com/sidetracklabs/sidetrack/commit/01d6ae5c23d20e055cee9f36b9d0c60f2f13ae83) Thanks [@aniravi24](https://github.com/aniravi24)! - Create SidetrackJob type
+
 ## 0.0.9
 
 ### Patch Changes
