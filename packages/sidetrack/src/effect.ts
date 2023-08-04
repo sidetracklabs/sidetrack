@@ -8,7 +8,7 @@ import * as Ref from "@effect/io/Ref";
 import * as Schedule from "@effect/io/Schedule";
 import pg from "pg";
 
-import { SidetrackDatabaseClient } from "./client";
+import { SidetrackDatabaseClient, usePg } from "./client";
 import { runMigrations } from "./migrations";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
@@ -99,13 +99,20 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
   return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
-    const pool = databaseOptions ? new pg.Pool(databaseOptions) : undefined;
-    const dbClient: SidetrackDatabaseClient = layerOptions.dbClient ?? {
-      execute: async <ResultRow>(query: string, params?: unknown[]) => {
-        const queryResult = await pool?.query(query, params);
-        return { rows: (queryResult?.rows ?? []) as ResultRow[] };
-      },
-    };
+    const pool =
+      !layerOptions.dbClient && databaseOptions
+        ? new pg.Pool(databaseOptions)
+        : undefined;
+    const dbClient: SidetrackDatabaseClient =
+      layerOptions.dbClient ??
+      (pool
+        ? usePg(pool)
+        : (() => {
+            throw new Error(
+              "No database client set for sidetrack, you must pass in a connection string or a custom db client",
+            );
+          })());
+
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
       Fiber.unit,
     );

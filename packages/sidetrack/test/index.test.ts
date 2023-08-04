@@ -2,7 +2,7 @@
 import pg from "pg";
 import { describe, expect, it } from "vitest";
 
-import { SidetrackTest } from "../src";
+import { SidetrackTest, usePg } from "../src";
 
 // TODO configure with global setup later: https://vitest.dev/config/#globalsetup
 
@@ -19,12 +19,7 @@ describe("jobs", () => {
       databaseOptions: {
         connectionString: process.env["DATABASE_URL"]!,
       },
-      dbClient: {
-        execute: async <ResultRow>(query: string, params?: unknown[]) => {
-          const result = await pool.query(query, params);
-          return { rows: result.rows as ResultRow[] };
-        },
-      },
+      dbClient: usePg(pool),
       queues: {
         test: {
           handler: async (payload) => {
