@@ -18,7 +18,7 @@ import {
   SidetrackGetJobOptions,
   SidetrackHandlerError,
   SidetrackInsertJobOptions,
-  SidetrackJobWithPayload,
+  SidetrackJob,
   SidetrackListJobsOptions,
   SidetrackListJobStatusesOptions,
   SidetrackOptions,
@@ -203,9 +203,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           return new SidetrackHandlerError(e);
         },
         try: () =>
-          queues[job.queue].handler(
-            job as SidetrackJobWithPayload<Queues[string]>,
-          ),
+          queues[job.queue].handler(job as SidetrackJob<Queues[string]>),
       })
         .pipe(
           Effect.flatMap(() =>

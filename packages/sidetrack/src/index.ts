@@ -178,10 +178,10 @@ export class SidetrackTest<
 export * from "./client";
 export { runMigrations } from "./migrations";
 export * from "./types";
-export { SidetrackJobs, SidetrackJobStatusEnum };
+export { SidetrackJobStatusEnum };
 
 /**
- * For compatibility with moduleResolution: node
+ * Re-export of Effect module For compatibility with moduleResolution: node
  * https://stackoverflow.com/questions/70296652/how-can-i-use-exports-in-package-json-for-nested-submodules-and-typescript
  * Export this to use the Effect module
  */

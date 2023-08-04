@@ -58,14 +58,14 @@ export class SidetrackHandlerError {
   constructor(readonly error: unknown) {}
 }
 
-export type SidetrackJobWithPayload<Payload extends JsonValue> = Omit<
+export type SidetrackJob<Payload extends JsonValue> = Omit<
   SidetrackJobs,
   "payload"
 > & { payload: Payload };
 
 export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
   [K in keyof Queues]: {
-    handler: (job: SidetrackJobWithPayload<Queues[K]>) => Promise<unknown>;
+    handler: (job: SidetrackJob<Queues[K]>) => Promise<unknown>;
     options?: {
       maxAttempts?: number;
     };
