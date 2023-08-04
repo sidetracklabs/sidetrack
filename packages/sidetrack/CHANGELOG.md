@@ -1,5 +1,14 @@
 # sidetrack
 
+## 0.0.11
+
+### Patch Changes
+
+- [`3bd5a34`](https://github.com/sidetracklabs/sidetrack/commit/3bd5a348e12814fcaaff4742a78508067aae1810) Thanks [@aniravi24](https://github.com/aniravi24)! - Refactor some names and upgrade deps
+
+- Updated dependencies [[`3bd5a34`](https://github.com/sidetracklabs/sidetrack/commit/3bd5a348e12814fcaaff4742a78508067aae1810)]:
+  - @sidetrack/pg-migrate@0.0.7
+
 ## 0.0.10
 
 ### Patch Changes
