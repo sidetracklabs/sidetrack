@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.0.13
+
+### Patch Changes
+
+- [`fbf2775`](https://github.com/sidetracklabs/sidetrack/commit/fbf2775ac3da0ae7d2449140cb222efdb7b90577) Thanks [@aniravi24](https://github.com/aniravi24)! - fix listJobStatuses test util
+
 ## 0.0.12
 
 ### Patch Changes
