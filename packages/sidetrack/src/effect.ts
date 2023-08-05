@@ -63,7 +63,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
      */
     listJobStatuses: (
       options?: SidetrackListJobStatusesOptions,
-    ) => Effect.Effect<never, never, Record<string, string>>;
+    ) => Effect.Effect<never, never, Record<SidetrackJobStatusEnum, number>>;
     /**
      * Test utility to get a list of jobs
      */
@@ -407,9 +407,12 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       // get jobs and group by status
       Effect.promise(() =>
         (options?.dbClient || dbClient).execute<{
-          count: string;
+          count: number;
           status: SidetrackJobStatusEnum;
-        }>(`SELECT status, count(*) FROM sidetrack_jobs GROUP BY status`),
+        }>(
+          // unsafely cast to int for now because you probably won't have 2 billion jobs
+          `SELECT status, count(*)::integer FROM sidetrack_jobs GROUP BY status`,
+        ),
       ).pipe(
         Effect.map((result) =>
           fromIterable(result.rows, (row) => [row.status, row.count]),

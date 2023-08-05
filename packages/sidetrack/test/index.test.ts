@@ -247,4 +247,32 @@ describe("jobs", () => {
       (await sidetrack.listJobs({ queue: ["one", "two"] })).length,
     ).toBeGreaterThanOrEqual(3);
   });
+
+  it("list job statuses works", async () => {
+    // // 1 . define queue and function to call, (and queue opts?)
+    const sidetrack = new SidetrackTest<{
+      one: { id: string };
+    }>({
+      databaseOptions: {
+        connectionString: process.env["DATABASE_URL"]!,
+      },
+      queues: {
+        one: {
+          handler: async (payload) => {
+            return payload;
+          },
+        },
+      },
+    });
+
+    // insert a job API
+    await sidetrack.insertJob("one", { id: "hello world" });
+
+    await sidetrack.insertJob("one", { id: "hello universe" });
+
+    // todo, clear db
+    expect(
+      (await sidetrack.listJobStatuses()).scheduled,
+    ).toBeGreaterThanOrEqual(2);
+  });
 });
