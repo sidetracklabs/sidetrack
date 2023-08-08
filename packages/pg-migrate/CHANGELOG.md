@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.0.8
+
+### Patch Changes
+
+- [`4266d72`](https://github.com/sidetracklabs/sidetrack/commit/4266d72142f296edcefd19be30c2ce28a8839f82) Thanks [@aniravi24](https://github.com/aniravi24)! - Try fixing ESM TS imports
+
 ## 0.0.7
 
 ### Patch Changes
