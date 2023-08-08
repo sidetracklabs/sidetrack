@@ -23,18 +23,25 @@
     "directory": "packages/sidetrack"
   },
   "exports": {
-    "./package.json": "./package.json",
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./effect": {
-      "types": "./dist/effect.d.ts",
-      "import": "./dist/effect.mjs",
-      "require": "./dist/effect.js",
-      "default": "./dist/effect.js"
+      "import": {
+        "types": "./dist/effect.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/effect.d.ts",
+        "default": "./dist/effect.js"
+      }
     }
   },
   "main": "dist/index.js",
