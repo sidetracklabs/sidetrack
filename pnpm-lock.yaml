@@ -171,8 +171,8 @@ importers:
         specifier: 7.2.1
         version: 7.2.1
       kanel:
-        specifier: 3.4.3
-        version: 3.4.3
+        specifier: 3.5.1
+        version: 3.5.1
       type-fest:
         specifier: 4.2.0
         version: 4.2.0
@@ -3580,8 +3580,8 @@ packages:
       underscore: 1.12.1
     dev: true
 
-  /kanel@3.4.3:
-    resolution: {integrity: sha512-Tch5BP7lx87QIUw15BEICijyXltS+tKPieY9pUJYWi/rkwEh6NiZjoIOQbWTNPlX4iKV+6tQDquVcZ7OU33+eQ==}
+  /kanel@3.5.1:
+    resolution: {integrity: sha512-B8bz9qKrAeSbHtODBc1N+qGkIhmSX5w1/V9k61zIs7IyrR6amuTUI1pUt7WgaySu48CFNS6KTGw+uipNDZ7L6Q==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     dependencies:
@@ -4311,10 +4311,6 @@ packages:
     resolution: {integrity: sha512-r5o/V/ORTA6TmUnyWZR9nCj1klXCO2CEKNRlVuJptZe85QuhFayC7WeMic7ndayT5IRIR0S0xFxFi2ousartlQ==}
     dev: true
 
-  /pg-connection-string@2.6.1:
-    resolution: {integrity: sha512-w6ZzNu6oMmIzEAYVw+RLK0+nqHPt8K3ZnknKi+g48Ak2pr3dtljJW3o+D/n2zzCG07Zoe9VOX3aiKpj+BN0pjg==}
-    dev: true
-
   /pg-connection-string@2.6.2:
     resolution: {integrity: sha512-ch6OwaeaPYcova4kKZ15sbJ2hKb/VP48ZD2gE7i1J+L4MspCtBMAx8nMgz7bksc7IojCIIWuEhHibSMFH8m8oA==}
 
@@ -4383,7 +4379,7 @@ packages:
     dependencies:
       buffer-writer: 2.0.0
       packet-reader: 1.0.0
-      pg-connection-string: 2.6.1
+      pg-connection-string: 2.6.2
       pg-pool: 3.6.1(pg@8.11.0)
       pg-protocol: 1.6.0
       pg-types: 2.2.0
