@@ -94,8 +94,8 @@ importers:
         specifier: 0.34.2
         version: 0.34.2(vitest@0.34.2)
       dotenv-cli:
-        specifier: 7.2.1
-        version: 7.2.1
+        specifier: 7.3.0
+        version: 7.3.0
       prisma:
         specifier: 5.1.1
         version: 5.1.1
@@ -128,8 +128,8 @@ importers:
         specifier: 0.34.2
         version: 0.34.2(vitest@0.34.2)
       dotenv-cli:
-        specifier: 7.2.1
-        version: 7.2.1
+        specifier: 7.3.0
+        version: 7.3.0
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -168,8 +168,8 @@ importers:
         specifier: 0.34.2
         version: 0.34.2(vitest@0.34.2)
       dotenv-cli:
-        specifier: 7.2.1
-        version: 7.2.1
+        specifier: 7.3.0
+        version: 7.3.0
       kanel:
         specifier: 3.5.1
         version: 3.5.1
@@ -2221,8 +2221,8 @@ packages:
       is-obj: 2.0.0
     dev: true
 
-  /dotenv-cli@7.2.1:
-    resolution: {integrity: sha512-ODHbGTskqRtXAzZapDPvgNuDVQApu4oKX8lZW7Y0+9hKA6le1ZJlyRS687oU9FXjOVEDU/VFV6zI125HzhM1UQ==}
+  /dotenv-cli@7.3.0:
+    resolution: {integrity: sha512-314CA4TyK34YEJ6ntBf80eUY+t1XaFLyem1k9P0sX1gn30qThZ5qZr/ZwE318gEnzyYP9yj9HJk6SqwE0upkfw==}
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3
