@@ -149,11 +149,11 @@ importers:
   packages/sidetrack:
     dependencies:
       '@effect/data':
-        specifier: ^0.17.1
-        version: 0.17.1
+        specifier: ^0.18.0
+        version: 0.18.5
       '@effect/io':
-        specifier: ^0.38.0
-        version: 0.38.0(@effect/data@0.17.1)
+        specifier: ^0.40.0
+        version: 0.40.1(@effect/data@0.18.5)
       '@sidetrack/pg-migrate':
         specifier: workspace:*
         version: link:../pg-migrate
@@ -611,16 +611,16 @@ packages:
       '@jridgewell/trace-mapping': 0.3.9
     dev: true
 
-  /@effect/data@0.17.1:
-    resolution: {integrity: sha512-QCYkLE5Y5Dm5Yax5R3GmW4ZIgTx7W+kSZ7yq5eqQ/mFWa8i4yxbLuu8cudqzdeZtRtTGZKlhDxfFfgVtMywXJg==}
+  /@effect/data@0.18.5:
+    resolution: {integrity: sha512-VFPJ0prGq3eF6/eZYKVI/1IC1purdGJXEHJC1ggKynPko03upjtmeCeCsEyMiY12DzVIAuME425JndiFb7m2xw==}
     dev: false
 
-  /@effect/io@0.38.0(@effect/data@0.17.1):
-    resolution: {integrity: sha512-qlVC9ASxNC+L2NKX5qOV9672CE5wWizfwBSFaX2XLI7CC118WRvohCTIPQ52n50Bj5TmR20+na+U9C7e4VkqzA==}
+  /@effect/io@0.40.1(@effect/data@0.18.5):
+    resolution: {integrity: sha512-OeMK7JonvW/D6Z377cOsuCSHUbsO9ZkmAIDmzQ1Qffx8+h5yUXRm0htmPwKkxtCHZr2QxyZfSBzxSzrGU7asXQ==}
     peerDependencies:
-      '@effect/data': ^0.17.1
+      '@effect/data': ^0.18.5
     dependencies:
-      '@effect/data': 0.17.1
+      '@effect/data': 0.18.5
     dev: false
 
   /@esbuild/android-arm64@0.18.17:
