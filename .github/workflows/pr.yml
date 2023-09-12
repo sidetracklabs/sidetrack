@@ -21,7 +21,7 @@ jobs:
           docker run -d -p 5432:5432 -e POSTGRES_DB=sidetrack -e POSTGRES_PASSWORD=password postgres:14-alpine
 
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
