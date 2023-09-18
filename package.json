@@ -39,7 +39,7 @@
     "eslint-plugin-typescript-sort-keys": "3.0.0",
     "husky": "8.0.3",
     "prettier": "3.0.3",
-    "prettier-plugin-sort-json": "1.0.0",
+    "prettier-plugin-sort-json": "3.1.0",
     "sonicware-tdt": "20.0.0",
     "tsup": "7.2.0",
     "turbo": "1.10.13",
