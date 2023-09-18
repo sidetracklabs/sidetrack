@@ -60,8 +60,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       prettier-plugin-sort-json:
-        specifier: 1.0.0
-        version: 1.0.0(prettier@3.0.3)
+        specifier: 3.1.0
+        version: 3.1.0(prettier@3.0.3)
       sonicware-tdt:
         specifier: 20.0.0
         version: 20.0.0(typedoc@0.25.1)
@@ -1148,10 +1148,6 @@ packages:
       '@types/node': 20.4.7
       pg-protocol: 1.6.0
       pg-types: 4.0.1
-    dev: true
-
-  /@types/prettier@2.7.3:
-    resolution: {integrity: sha512-+68kP9yzs4LMp7VNh8gdzMSPZFL44MLGqiHWvttYJe+6qnuVr4Ek9wSBQoveqY/r+LwjCcU29kNVkidwim+kYA==}
     dev: true
 
   /@types/responselike@1.0.0:
@@ -4570,13 +4566,12 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /prettier-plugin-sort-json@1.0.0(prettier@3.0.3):
-    resolution: {integrity: sha512-XgcaF/Sojax1vD6j53wNIByx0rp7ecang+A8W0eM+Ks3yBFu/qXjJNvUtC1lEWeYbNfmRs/d8FyYJCYozAVENw==}
-    engines: {node: '>=14.0.0'}
+  /prettier-plugin-sort-json@3.1.0(prettier@3.0.3):
+    resolution: {integrity: sha512-eIDEUjwzekiVd+oKrpd0aoACBTp5zOW71wDTNy+qQ5C9Q8oqt9n9wCm4F+SeRZbXfgblh/WYIguJynImlBXrvQ==}
+    engines: {node: '>=16.0.0'}
     peerDependencies:
-      prettier: ^2.3.2
+      prettier: ^3.0.0
     dependencies:
-      '@types/prettier': 2.7.3
       prettier: 3.0.3
     dev: true
 
