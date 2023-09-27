@@ -52,13 +52,13 @@
   "devDependencies": {
     "@prisma/client": "5.3.1",
     "@types/uuid": "9.0.4",
-    "@vitest/coverage-v8": "0.34.4",
+    "@vitest/coverage-v8": "0.34.5",
     "dotenv-cli": "7.3.0",
     "prisma": "5.3.1",
     "sidetrack": "workspace:*",
     "vite": "4.4.9",
     "vite-tsconfig-paths": "4.2.1",
-    "vitest": "0.34.4"
+    "vitest": "0.34.5"
   },
   "peerDependencies": {
     "@prisma/client": ">= 4"
