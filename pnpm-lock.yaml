@@ -148,15 +148,12 @@ importers:
 
   packages/sidetrack:
     dependencies:
-      '@effect/data':
-        specifier: ^0.18.0
-        version: 0.18.7
-      '@effect/io':
-        specifier: ^0.40.0
-        version: 0.40.3(@effect/data@0.18.7)
       '@sidetrack/pg-migrate':
         specifier: workspace:*
         version: link:../pg-migrate
+      effect:
+        specifier: 2.0.0-next.41
+        version: 2.0.0-next.41
       pg:
         specifier: ^8.11.2
         version: 8.11.2
@@ -610,18 +607,6 @@ packages:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
     dev: true
-
-  /@effect/data@0.18.7:
-    resolution: {integrity: sha512-r7C9VjavmG85wb5BOvcbbKGioPJCoBAFsJVOUNWlxZBRIU+l68ENpsyzCkWsU7dP4teAztjBZ89O3hVhBX0Huw==}
-    dev: false
-
-  /@effect/io@0.40.3(@effect/data@0.18.7):
-    resolution: {integrity: sha512-bnHBFq1XzXn94x2w5FcXZz3MbY7N3YrhiI2CrncJr3WcGRDc2rCYIpPupw0JQGFcJsoopTj1BNfBuBR5s4/RyA==}
-    peerDependencies:
-      '@effect/data': ^0.18.5
-    dependencies:
-      '@effect/data': 0.18.7
-    dev: false
 
   /@esbuild/android-arm64@0.18.17:
     resolution: {integrity: sha512-9np+YYdNDed5+Jgr1TdWBsozZ85U1Oa3xW0c7TWqH0y2aGghXtZsuT8nYRbzOMcl0bXZXjOGbksoTtVOlWrRZg==}
@@ -2306,6 +2291,10 @@ packages:
   /duplexer3@0.1.5:
     resolution: {integrity: sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA==}
     dev: true
+
+  /effect@2.0.0-next.41:
+    resolution: {integrity: sha512-1bExxFIv9/i9dr7XATkP6goh6HlAA1Ar0RwHRkbFYSBZ/8olx0dVPZ6Lewlo/9B4Zt2+hIu/OtbjplVaItGQwQ==}
+    dev: false
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}

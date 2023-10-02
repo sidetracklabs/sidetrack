@@ -1,6 +1,6 @@
-import * as Effect from "@effect/io/Effect";
-import * as Layer from "@effect/io/Layer";
-import * as Runtime from "@effect/io/Runtime";
+import * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
+import * as Runtime from "effect/Runtime";
 
 import {
   createSidetrackServiceTag,

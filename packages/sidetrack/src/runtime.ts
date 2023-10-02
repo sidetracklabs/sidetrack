@@ -1,9 +1,9 @@
-import * as Context from "@effect/data/Context";
-import * as Effect from "@effect/io/Effect";
-import * as Exit from "@effect/io/Exit";
-import * as Layer from "@effect/io/Layer";
-import * as Runtime from "@effect/io/Runtime";
-import * as Scope from "@effect/io/Scope";
+import * as Context from "effect/Context";
+import * as Effect from "effect/Effect";
+import * as Exit from "effect/Exit";
+import * as Layer from "effect/Layer";
+import * as Runtime from "effect/Runtime";
+import * as Scope from "effect/Scope";
 
 export function makeAppRuntime<R, E, A>(
   layer: Layer.Layer<R, E, A>,
@@ -20,9 +20,7 @@ export function makeAppRuntime<R, E, A>(
     const ctx: Context.Context<A> = yield* $(
       Layer.buildWithScope(scope)(layer),
     );
-    const runtime = yield* $(
-      Effect.runtime<A>().pipe(Effect.provideContext(ctx)),
-    );
+    const runtime = yield* $(Effect.runtime<A>().pipe(Effect.provide(ctx)));
 
     return {
       close: Scope.close(scope, Exit.unit),

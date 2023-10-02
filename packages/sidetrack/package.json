@@ -57,9 +57,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@effect/data": "^0.18.0",
-    "@effect/io": "^0.40.0",
     "@sidetrack/pg-migrate": "workspace:*",
+    "effect": "2.0.0-next.41",
     "pg": "^8.11.2"
   },
   "devDependencies": {
