@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@sidetrack/pg-migrate": "workspace:*",
-    "effect": "2.0.0-next.41",
+    "effect": "2.0.0-next.42",
     "pg": "^8.11.2"
   },
   "devDependencies": {
