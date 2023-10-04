@@ -32,11 +32,6 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
   private sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
   /** @internal */
-  private runtimeHandler: {
-    close: Effect.Effect<never, never, void>;
-    runtime: Runtime.Runtime<SidetrackService<Queues>>;
-  };
-  /** @internal */
   private runtime: Runtime.Runtime<SidetrackService<Queues>>;
   /** @internal */
   protected customRunPromise: <R extends SidetrackService<Queues>, E, A>(
@@ -46,19 +41,13 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   constructor(options: SidetrackOptions<Queues>) {
     this.sidetrackLayer = makeLayer(options);
 
-    this.runtimeHandler = Effect.runSync(makeAppRuntime(this.sidetrackLayer));
-
-    this.runtime = this.runtimeHandler.runtime;
+    this.runtime = Effect.runSync(
+      Effect.scoped(makeAppRuntime(this.sidetrackLayer)),
+    );
 
     this.customRunPromise = <R extends SidetrackService<Queues>, E, A>(
       self: Effect.Effect<R, E, A>,
     ) => Runtime.runPromise(this.runtime)(self);
-
-    // TODO should we keep this in here? Node specific
-    const runtimeCleanup = () => Effect.runPromise(this.runtimeHandler.close);
-    // TODO should we keep this in here? Node specific
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    process.on("beforeExit", runtimeCleanup);
   }
 
   async cancelJob(jobId: string, options?: SidetrackCancelJobOptions) {
