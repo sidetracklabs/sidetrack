@@ -1,5 +1,11 @@
 # @sidetrack/client-prisma
 
+## 0.0.15
+
+### Patch Changes
+
+- [`205db96`](https://github.com/sidetracklabs/sidetrack/commit/205db965de7b860a60b4148fd12dc3b14ee912a4) Thanks [@aniravi24](https://github.com/aniravi24)! - Update deps, move to Effect 2.0-next
+
 ## 0.0.14
 
 ### Patch Changes

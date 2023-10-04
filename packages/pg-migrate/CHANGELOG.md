@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.0.9
+
+### Patch Changes
+
+- [`205db96`](https://github.com/sidetracklabs/sidetrack/commit/205db965de7b860a60b4148fd12dc3b14ee912a4) Thanks [@aniravi24](https://github.com/aniravi24)! - Update deps, move to Effect 2.0-next
+
 ## 0.0.8
 
 ### Patch Changes
