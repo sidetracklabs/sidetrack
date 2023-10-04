@@ -1,5 +1,14 @@
 # sidetrack
 
+## 0.0.15
+
+### Patch Changes
+
+- [`205db96`](https://github.com/sidetracklabs/sidetrack/commit/205db965de7b860a60b4148fd12dc3b14ee912a4) Thanks [@aniravi24](https://github.com/aniravi24)! - Update deps, move to Effect 2.0-next
+
+- Updated dependencies [[`205db96`](https://github.com/sidetracklabs/sidetrack/commit/205db965de7b860a60b4148fd12dc3b14ee912a4)]:
+  - @sidetrack/pg-migrate@0.0.9
+
 ## 0.0.14
 
 ### Patch Changes
