@@ -27,8 +27,8 @@
     "@commitlint/cli": "17.7.2",
     "@commitlint/config-conventional": "17.7.0",
     "@manypkg/cli": "0.21.0",
-    "@typescript-eslint/eslint-plugin": "6.7.4",
-    "@typescript-eslint/parser": "6.7.4",
+    "@typescript-eslint/eslint-plugin": "6.7.5",
+    "@typescript-eslint/parser": "6.7.5",
     "commitizen": "4.3.0",
     "cz-git": "1.7.1",
     "eslint": "8.51.0",
@@ -42,8 +42,8 @@
     "prettier-plugin-sort-json": "3.1.0",
     "sonicware-tdt": "20.0.0",
     "tsup": "7.2.0",
-    "turbo": "1.10.14",
-    "typedoc": "0.25.1",
+    "turbo": "1.10.15",
+    "typedoc": "0.25.2",
     "typescript": "5.2.2"
   },
   "packageManager": "pnpm@8.8.0"

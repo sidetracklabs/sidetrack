@@ -58,16 +58,16 @@
   },
   "dependencies": {
     "@sidetrack/pg-migrate": "workspace:*",
-    "effect": "2.0.0-next.42",
+    "effect": "2.0.0-next.47",
     "pg": "^8.11.2"
   },
   "devDependencies": {
-    "@types/pg": "8.10.3",
+    "@types/pg": "8.10.4",
     "@vitest/coverage-v8": "0.34.6",
     "dotenv-cli": "7.3.0",
-    "kanel": "3.5.3",
+    "kanel": "3.5.5",
     "type-fest": "4.3.3",
-    "vite": "4.4.9",
+    "vite": "4.4.11",
     "vite-tsconfig-paths": "4.2.1",
     "vitest": "0.34.6"
   }
