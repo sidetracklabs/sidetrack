@@ -24,8 +24,8 @@
   "devDependencies": {
     "@changesets/changelog-github": "0.4.8",
     "@changesets/cli": "2.26.2",
-    "@commitlint/cli": "17.8.0",
-    "@commitlint/config-conventional": "17.8.0",
+    "@commitlint/cli": "17.8.1",
+    "@commitlint/config-conventional": "17.8.1",
     "@manypkg/cli": "0.21.0",
     "@typescript-eslint/eslint-plugin": "6.7.5",
     "@typescript-eslint/parser": "6.7.5",
@@ -42,7 +42,7 @@
     "prettier-plugin-sort-json": "3.1.0",
     "sonicware-tdt": "20.0.0",
     "tsup": "7.2.0",
-    "turbo": "1.10.15",
+    "turbo": "1.10.16",
     "typedoc": "0.25.2",
     "typescript": "5.2.2"
   },
