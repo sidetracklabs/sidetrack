@@ -64,7 +64,7 @@ importers:
         version: 3.1.0(prettier@3.0.3)
       sonicware-tdt:
         specifier: 20.0.0
-        version: 20.0.0(typedoc@0.25.2)
+        version: 20.0.0(typedoc@0.25.3)
       tsup:
         specifier: 7.2.0
         version: 7.2.0(ts-node@10.9.1)(typescript@5.2.2)
@@ -72,8 +72,8 @@ importers:
         specifier: 1.10.16
         version: 1.10.16
       typedoc:
-        specifier: 0.25.2
-        version: 0.25.2(typescript@5.2.2)
+        specifier: 0.25.3
+        version: 0.25.3(typescript@5.2.2)
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -152,8 +152,8 @@ importers:
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 2.0.0-next.50
-        version: 2.0.0-next.50
+        specifier: 2.0.0-next.52
+        version: 2.0.0-next.52
       pg:
         specifier: ^8.11.2
         version: 8.11.2
@@ -2262,8 +2262,8 @@ packages:
     resolution: {integrity: sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA==}
     dev: true
 
-  /effect@2.0.0-next.50:
-    resolution: {integrity: sha512-dlwI31Vza4ybFtNDstx3AnZkBBzaSMMNfZmwXNrzm1S3fE1IoQzoHCHelBH9gSZCRtE4gzZbplyWD/B6iePGxg==}
+  /effect@2.0.0-next.52:
+    resolution: {integrity: sha512-6VmmfS6xyOZsJRT0hcEsMx03HxXSeG/VmcniDvVw0nzBudlu+4qUvj8GBGYVFVgJfKcISSRey0tzfO9HXIzApg==}
     dev: false
 
   /emoji-regex@8.0.0:
@@ -5011,7 +5011,7 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonicware-tdt@20.0.0(typedoc@0.25.2):
+  /sonicware-tdt@20.0.0(typedoc@0.25.3):
     resolution: {integrity: sha512-srOBM058MgejyjL87ovkdG73OXmBzJGq/gHPjGkrr4J6CXmaoBes5IAuZRGO1E1jf3FxEJs8NOLJQkcXl63eOA==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -5019,7 +5019,7 @@ packages:
     dependencies:
       '@types/node': 20.4.7
       fs: 0.0.1-security
-      typedoc: 0.25.2(typescript@5.2.2)
+      typedoc: 0.25.3(typescript@5.2.2)
     dev: true
 
   /source-map-js@1.0.2:
@@ -5620,8 +5620,8 @@ packages:
       is-typed-array: 1.1.12
     dev: true
 
-  /typedoc@0.25.2(typescript@5.2.2):
-    resolution: {integrity: sha512-286F7BeATBiWe/qC4PCOCKlSTwfnsLbC/4cZ68oGBbvAqb9vV33quEOXx7q176OXotD+JdEerdQ1OZGJ818lnA==}
+  /typedoc@0.25.3(typescript@5.2.2):
+    resolution: {integrity: sha512-Ow8Bo7uY1Lwy7GTmphRIMEo6IOZ+yYUyrc8n5KXIZg1svpqhZSWgni2ZrDhe+wLosFS8yswowUzljTAV/3jmWw==}
     engines: {node: '>= 16'}
     hasBin: true
     peerDependencies:
