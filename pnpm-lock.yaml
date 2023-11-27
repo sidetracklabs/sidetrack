@@ -64,7 +64,7 @@ importers:
         version: 3.1.0(prettier@3.1.0)
       sonicware-tdt:
         specifier: 20.0.0
-        version: 20.0.0(typedoc@0.25.3)
+        version: 20.0.0(typedoc@0.25.4)
       tsup:
         specifier: 7.2.0
         version: 7.2.0(ts-node@10.9.1)(typescript@5.2.2)
@@ -72,8 +72,8 @@ importers:
         specifier: 1.10.16
         version: 1.10.16
       typedoc:
-        specifier: 0.25.3
-        version: 0.25.3(typescript@5.2.2)
+        specifier: 0.25.4
+        version: 0.25.4(typescript@5.2.2)
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -152,8 +152,8 @@ importers:
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 2.0.0-next.55
-        version: 2.0.0-next.55
+        specifier: 2.0.0-next.56
+        version: 2.0.0-next.56
       pg:
         specifier: ^8.11.2
         version: 8.11.2
@@ -2262,8 +2262,8 @@ packages:
     resolution: {integrity: sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA==}
     dev: true
 
-  /effect@2.0.0-next.55:
-    resolution: {integrity: sha512-kNOB/HaDSdaFSDVXK2gyf4XcTKbKKlllyoS871uDyoJskcc+024sSOHnNioXZPgkqaz55a3mad4DFfLUIETwYQ==}
+  /effect@2.0.0-next.56:
+    resolution: {integrity: sha512-Z6L9rf78OveZorl4pC82hUM/kNhQ8epChuCBVNIjVsookbb6iqTuP9goi3qi6CR7xUZE+HnOKF2bzMIdOOP+Vw==}
     dev: false
 
   /emoji-regex@8.0.0:
@@ -5011,7 +5011,7 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonicware-tdt@20.0.0(typedoc@0.25.3):
+  /sonicware-tdt@20.0.0(typedoc@0.25.4):
     resolution: {integrity: sha512-srOBM058MgejyjL87ovkdG73OXmBzJGq/gHPjGkrr4J6CXmaoBes5IAuZRGO1E1jf3FxEJs8NOLJQkcXl63eOA==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -5019,7 +5019,7 @@ packages:
     dependencies:
       '@types/node': 20.4.7
       fs: 0.0.1-security
-      typedoc: 0.25.3(typescript@5.2.2)
+      typedoc: 0.25.4(typescript@5.2.2)
     dev: true
 
   /source-map-js@1.0.2:
@@ -5620,12 +5620,12 @@ packages:
       is-typed-array: 1.1.12
     dev: true
 
-  /typedoc@0.25.3(typescript@5.2.2):
-    resolution: {integrity: sha512-Ow8Bo7uY1Lwy7GTmphRIMEo6IOZ+yYUyrc8n5KXIZg1svpqhZSWgni2ZrDhe+wLosFS8yswowUzljTAV/3jmWw==}
+  /typedoc@0.25.4(typescript@5.2.2):
+    resolution: {integrity: sha512-Du9ImmpBCw54bX275yJrxPVnjdIyJO/84co0/L9mwe0R3G4FSR6rQ09AlXVRvZEGMUg09+z/usc8mgygQ1aidA==}
     engines: {node: '>= 16'}
     hasBin: true
     peerDependencies:
-      typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x
+      typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x
     dependencies:
       lunr: 2.3.9
       marked: 4.3.0
