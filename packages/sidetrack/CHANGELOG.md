@@ -1,5 +1,14 @@
 # sidetrack
 
+## 0.0.16
+
+### Patch Changes
+
+- [#75](https://github.com/sidetracklabs/sidetrack/pull/75) [`dfa6781`](https://github.com/sidetracklabs/sidetrack/commit/dfa6781cf35ac0bf4e91d2536d1ccc4eb67b2ac7) Thanks [@renovate](https://github.com/apps/renovate)! - Support Effect 2.0
+
+- Updated dependencies [[`dfa6781`](https://github.com/sidetracklabs/sidetrack/commit/dfa6781cf35ac0bf4e91d2536d1ccc4eb67b2ac7)]:
+  - @sidetrack/pg-migrate@0.0.10
+
 ## 0.0.15
 
 ### Patch Changes
