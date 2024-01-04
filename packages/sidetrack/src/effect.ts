@@ -3,7 +3,7 @@ import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 import * as Layer from "effect/Layer";
-import { fromIterable } from "effect/ReadonlyRecord";
+import { fromIterableWith } from "effect/ReadonlyRecord";
 import * as Ref from "effect/Ref";
 import * as Schedule from "effect/Schedule";
 import pg from "pg";
@@ -415,7 +415,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(
         Effect.map((result) =>
-          fromIterable(result.rows, (row) => [row.status, row.count]),
+          fromIterableWith(result.rows, (row) => [row.status, row.count]),
         ),
       );
 
