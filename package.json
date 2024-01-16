@@ -26,9 +26,9 @@
     "@changesets/cli": "2.27.1",
     "@commitlint/cli": "17.8.1",
     "@commitlint/config-conventional": "17.8.1",
-    "@manypkg/cli": "0.21.1",
-    "@typescript-eslint/eslint-plugin": "6.18.0",
-    "@typescript-eslint/parser": "6.18.0",
+    "@manypkg/cli": "0.21.2",
+    "@typescript-eslint/eslint-plugin": "6.18.1",
+    "@typescript-eslint/parser": "6.18.1",
     "commitizen": "4.3.0",
     "cz-git": "1.8.0",
     "eslint": "8.56.0",
@@ -46,5 +46,5 @@
     "typedoc": "0.25.7",
     "typescript": "5.3.3"
   },
-  "packageManager": "pnpm@8.14.0"
+  "packageManager": "pnpm@8.14.1"
 }
