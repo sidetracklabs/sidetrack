@@ -88,8 +88,8 @@ importers:
         specifier: 5.7.1
         version: 5.7.1(prisma@5.7.1)
       '@types/uuid':
-        specifier: 9.0.7
-        version: 9.0.7
+        specifier: 9.0.8
+        version: 9.0.8
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -168,8 +168,8 @@ importers:
         specifier: 7.3.0
         version: 7.3.0
       kanel:
-        specifier: 3.8.2
-        version: 3.8.2
+        specifier: 3.8.7
+        version: 3.8.7
       type-fest:
         specifier: 4.9.0
         version: 4.9.0
@@ -1181,8 +1181,8 @@ packages:
     resolution: {integrity: sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw==}
     dev: true
 
-  /@types/uuid@9.0.7:
-    resolution: {integrity: sha512-WUtIVRUZ9i5dYXefDEAI7sh9/O7jGvHg7Df/5O/gtH3Yabe5odI3UWopVR1qbPXQtvOxWu3mM4XxlYeZtMWF4g==}
+  /@types/uuid@9.0.8:
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@6.18.1(@typescript-eslint/parser@6.18.1)(eslint@8.56.0)(typescript@5.3.3):
@@ -2712,8 +2712,8 @@ packages:
       tmp: 0.0.33
     dev: true
 
-  /extract-pg-schema@4.3.1:
-    resolution: {integrity: sha512-j2ebAVgMtniR5DY8pa8lp81OgOt6lnb2D1q59ku0p7OhRvQG7AXqkOQanS4l1zXV4Hg2qvIyNl1LT6UAxv0BVQ==}
+  /extract-pg-schema@4.6.0:
+    resolution: {integrity: sha512-BsWyENBaNpUPD2EaH+NYJvN55HFqgKo8hIjELEC7qm5taxYbS3jWBqsJFyzWOO391zxh/vw5YJUr9wx4Z8wBAQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       jsonpath: 1.1.1
@@ -3620,15 +3620,15 @@ packages:
       underscore: 1.12.1
     dev: true
 
-  /kanel@3.8.2:
-    resolution: {integrity: sha512-nezUGBL+WIpUBmTpkfIMLsU8F5TCVX16N138fZIZ/pzP1hQVRHJ9hvhsrpWmgatfBACnFLi2ibKhh+ffRF1RYA==}
+  /kanel@3.8.7:
+    resolution: {integrity: sha512-f/9hz5ygIp9KqqIiCAyTqEWsg8XWrE+JMstudKAgjGX03FHlABtyiCODVgdweTCZApnHRXTlQbTDiHrqIlKskQ==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     dependencies:
       '@kristiandupont/recase': 1.2.1
       chalk: 4.1.2
       cli-progress: 3.12.0
-      extract-pg-schema: 4.3.1
+      extract-pg-schema: 4.6.0
       optionator: 0.9.3
       pg: 8.11.3
       ramda: 0.29.0
