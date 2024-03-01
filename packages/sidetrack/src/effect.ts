@@ -90,7 +90,7 @@ export const createSidetrackServiceTag = <
   Queues extends SidetrackQueuesGenericType,
 >() =>
   Context.GenericTag<SidetrackService<Queues>>(
-    Symbol.for("@sidetracklabs/sidetrack/effect/service"),
+    "@sidetracklabs/sidetrack/effect/service",
   );
 
 export function makeLayer<Queues extends SidetrackQueuesGenericType>(
@@ -290,7 +290,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING *`,
           [queueName, payload, queues[queueName].options?.maxAttempts ?? 1],
         ),
-      ).pipe(Effect.map((result) => result.rows[0]!));
+      ).pipe(Effect.map((result) => result.rows[0]));
 
     const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
       Effect.promise(() =>
