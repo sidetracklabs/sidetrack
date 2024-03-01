@@ -37,7 +37,7 @@
     "eslint-plugin-simple-import-sort": "12.0.0",
     "eslint-plugin-sort-keys": "2.3.5",
     "eslint-plugin-typescript-sort-keys": "3.2.0",
-    "husky": "8.0.3",
+    "husky": "9.0.11",
     "prettier": "3.2.5",
     "prettier-plugin-sort-json": "3.1.0",
     "sonicware-tdt": "20.0.0",
