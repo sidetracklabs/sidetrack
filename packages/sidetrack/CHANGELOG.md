@@ -1,5 +1,16 @@
 # sidetrack
 
+## 0.1.0
+
+### Minor Changes
+
+- [`65fb249`](https://github.com/sidetracklabs/sidetrack/commit/65fb249719532a2ddcb207e41ee3ce5935db45ff) Thanks [@aniravi24](https://github.com/aniravi24)! - Effect 2.4 bump
+
+### Patch Changes
+
+- Updated dependencies [[`65fb249`](https://github.com/sidetracklabs/sidetrack/commit/65fb249719532a2ddcb207e41ee3ce5935db45ff)]:
+  - @sidetrack/pg-migrate@0.1.0
+
 ## 0.0.16
 
 ### Patch Changes
