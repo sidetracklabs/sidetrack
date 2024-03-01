@@ -30,12 +30,12 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
   protected sidetrackService = createSidetrackServiceTag<Queues>();
   /** @internal */
-  private sidetrackLayer: Layer.Layer<never, never, SidetrackService<Queues>>;
+  private sidetrackLayer: Layer.Layer<SidetrackService<Queues>>;
   /** @internal */
   private runtime: Runtime.Runtime<SidetrackService<Queues>>;
   /** @internal */
   protected customRunPromise: <R extends SidetrackService<Queues>, E, A>(
-    self: Effect.Effect<R, E, A>,
+    self: Effect.Effect<A, E, R>,
   ) => Promise<A>;
 
   constructor(options: SidetrackOptions<Queues>) {
@@ -46,7 +46,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     );
 
     this.customRunPromise = <R extends SidetrackService<Queues>, E, A>(
-      self: Effect.Effect<R, E, A>,
+      self: Effect.Effect<A, E, R>,
     ) => Runtime.runPromise(this.runtime)(self);
   }
 
