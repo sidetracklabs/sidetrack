@@ -64,16 +64,16 @@ importers:
         version: 3.1.0(prettier@3.2.5)
       sonicware-tdt:
         specifier: 20.0.0
-        version: 20.0.0(typedoc@0.25.8)
+        version: 20.0.0(typedoc@0.25.9)
       tsup:
         specifier: 7.2.0
         version: 7.2.0(ts-node@10.9.1)(typescript@5.3.3)
       turbo:
-        specifier: 1.12.3
-        version: 1.12.3
+        specifier: 1.12.4
+        version: 1.12.4
       typedoc:
-        specifier: 0.25.8
-        version: 0.25.8(typescript@5.3.3)
+        specifier: 0.25.9
+        version: 0.25.9(typescript@5.3.3)
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -122,8 +122,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@types/pg':
-        specifier: 8.11.0
-        version: 8.11.0
+        specifier: 8.11.2
+        version: 8.11.2
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -134,8 +134,8 @@ importers:
         specifier: 8.11.3
         version: 8.11.3
       type-fest:
-        specifier: 4.10.2
-        version: 4.10.2
+        specifier: 4.10.3
+        version: 4.10.3
       vite:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.5.1)
@@ -159,8 +159,8 @@ importers:
         version: 8.11.2
     devDependencies:
       '@types/pg':
-        specifier: 8.11.0
-        version: 8.11.0
+        specifier: 8.11.2
+        version: 8.11.2
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -168,11 +168,11 @@ importers:
         specifier: 7.3.0
         version: 7.3.0
       kanel:
-        specifier: 3.8.7
-        version: 3.8.7
+        specifier: 3.8.8
+        version: 3.8.8
       type-fest:
-        specifier: 4.10.2
-        version: 4.10.2
+        specifier: 4.10.3
+        version: 4.10.3
       vite:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.5.1)
@@ -1165,8 +1165,8 @@ packages:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
     dev: true
 
-  /@types/pg@8.11.0:
-    resolution: {integrity: sha512-sDAlRiBNthGjNFfvt0k6mtotoVYVQ63pA8R4EMWka7crawSR60waVYR0HAgmPRs/e2YaeJTD/43OoZ3PFw80pw==}
+  /@types/pg@8.11.2:
+    resolution: {integrity: sha512-G2Mjygf2jFMU/9hCaTYxJrwdObdcnuQde1gndooZSOHsNSaCehAuwc7EIuSA34Do8Jx2yZ19KtvW8P0j4EuUXw==}
     dependencies:
       '@types/node': 20.5.1
       pg-protocol: 1.6.0
@@ -2712,9 +2712,10 @@ packages:
       tmp: 0.0.33
     dev: true
 
-  /extract-pg-schema@4.6.0:
-    resolution: {integrity: sha512-BsWyENBaNpUPD2EaH+NYJvN55HFqgKo8hIjELEC7qm5taxYbS3jWBqsJFyzWOO391zxh/vw5YJUr9wx4Z8wBAQ==}
+  /extract-pg-schema@5.0.0:
+    resolution: {integrity: sha512-0PEaTKQ9ND0nwaSQiSEadmInjAiU9iRe7aR+P++o2QPniTPBQeY6q5U85V9b9IzJg1iaJzlkm6bUgDE6XecTtw==}
     engines: {node: '>=16.0.0'}
+    hasBin: true
     dependencies:
       jsonpath: 1.1.1
       knex: 3.1.0(pg@8.11.3)
@@ -3620,15 +3621,15 @@ packages:
       underscore: 1.12.1
     dev: true
 
-  /kanel@3.8.7:
-    resolution: {integrity: sha512-f/9hz5ygIp9KqqIiCAyTqEWsg8XWrE+JMstudKAgjGX03FHlABtyiCODVgdweTCZApnHRXTlQbTDiHrqIlKskQ==}
+  /kanel@3.8.8:
+    resolution: {integrity: sha512-z233tnMEmk+q02DXLdJFPFMsfhvppwFm3X+Bf9wy969NtIvqKDRW5Cv29MN0Ve+8sGXChuD0fKesPUhWFRTx4A==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     dependencies:
       '@kristiandupont/recase': 1.2.1
       chalk: 4.1.2
       cli-progress: 3.12.0
-      extract-pg-schema: 4.6.0
+      extract-pg-schema: 5.0.0
       optionator: 0.9.3
       pg: 8.11.3
       ramda: 0.29.0
@@ -5001,7 +5002,7 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonicware-tdt@20.0.0(typedoc@0.25.8):
+  /sonicware-tdt@20.0.0(typedoc@0.25.9):
     resolution: {integrity: sha512-srOBM058MgejyjL87ovkdG73OXmBzJGq/gHPjGkrr4J6CXmaoBes5IAuZRGO1E1jf3FxEJs8NOLJQkcXl63eOA==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -5009,7 +5010,7 @@ packages:
     dependencies:
       '@types/node': 20.4.7
       fs: 0.0.1-security
-      typedoc: 0.25.8(typescript@5.3.3)
+      typedoc: 0.25.9(typescript@5.3.3)
     dev: true
 
   /source-map-js@1.0.2:
@@ -5453,64 +5454,64 @@ packages:
       yargs: 17.7.2
     dev: true
 
-  /turbo-darwin-64@1.12.3:
-    resolution: {integrity: sha512-dDglIaux+A4jOnB9CDH69sujmrnuLJLrKw1t3J+if6ySlFuxSwC++gDq9TVuOZo2+S7lFkGh+x5ytn3wp+jE8Q==}
+  /turbo-darwin-64@1.12.4:
+    resolution: {integrity: sha512-dBwFxhp9isTa9RS/fz2gDVk5wWhKQsPQMozYhjM7TT4jTrnYn0ZJMzr7V3B/M/T8QF65TbniW7w1gtgxQgX5Zg==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64@1.12.3:
-    resolution: {integrity: sha512-5TqqeujEyHMoVUWGzSzUl5ERSg7HDCdbU3gBs5ziWTpFRpeJ/+Y15kYyZJcMQcubRIH3Y1hL/yA5IhlGdgXOMA==}
+  /turbo-darwin-arm64@1.12.4:
+    resolution: {integrity: sha512-1Uo5iI6xsJ1j9ObsqxYRsa3W26mEbUe6fnj4rQYV6kDaqYD54oAMJ6hM53q9rB8JvFxwdrUXGp3PwTw9A0qqkA==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64@1.12.3:
-    resolution: {integrity: sha512-yUreU+/gq4vlBtcdyfjz7slwz4zM1RG8sSXvyHmAS+QXqSrGkegg4qLl2fRbv/c3EyA/XbfcZuD6tcrXkejr6g==}
+  /turbo-linux-64@1.12.4:
+    resolution: {integrity: sha512-ONg2aSqKP7LAQOg7ysmU5WpEQp4DGNxSlAiR7um+LKtbmC/UxogbR5+T+Uuq6zGuQ5kJyKjWJ4NhtvUswOqBsA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64@1.12.3:
-    resolution: {integrity: sha512-XRwAsp2eRSqZmaMVNrmHoKqofeJMuD87zmefZLTRAObh38hIwKgyl2QRsJIbteob5RN77yFbv3lAJ36UIY5h7w==}
+  /turbo-linux-arm64@1.12.4:
+    resolution: {integrity: sha512-9FPufkwdgfIKg/9jj87Cdtftw8o36y27/S2vLN7FTR2pp9c0MQiTBOLVYadUr1FlShupddmaMbTkXEhyt9SdrA==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64@1.12.3:
-    resolution: {integrity: sha512-CPnRfnUCtmFeShOtUdMCthySjmyHaoTyh9JueiYFvtCNeO3WfDMj63dpOQstQWHdJFYmIrIGfhAclcds9ePQYA==}
+  /turbo-windows-64@1.12.4:
+    resolution: {integrity: sha512-2mOtxHW5Vjh/5rDVu/aFwsMzI+chs8XcEuJHlY1sYOpEymYTz+u6AXbnzRvwZFMrLKr7J7fQOGl+v96sLKbNdA==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64@1.12.3:
-    resolution: {integrity: sha512-cYA/wlzvp4vlCNHYJ2AjNS3FLXWwUC/5CJompBkTeKFFB6AviE/iLkbIhFikCVSNXZk/3AGanpMUXIkt3bdlwg==}
+  /turbo-windows-arm64@1.12.4:
+    resolution: {integrity: sha512-nOY5wae9qnxPOpT1fRuYO0ks6dTwpKMPV6++VkDkamFDLFHUDVM/9kmD2UTeh1yyrKnrZksbb9zmShhmfj1wog==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo@1.12.3:
-    resolution: {integrity: sha512-a6q8I0TK9ohACYbkmxzG/JYPuDC4VCvfmXLTlf321qQ4BIAhoyaOj/O2g+zJ6L1vNYnZ82G4LrbMfgLLngbLsg==}
+  /turbo@1.12.4:
+    resolution: {integrity: sha512-yUJ7elEUSToiGwFZogXpYKJpQ0BvaMbkEuQECIWtkBLcmWzlMOt6bActsIm29oN83mRU0WbzGt4e8H1KHWedhg==}
     hasBin: true
     optionalDependencies:
-      turbo-darwin-64: 1.12.3
-      turbo-darwin-arm64: 1.12.3
-      turbo-linux-64: 1.12.3
-      turbo-linux-arm64: 1.12.3
-      turbo-windows-64: 1.12.3
-      turbo-windows-arm64: 1.12.3
+      turbo-darwin-64: 1.12.4
+      turbo-darwin-arm64: 1.12.4
+      turbo-linux-64: 1.12.4
+      turbo-linux-arm64: 1.12.4
+      turbo-windows-64: 1.12.4
+      turbo-windows-arm64: 1.12.4
     dev: true
 
   /type-check@0.3.2:
@@ -5562,8 +5563,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /type-fest@4.10.2:
-    resolution: {integrity: sha512-anpAG63wSpdEbLwOqH8L84urkL6PiVIov3EMmgIhhThevh9aiMQov+6Btx0wldNcvm4wV+e2/Rt1QdDwKHFbHw==}
+  /type-fest@4.10.3:
+    resolution: {integrity: sha512-JLXyjizi072smKGGcZiAJDCNweT8J+AuRxmPZ1aG7TERg4ijx9REl8CNhbr36RV4qXqL1gO1FF9HL8OkVmmrsA==}
     engines: {node: '>=16'}
     dev: true
 
@@ -5605,8 +5606,8 @@ packages:
       is-typed-array: 1.1.12
     dev: true
 
-  /typedoc@0.25.8(typescript@5.3.3):
-    resolution: {integrity: sha512-mh8oLW66nwmeB9uTa0Bdcjfis+48bAjSH3uqdzSuSawfduROQLlXw//WSNZLYDdhmMVB7YcYZicq6e8T0d271A==}
+  /typedoc@0.25.9(typescript@5.3.3):
+    resolution: {integrity: sha512-jVoGmfNw848iW0L313+jqHbsknepwDV6F9nzk1H30oWhKXkw65uaENgR6QtTw9a5KqRWEb6nwNd54KxffBJyWw==}
     engines: {node: '>= 16'}
     hasBin: true
     peerDependencies:

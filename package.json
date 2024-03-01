@@ -42,8 +42,8 @@
     "prettier-plugin-sort-json": "3.1.0",
     "sonicware-tdt": "20.0.0",
     "tsup": "7.2.0",
-    "turbo": "1.12.3",
-    "typedoc": "0.25.8",
+    "turbo": "1.12.4",
+    "typedoc": "0.25.9",
     "typescript": "5.3.3"
   },
   "packageManager": "pnpm@8.15.4"
