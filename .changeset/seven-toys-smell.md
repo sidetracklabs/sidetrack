@@ -1,7 +1,7 @@
 ---
-"@sidetrack/client-prisma": minor
-"@sidetrack/pg-migrate": minor
-"sidetrack": minor
+"@sidetrack/client-prisma": patch
+"@sidetrack/pg-migrate": patch
+"sidetrack": patch
 ---
 
 Effect 2.4 bump
