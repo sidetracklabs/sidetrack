@@ -33,8 +33,8 @@ importers:
         specifier: 4.3.0
         version: 4.3.0(@types/node@20.5.1)(typescript@5.3.3)
       cz-git:
-        specifier: 1.8.0
-        version: 1.8.0
+        specifier: 1.9.0
+        version: 1.9.0
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -2215,8 +2215,8 @@ packages:
       - typescript
     dev: true
 
-  /cz-git@1.8.0:
-    resolution: {integrity: sha512-XL5nXiqbW10YswQqWODrbwyWhydw3mLhP8OBrXyl8u4sIjTf/6mhGsizd6FA2VgPc4tZaNGguFoUyDj7vIBouw==}
+  /cz-git@1.9.0:
+    resolution: {integrity: sha512-xxqJwVS4MseVXLOlIK6w97WSHlo14BaOmhO3H6qB0H2Q5Kf3URMwJuYbInq1GxAVT14XLUZBhMy/3Di+lux/Cg==}
     engines: {node: '>=v12.20.0'}
     dev: true
 
