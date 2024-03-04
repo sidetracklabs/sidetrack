@@ -64,7 +64,7 @@ importers:
         version: 3.1.0(prettier@3.2.5)
       sonicware-tdt:
         specifier: 20.0.0
-        version: 20.0.0(typedoc@0.25.9)
+        version: 20.0.0(typedoc@0.25.10)
       tsup:
         specifier: 8.0.2
         version: 8.0.2(typescript@5.3.3)
@@ -72,8 +72,8 @@ importers:
         specifier: 1.12.4
         version: 1.12.4
       typedoc:
-        specifier: 0.25.9
-        version: 0.25.9(typescript@5.3.3)
+        specifier: 0.25.10
+        version: 0.25.10(typescript@5.3.3)
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -5209,7 +5209,7 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonicware-tdt@20.0.0(typedoc@0.25.9):
+  /sonicware-tdt@20.0.0(typedoc@0.25.10):
     resolution: {integrity: sha512-srOBM058MgejyjL87ovkdG73OXmBzJGq/gHPjGkrr4J6CXmaoBes5IAuZRGO1E1jf3FxEJs8NOLJQkcXl63eOA==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -5217,7 +5217,7 @@ packages:
     dependencies:
       '@types/node': 20.4.7
       fs: 0.0.1-security
-      typedoc: 0.25.9(typescript@5.3.3)
+      typedoc: 0.25.10(typescript@5.3.3)
     dev: true
 
   /source-map-js@1.0.2:
@@ -5778,8 +5778,8 @@ packages:
       is-typed-array: 1.1.12
     dev: true
 
-  /typedoc@0.25.9(typescript@5.3.3):
-    resolution: {integrity: sha512-jVoGmfNw848iW0L313+jqHbsknepwDV6F9nzk1H30oWhKXkw65uaENgR6QtTw9a5KqRWEb6nwNd54KxffBJyWw==}
+  /typedoc@0.25.10(typescript@5.3.3):
+    resolution: {integrity: sha512-v10rtOFojrjW9og3T+6wAKeJaGMuojU87DXGZ33sfs+554wgPTRG+s07Ag1BjPZI85Y5QPVouPI63JQ6fcQM5w==}
     engines: {node: '>= 16'}
     hasBin: true
     peerDependencies:
