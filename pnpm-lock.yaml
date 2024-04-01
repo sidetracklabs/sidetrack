@@ -33,8 +33,8 @@ importers:
         specifier: 4.3.0
         version: 4.3.0(@types/node@20.5.1)(typescript@5.4.3)
       cz-git:
-        specifier: 1.9.0
-        version: 1.9.0
+        specifier: 1.9.1
+        version: 1.9.1
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -131,8 +131,8 @@ importers:
         specifier: 7.4.1
         version: 7.4.1
       pg:
-        specifier: 8.11.3
-        version: 8.11.3
+        specifier: 8.11.4
+        version: 8.11.4
       type-fest:
         specifier: 4.12.0
         version: 4.12.0
@@ -2543,8 +2543,8 @@ packages:
       - typescript
     dev: true
 
-  /cz-git@1.9.0:
-    resolution: {integrity: sha512-xxqJwVS4MseVXLOlIK6w97WSHlo14BaOmhO3H6qB0H2Q5Kf3URMwJuYbInq1GxAVT14XLUZBhMy/3Di+lux/Cg==}
+  /cz-git@1.9.1:
+    resolution: {integrity: sha512-GK3EI5R7GApS8u+g9QPvy/50z0NiG7ijc1NASxZaDnQn0ARzr73MjZb3Lt4cZQvKJBd8GrfvOWqHgwMQQ/OlaA==}
     engines: {node: '>=v12.20.0'}
     dev: true
 
@@ -4149,7 +4149,7 @@ packages:
       cli-progress: 3.12.0
       extract-pg-schema: 5.0.0
       optionator: 0.9.3
-      pg: 8.11.3
+      pg: 8.11.4
       ramda: 0.29.0
       rmfr: 2.0.0
       tagged-comment-parser: 1.3.5
@@ -4918,6 +4918,10 @@ packages:
   /pg-connection-string@2.6.2:
     resolution: {integrity: sha512-ch6OwaeaPYcova4kKZ15sbJ2hKb/VP48ZD2gE7i1J+L4MspCtBMAx8nMgz7bksc7IojCIIWuEhHibSMFH8m8oA==}
 
+  /pg-connection-string@2.6.3:
+    resolution: {integrity: sha512-77FxhhKJQH+xJx6tDqkhhMa0nZvv3U1HYLDQgwZxZafVD583++O5LXn5oo5HaQZ0vXwYcZA1koYAJM3JvD6Gtw==}
+    dev: true
+
   /pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
@@ -4943,8 +4947,20 @@ packages:
       pg: 8.11.3
     dev: true
 
+  /pg-pool@3.6.2(pg@8.11.4):
+    resolution: {integrity: sha512-Htjbg8BlwXqSBQ9V8Vjtc+vzf/6fVUuak/3/XXKA9oxZprwW3IMDQTGHP+KDmVL7rtd+R1QjbnCFPuTHm3G4hg==}
+    peerDependencies:
+      pg: '>=8.0'
+    dependencies:
+      pg: 8.11.4
+    dev: true
+
   /pg-protocol@1.6.0:
     resolution: {integrity: sha512-M+PDm637OY5WM307051+bsDia5Xej6d9IR4GwJse1qA1DIhiKlksvrneZOYQq42OM+spubpcNYEo2FcKQrDk+Q==}
+
+  /pg-protocol@1.6.1:
+    resolution: {integrity: sha512-jPIlvgoD63hrEuihvIg+tJhoGjUsLPn6poJY9N5CnlPd91c2T18T/9zBtLxZSb1EhYxBRoZJtzScCaWlYLtktg==}
+    dev: true
 
   /pg-query-emscripten@0.1.0:
     resolution: {integrity: sha512-Awwf0s6gyVZEmZeMLXnXZOIQveqVEBFhxMkR0UcMmijwX/y9FW1od71X1hNRtGFWrU/ML5sxerZyH20pvpLGuA==}
@@ -5007,6 +5023,24 @@ packages:
       pg-connection-string: 2.6.2
       pg-pool: 3.6.1(pg@8.11.3)
       pg-protocol: 1.6.0
+      pg-types: 2.2.0
+      pgpass: 1.0.5
+    optionalDependencies:
+      pg-cloudflare: 1.1.1
+    dev: true
+
+  /pg@8.11.4:
+    resolution: {integrity: sha512-pWb7JKPxGk1UFbtq7jQ0m3IfPpb7LLACCEyN8/u9DYEom+Q/BSKy+4TRl4+Hh003AOYhppB/z+QK87/hx/bk0w==}
+    engines: {node: '>= 8.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+    dependencies:
+      pg-connection-string: 2.6.3
+      pg-pool: 3.6.2(pg@8.11.4)
+      pg-protocol: 1.6.1
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
