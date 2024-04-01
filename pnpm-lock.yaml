@@ -134,8 +134,8 @@ importers:
         specifier: 8.11.4
         version: 8.11.4
       type-fest:
-        specifier: 4.12.0
-        version: 4.12.0
+        specifier: 4.14.0
+        version: 4.14.0
       vite:
         specifier: 5.2.7
         version: 5.2.7(@types/node@20.5.1)
@@ -171,8 +171,8 @@ importers:
         specifier: 3.8.8
         version: 3.8.8
       type-fest:
-        specifier: 4.12.0
-        version: 4.12.0
+        specifier: 4.14.0
+        version: 4.14.0
       vite:
         specifier: 5.2.7
         version: 5.2.7(@types/node@20.5.1)
@@ -6176,8 +6176,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /type-fest@4.12.0:
-    resolution: {integrity: sha512-5Y2/pp2wtJk8o08G0CMkuFPCO354FGwk/vbidxrdhRGZfd0tFnb4Qb8anp9XxXriwBgVPjdWbKpGl4J9lJY2jQ==}
+  /type-fest@4.14.0:
+    resolution: {integrity: sha512-on5/Cw89wwqGZQu+yWO0gGMGu8VNxsaW9SB2HE8yJjllEk7IDTwnSN1dUVldYILhYPN5HzD7WAaw2cc/jBfn0Q==}
     engines: {node: '>=16'}
     dev: true
 
