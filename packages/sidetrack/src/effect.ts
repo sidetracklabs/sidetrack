@@ -3,7 +3,7 @@ import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 import * as Layer from "effect/Layer";
-import { fromIterableWith } from "effect/ReadonlyRecord";
+import { fromIterableWith } from "effect/Record";
 import * as Ref from "effect/Ref";
 import * as Schedule from "effect/Schedule";
 import pg from "pg";
@@ -114,7 +114,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           })());
 
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
-      Fiber.unit,
+      Fiber.void,
     );
 
     const startPolling = () =>
@@ -185,7 +185,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
           [jobId],
         ),
-      ).pipe(Effect.asUnit);
+      ).pipe(Effect.asVoid);
 
     const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
       Effect.promise(() =>
@@ -193,12 +193,12 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           `DELETE FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
-      ).pipe(Effect.asUnit);
+      ).pipe(Effect.asVoid);
 
     const stop = () =>
       Ref.get(pollingFiber)
         .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
-        .pipe(Effect.asUnit);
+        .pipe(Effect.asVoid);
 
     const runHandler = (
       job: SidetrackJobs,
@@ -272,7 +272,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             }),
           ),
         )
-        .pipe(Effect.asUnit);
+        .pipe(Effect.asVoid);
 
     const insertJob = <K extends keyof Queues>(
       queueName: K,
@@ -384,7 +384,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             }),
           ),
         )
-        .pipe(Effect.asUnit);
+        .pipe(Effect.asVoid);
 
     const listJobs = <K extends keyof Queues>(
       options?: SidetrackListJobsOptions<Queues, K>,
