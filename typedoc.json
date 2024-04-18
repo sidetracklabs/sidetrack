@@ -1,9 +1,9 @@
 {
-  "entryPoints": ["packages/*"],
-  "name": "Sidetrack",
   "entryPointStrategy": "packages",
+  "entryPoints": ["packages/*"],
   "includeVersion": true,
+  "name": "Sidetrack",
   "out": "docs",
-  "theme": "sonicware",
-  "plugin": ["sonicware-tdt"]
+  "plugin": ["sonicware-tdt"],
+  "theme": "sonicware"
 }

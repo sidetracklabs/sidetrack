@@ -73,9 +73,9 @@ export const createTransformer =
         v === undefined
           ? ""
           : typeof v === "string" ||
-            (typeof v === "object" && v !== null && "name" in v)
-          ? literal(v)
-          : String(escapeValue(v)),
+              (typeof v === "object" && v !== null && "name" in v)
+            ? literal(v)
+            : String(escapeValue(v)),
       );
     }, s);
 

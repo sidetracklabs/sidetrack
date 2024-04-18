@@ -1,9 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["*.ts", "*.mts", "src", "test"],
-  "exclude": ["dist", "test/prisma"],
   "compilerOptions": {
     "declaration": false,
     "declarationMap": false
-  }
+  },
+  "exclude": ["dist", "test/prisma"],
+  "extends": "../../tsconfig.json",
+  "include": ["*.ts", "*.mts", "src", "test"]
 }

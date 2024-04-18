@@ -135,8 +135,9 @@ ${err}
     close: async () => {
       await beforeCloseListeners.reduce(
         (promise, listener) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
           promise
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             .then(listener)
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             .catch((err: any) => logger.error(err.stack || err)),

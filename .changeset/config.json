@@ -1,13 +1,13 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.3.1/schema.json",
+  "access": "public",
+  "baseBranch": "main",
   "changelog": [
     "@changesets/changelog-github",
     { "repo": "sidetracklabs/sidetrack" }
   ],
   "commit": false,
   "fixed": [["sidetrack", "@sidetrack/client-prisma"]],
-  "access": "public",
-  "baseBranch": "main",
-  "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "updateInternalDependencies": "patch"
 }
