@@ -1,5 +1,11 @@
 # @sidetrack/client-prisma
 
+## 0.0.18
+
+### Patch Changes
+
+- [`19ba808`](https://github.com/sidetracklabs/sidetrack/commit/19ba8080bce6e758b3e8d53423a5d15c5eb0b25d) Thanks [@aniravi24](https://github.com/aniravi24)! - Effect 3.0 support
+
 ## 0.0.17
 
 ### Patch Changes
