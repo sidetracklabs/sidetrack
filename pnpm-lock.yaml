@@ -134,8 +134,8 @@ importers:
         specifier: 8.11.5
         version: 8.11.5
       type-fest:
-        specifier: 4.15.0
-        version: 4.15.0
+        specifier: 4.18.2
+        version: 4.18.2
       vite:
         specifier: 5.2.10
         version: 5.2.10(@types/node@20.12.7)
@@ -171,8 +171,8 @@ importers:
         specifier: 3.8.8
         version: 3.8.8
       type-fest:
-        specifier: 4.15.0
-        version: 4.15.0
+        specifier: 4.18.2
+        version: 4.18.2
       vite:
         specifier: 5.2.10
         version: 5.2.10(@types/node@20.12.7)
@@ -3446,8 +3446,8 @@ packages:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
 
-  type-fest@4.15.0:
-    resolution: {integrity: sha512-tB9lu0pQpX5KJq54g+oHOLumOx+pMep4RaM6liXh2PKmVRFF+/vAtUP0ZaJ0kOySfVNjF6doBWPHhBhISKdlIA==}
+  type-fest@4.18.2:
+    resolution: {integrity: sha512-+suCYpfJLAe4OXS6+PPXjW3urOS4IoP9waSiLuXfLgqZODKw/aWwASvzqE886wA0kQgGy0mIWyhd87VpqIy6Xg==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.0:
@@ -7126,7 +7126,7 @@ snapshots:
 
   type-fest@0.8.1: {}
 
-  type-fest@4.15.0: {}
+  type-fest@4.18.2: {}
 
   typed-array-buffer@1.0.0:
     dependencies:
