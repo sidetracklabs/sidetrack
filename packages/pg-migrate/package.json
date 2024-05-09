@@ -50,12 +50,12 @@
   },
   "devDependencies": {
     "@types/mkdirp": "2.0.0",
-    "@types/pg": "8.11.5",
+    "@types/pg": "8.11.6",
     "@vitest/coverage-v8": "1.5.3",
-    "dotenv-cli": "7.4.1",
+    "dotenv-cli": "7.4.2",
     "pg": "8.11.5",
     "type-fest": "4.18.2",
-    "vite": "5.2.10",
+    "vite": "5.2.11",
     "vite-tsconfig-paths": "4.3.2",
     "vitest": "1.5.3"
   },
