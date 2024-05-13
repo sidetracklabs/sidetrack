@@ -65,7 +65,7 @@
     "@types/pg": "8.11.6",
     "@vitest/coverage-v8": "1.5.3",
     "dotenv-cli": "7.4.2",
-    "kanel": "3.8.8",
+    "kanel": "3.8.9",
     "type-fest": "4.18.2",
     "vite": "5.2.11",
     "vite-tsconfig-paths": "4.3.2",
