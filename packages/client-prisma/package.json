@@ -50,11 +50,11 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@prisma/client": "5.13.0",
+    "@prisma/client": "5.14.0",
     "@types/uuid": "9.0.8",
     "@vitest/coverage-v8": "1.5.3",
     "dotenv-cli": "7.4.2",
-    "prisma": "5.13.0",
+    "prisma": "5.14.0",
     "sidetrack": "workspace:*",
     "vite": "5.2.11",
     "vite-tsconfig-paths": "4.3.2",
