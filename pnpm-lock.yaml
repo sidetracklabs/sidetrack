@@ -134,8 +134,8 @@ importers:
         specifier: 8.11.5
         version: 8.11.5
       type-fest:
-        specifier: 4.18.3
-        version: 4.18.3
+        specifier: 4.20.0
+        version: 4.20.0
       vite:
         specifier: 5.2.12
         version: 5.2.12(@types/node@20.12.7)
@@ -171,8 +171,8 @@ importers:
         specifier: 3.8.9
         version: 3.8.9
       type-fest:
-        specifier: 4.18.3
-        version: 4.18.3
+        specifier: 4.20.0
+        version: 4.20.0
       vite:
         specifier: 5.2.12
         version: 5.2.12(@types/node@20.12.7)
@@ -652,6 +652,7 @@ packages:
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -659,6 +660,7 @@ packages:
 
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@istanbuljs/schema@0.1.3':
     resolution: {integrity: sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==}
@@ -3361,8 +3363,8 @@ packages:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
 
-  type-fest@4.18.3:
-    resolution: {integrity: sha512-Q08/0IrpvM+NMY9PA2rti9Jb+JejTddwmwmVQGskAlhtcrw1wsRzoR6ode6mR+OAabNa75w/dxedSUY2mlphaQ==}
+  type-fest@4.20.0:
+    resolution: {integrity: sha512-MBh+PHUHHisjXf4tlx0CFWoMdjx8zCMLJHOjnV1prABYZFHqtFOyauCIK2/7w4oIfwkF8iNhLtnJEfVY2vn3iw==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.0:
@@ -6969,7 +6971,7 @@ snapshots:
 
   type-fest@0.8.1: {}
 
-  type-fest@4.18.3: {}
+  type-fest@4.20.0: {}
 
   typed-array-buffer@1.0.0:
     dependencies:
