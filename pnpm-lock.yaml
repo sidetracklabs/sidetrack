@@ -168,8 +168,8 @@ importers:
         specifier: 7.4.2
         version: 7.4.2
       kanel:
-        specifier: 3.8.9
-        version: 3.8.9
+        specifier: 3.9.0
+        version: 3.9.0
       type-fest:
         specifier: 4.20.1
         version: 4.20.1
@@ -1997,8 +1997,8 @@ packages:
   jsonpath@1.1.1:
     resolution: {integrity: sha512-l6Cg7jRpixfbgoWgkrl77dgEj8RPvND0wMH6TwQmi9Qs4TFfS9u5cUFnbeKTwj5ga5Y3BTGGNI28k117LJ009w==}
 
-  kanel@3.8.9:
-    resolution: {integrity: sha512-YXAYpjnqRFHnODefWfrKlxwTj0aiYU1zOkAFUL7Ucr6xGyjX4HSkUeNh/z5VynZr0iJdp/jqGIfV+3qiqigpeQ==}
+  kanel@3.9.0:
+    resolution: {integrity: sha512-MnIjfAwNvCK58hy29ahI3Tx4FuDggRjGKZsPqP0caf0Iso/UABN2jmVi5fNZOE3IHQKW3f8MgTd9aVVc9pM3Dg==}
     engines: {node: '>=16.0.0'}
     hasBin: true
 
@@ -5415,7 +5415,7 @@ snapshots:
       static-eval: 2.0.2
       underscore: 1.12.1
 
-  kanel@3.8.9:
+  kanel@3.9.0:
     dependencies:
       '@kristiandupont/recase': 1.2.1
       chalk: 4.1.2
