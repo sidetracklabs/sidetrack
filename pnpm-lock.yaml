@@ -152,8 +152,8 @@ importers:
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 3.0.3
-        version: 3.0.3
+        specifier: 3.4.2
+        version: 3.4.2
       pg:
         specifier: ^8.11.5
         version: 8.11.5
@@ -1288,8 +1288,8 @@ packages:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
 
-  effect@3.0.3:
-    resolution: {integrity: sha512-mgG+FoWrM4sny8OxDFWCpq+6LwGf9cK/JztVhxZQeZM9ZMXY+lKbdMEQmemNYce0QVAz2+YqUKwhKzOidwbZzg==}
+  effect@3.4.2:
+    resolution: {integrity: sha512-y20gL/fMqm4mUL71Tcuu3pYQ7Phm8RMX/hUt6vVfkg4Iac/RvMjP5DrJxT6RI0j0VNRLhTgb6pyL3oXeqxTeRg==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -4573,7 +4573,7 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  effect@3.0.3: {}
+  effect@3.4.2: {}
 
   emoji-regex@8.0.0: {}
 
