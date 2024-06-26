@@ -47,11 +47,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "uuid": "^9.0.1"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@prisma/client": "5.16.0",
-    "@types/uuid": "9.0.8",
+    "@types/uuid": "10.0.0",
     "@vitest/coverage-v8": "1.6.0",
     "dotenv-cli": "7.4.2",
     "prisma": "5.16.0",
