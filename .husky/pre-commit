@@ -1,1 +1,1 @@
-CI=true pnpm turbo build --force && CI=true pnpm turbo lint test typecheck --force
+CI=true pnpm turbo --env-mode=loose build --force && CI=true pnpm turbo --env-mode=loose lint test typecheck --force
