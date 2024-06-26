@@ -36,7 +36,7 @@ jobs:
         run: pnpm install && pnpm postinstall-steps
 
       - name: Build and lint and type-check
-        run: pnpm build && pnpm turbo lint test-ci typecheck
+        run: pnpm build && pnpm turbo --env-mode=loose lint test-ci typecheck
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/sidetrack?sslmode=disable
 
