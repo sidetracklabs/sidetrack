@@ -34,7 +34,7 @@
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
-    "eslint-plugin-simple-import-sort": "12.1.0",
+    "eslint-plugin-simple-import-sort": "12.1.1",
     "eslint-plugin-sort-keys": "2.3.5",
     "eslint-plugin-typescript-sort-keys": "3.2.0",
     "husky": "9.0.11",
@@ -43,8 +43,8 @@
     "sonicware-tdt": "20.0.0",
     "tsup": "8.1.0",
     "turbo": "2.0.6",
-    "typedoc": "0.26.3",
-    "typescript": "5.5.2"
+    "typedoc": "0.26.4",
+    "typescript": "5.5.3"
   },
   "packageManager": "pnpm@9.4.0"
 }
