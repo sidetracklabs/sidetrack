@@ -118,9 +118,6 @@ importers:
         specifier: ~3.0.1
         version: 3.0.1
     devDependencies:
-      '@types/mkdirp':
-        specifier: 2.0.0
-        version: 2.0.0
       '@types/pg':
         specifier: 8.11.6
         version: 8.11.6
@@ -735,10 +732,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/mkdirp@2.0.0':
-    resolution: {integrity: sha512-c/iUqMymAlxLAyIK3u5SzrwkrkyOdv1XDc91T+b5FsY7Jr6ERhUD19jJHOhPW4GD6tmN6mFEorfSdks525pwdQ==}
-    deprecated: This is a stub types definition. mkdirp provides its own type definitions, so you do not need this installed.
 
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
@@ -3974,10 +3967,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/mkdirp@2.0.0':
-    dependencies:
-      mkdirp: 3.0.1
 
   '@types/node@12.20.55': {}
 
