@@ -30,7 +30,7 @@
     "@typescript-eslint/eslint-plugin": "7.16.0",
     "@typescript-eslint/parser": "7.16.0",
     "commitizen": "4.3.0",
-    "cz-git": "1.9.3",
+    "cz-git": "1.9.4",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
@@ -42,9 +42,9 @@
     "prettier-plugin-sort-json": "4.0.0",
     "sonicware-tdt": "20.0.0",
     "tsup": "8.1.0",
-    "turbo": "2.0.6",
-    "typedoc": "0.26.4",
-    "typescript": "5.5.3"
+    "turbo": "2.0.9",
+    "typedoc": "0.26.5",
+    "typescript": "5.5.4"
   },
   "packageManager": "pnpm@9.5.0"
 }
