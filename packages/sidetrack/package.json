@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@sidetrack/pg-migrate": "workspace:*",
-    "effect": "3.5.6",
+    "effect": "3.6.1",
     "pg": "^8.11.5"
   },
   "devDependencies": {
