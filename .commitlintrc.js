@@ -1,5 +1,16 @@
 // Default template copied from: https://cz-git.qbb.sh/config/
 
+const { execSync } = require("child_process");
+
+// Get the list of affected projects
+const turboOutput = execSync("npx turbo run build --filter=[HEAD^1] --dry=json")
+  .toString()
+  .trim();
+
+const scopes = JSON.parse(turboOutput)
+  .tasks.filter((task) => task.task === "build")
+  .map((task) => task.package);
+
 /** @type {import('cz-git').UserConfig} */
 module.exports = {
   // I'm just putting something in here because this rules key can't be empty
@@ -82,8 +93,8 @@ module.exports = {
     useAI: false,
     aiNumber: 1,
     themeColorCode: "",
-    // scopes,
-    // allowCustomScopes: true,
+    scopes,
+    allowCustomScopes: true,
     allowEmptyScopes: true,
     customScopesAlign: "top",
     customScopesAlias: "custom",
