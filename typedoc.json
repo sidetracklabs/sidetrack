@@ -4,6 +4,5 @@
   "includeVersion": true,
   "name": "Sidetrack",
   "out": "docs",
-  "plugin": ["sonicware-tdt"],
-  "theme": "sonicware"
+  "plugin": ["typedoc-github-theme"],
 }
