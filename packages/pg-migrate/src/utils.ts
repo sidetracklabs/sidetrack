@@ -15,7 +15,6 @@ export const createSchemalize = () => {
 export class StringIdGenerator {
   private ids: number[] = [0];
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(private readonly chars = "abcdefghijklmnopqrstuvwxyz") {}
 
   next() {
@@ -69,7 +68,7 @@ export const createTransformer =
       const v = d?.[p];
       return str.replace(
         new RegExp(`{${p}}`, "g"),
-        // eslint-disable-next-line no-nested-ternary
+
         v === undefined
           ? ""
           : typeof v === "string" ||

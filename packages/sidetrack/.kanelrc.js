@@ -4,8 +4,6 @@ const { resolveType } = require("kanel");
 /** @type {import('kanel').Config} */
 module.exports = {
   connection: { connectionString: process.env.DATABASE_URL },
-  preDeleteOutputFolder: true,
-  outputPath: "./src/models/generated",
   generateIdentifierType: (c, d, config) => {
     // Id columns are already prefixed with the table name, so we don't need to add it here
     const name = "Id";
@@ -14,13 +12,15 @@ module.exports = {
       generateIdentifierType: undefined,
     });
     return {
-      declarationType: "typeDeclaration",
-      name,
-      exportAs: "named",
-      typeDefinition: [innerType],
       comment: [],
+      declarationType: "typeDeclaration",
+      exportAs: "named",
+      name,
+      typeDefinition: [innerType],
     };
   },
+  outputPath: "./src/models/generated",
+  preDeleteOutputFolder: true,
   //   customTypeMap: {
   //     "pg_catalog.tsvector": "string",
   //     "pg_catalog.bpchar": "string",

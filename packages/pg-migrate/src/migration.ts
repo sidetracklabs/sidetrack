@@ -91,7 +91,6 @@ export class Migration implements RunMigration {
     _filenameFormat?: FilenameFormat,
   ) {
     if (typeof _language === "string") {
-      // eslint-disable-next-line no-console
       console.warn(
         "This usage is deprecated. Please use this method with options object argument",
       );

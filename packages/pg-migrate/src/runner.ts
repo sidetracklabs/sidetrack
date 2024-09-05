@@ -67,7 +67,7 @@ const unlock = async (db: DBConnection): Promise<boolean> => {
   );
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return result.lockReleased as boolean;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   // if (!result.lockReleased) {
   // throw new Error("Failed to release migration lock");
   // }
@@ -299,7 +299,6 @@ export default async (
   } finally {
     if (db.connected()) {
       if (!options.noLock) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         const unlocked = await unlock(db);
         if (!unlocked) {
           logger.warn("Failed to release migration lock");
