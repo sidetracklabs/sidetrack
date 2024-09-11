@@ -21,13 +21,13 @@ importers:
         specifier: 19.4.1
         version: 19.4.1
       '@eslint/compat':
-        specifier: ^1.1.1
+        specifier: 1.1.1
         version: 1.1.1
       '@eslint/eslintrc':
-        specifier: ^3.1.0
+        specifier: 3.1.0
         version: 3.1.0
       '@eslint/js':
-        specifier: ^9.10.0
+        specifier: 9.10.0
         version: 9.10.0
       '@manypkg/cli':
         specifier: 0.21.4
@@ -81,7 +81,7 @@ importers:
         specifier: 0.26.7
         version: 0.26.7(typescript@5.5.4)
       typedoc-github-theme:
-        specifier: ^0.1.2
+        specifier: 0.1.2
         version: 0.1.2(typedoc@0.26.7(typescript@5.5.4))
       typescript:
         specifier: 5.5.4
@@ -2072,10 +2072,6 @@ packages:
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
-
-  ignore@5.3.1:
-    resolution: {integrity: sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==}
-    engines: {node: '>= 4'}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -4137,7 +4133,7 @@ snapshots:
       debug: 4.3.6
       espree: 10.1.0
       globals: 14.0.0
-      ignore: 5.3.1
+      ignore: 5.3.2
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       minimatch: 3.1.2
@@ -5676,7 +5672,7 @@ snapshots:
       array-union: 2.1.0
       dir-glob: 3.0.1
       fast-glob: 3.3.1
-      ignore: 5.3.1
+      ignore: 5.3.2
       merge2: 1.4.1
       slash: 3.0.0
 
@@ -5758,8 +5754,6 @@ snapshots:
       safer-buffer: 2.1.2
 
   ieee754@1.2.1: {}
-
-  ignore@5.3.1: {}
 
   ignore@5.3.2: {}
 

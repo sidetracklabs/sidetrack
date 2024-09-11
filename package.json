@@ -26,9 +26,9 @@
     "@changesets/cli": "2.27.8",
     "@commitlint/cli": "19.4.1",
     "@commitlint/config-conventional": "19.4.1",
-    "@eslint/compat": "^1.1.1",
-    "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.10.0",
+    "@eslint/compat": "1.1.1",
+    "@eslint/eslintrc": "3.1.0",
+    "@eslint/js": "9.10.0",
     "@manypkg/cli": "0.21.4",
     "@typescript-eslint/eslint-plugin": "8.4.0",
     "@typescript-eslint/parser": "8.4.0",
@@ -46,7 +46,7 @@
     "tsup": "8.2.4",
     "turbo": "2.1.1",
     "typedoc": "0.26.7",
-    "typedoc-github-theme": "^0.1.2",
+    "typedoc-github-theme": "0.1.2",
     "typescript": "5.5.4"
   },
   "packageManager": "pnpm@9.10.0"
