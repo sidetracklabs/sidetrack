@@ -42,8 +42,8 @@ importers:
         specifier: 4.3.1
         version: 4.3.1(@types/node@22.5.2)(typescript@5.5.4)
       cz-git:
-        specifier: 1.9.4
-        version: 1.9.4
+        specifier: 1.10.0
+        version: 1.10.0
       eslint:
         specifier: 9.10.0
         version: 9.10.0(jiti@1.21.6)
@@ -1430,8 +1430,8 @@ packages:
     resolution: {integrity: sha512-U466fIzU5U22eES5lTNiNbZ+d8dfcHcssH4o7QsdWaCcRs/feIPCxKYSWkYBNs5mny7MvEfwpTLWjvbm94hecw==}
     engines: {node: '>= 10'}
 
-  cz-git@1.9.4:
-    resolution: {integrity: sha512-VntWcIEFfW8+7RgwYaRn1r10NhUkl8/8ZdJQRupEdqE7QXBCSjNP8hKSk9zhSLzYAsdXfGEAwiAYJM1T2Qsh8w==}
+  cz-git@1.10.0:
+    resolution: {integrity: sha512-WJidM6BwqJXPi2KUBzkUgZwZYh9U5VP5tJSIZ5G4+CDDv0lzLo8vrOrsWItE12f3xpAvlZTeQipreSczuaxFRA==}
     engines: {node: '>=v12.20.0'}
 
   dargs@8.1.0:
@@ -4930,7 +4930,7 @@ snapshots:
       - '@types/node'
       - typescript
 
-  cz-git@1.9.4: {}
+  cz-git@1.10.0: {}
 
   dargs@8.1.0: {}
 
