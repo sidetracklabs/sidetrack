@@ -286,9 +286,15 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       queue,
       payload,
       current_attempt,
-      max_attempts
-          ) VALUES ('scheduled', $1, $2, 0, $3) RETURNING *`,
-          [queueName, payload, queues[queueName].options?.maxAttempts ?? 1],
+      max_attempts,
+      scheduled_at
+          ) VALUES ('scheduled', $1, $2, 0, $3, $4) RETURNING *`,
+          [
+            queueName,
+            payload,
+            queues[queueName].options?.maxAttempts ?? 1,
+            options?.scheduledAt ?? new Date(),
+          ],
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
 
