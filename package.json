@@ -36,7 +36,7 @@
     "cz-git": "1.10.1",
     "eslint": "9.12.0",
     "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-simple-import-sort": "12.1.1",
     "eslint-plugin-sort-keys": "2.3.5",
     "eslint-plugin-typescript-sort-keys": "3.2.0",
