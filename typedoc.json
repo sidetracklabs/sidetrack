@@ -4,5 +4,6 @@
   "includeVersion": true,
   "name": "Sidetrack",
   "out": "docs",
+  "excludeInternal": true,
   "plugin": ["typedoc-github-theme"]
 }

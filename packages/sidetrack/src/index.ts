@@ -12,6 +12,9 @@ import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatus
 import { makeAppRuntime } from "./runtime";
 import {
   SidetrackCancelJobOptions,
+  SidetrackCronJobOptions,
+  SidetrackDeactivateCronScheduleOptions,
+  SidetrackDeleteCronScheduleOptions,
   SidetrackDeleteJobOptions,
   SidetrackGetJobOptions,
   SidetrackInsertJobOptions,
@@ -22,6 +25,7 @@ import {
   SidetrackRunJobOptions,
   SidetrackRunJobsOptions,
 } from "./types";
+import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 
 /**
  * Main class that contains all the primary methods for interacting with Sidetrack
@@ -85,6 +89,58 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.insertJob(queueName, payload, options),
+      ),
+    );
+  }
+
+  /**
+   * Schedule a cron job on a queue
+   * @param queueName - The queue to schedule the cron job on
+   * @param cronExpression - A 5 part cron expression
+   */
+  async scheduleCron<K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    payload: Queues[K],
+    options?: SidetrackCronJobOptions,
+  ): Promise<SidetrackCronJobs> {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.scheduleCron(queueName, cronExpression, payload, options),
+      ),
+    );
+  }
+
+  /**
+   * Deactivate a cron schedule. This prevents the cron schedule from creating new jobs.
+   * @param queueName - The queue to deactivate the cron job from
+   * @param cronExpression - The cron expression to deactivate
+   */
+  async deactivateCronSchedule<K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeactivateCronScheduleOptions,
+  ) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.deactivateCronSchedule(queueName, cronExpression, options),
+      ),
+    );
+  }
+
+  /**
+   * Delete a cron schedule. This removes the cron job from the database.
+   * @param queueName - The queue to delete the cron job from
+   * @param cronExpression - The cron expression to delete
+   */
+  async deleteCronSchedule<K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeleteCronScheduleOptions,
+  ) {
+    return this.customRunPromise(
+      Effect.flatMap(this.sidetrackService, (service) =>
+        service.deleteCronSchedule(queueName, cronExpression, options),
       ),
     );
   }

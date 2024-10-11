@@ -335,4 +335,40 @@ describe("jobs", () => {
     expect(jobsAfterRun[0].status).toBe("completed");
     expect(jobsAfterRun[0].payload).toEqual({ message: "Future job" });
   });
+
+  it("cron job functionality works", { timeout: 80000 }, async () => {
+    const sidetrack = new SidetrackTest<{
+      cronTest: { message: string };
+    }>({
+      databaseOptions: {
+        connectionString: process.env["DATABASE_URL"]!,
+      },
+      queues: {
+        cronTest: {
+          handler: async (payload) => {
+            return payload;
+          },
+        },
+      },
+    });
+
+    // Schedule a cron job to run every minute
+    // TODO this cron will start immediately, which mostly defeats the purpose of the test
+    // TODO We need to do some sort of specific time-based test and time-travel
+    await sidetrack.scheduleCron("cronTest", "* * * * *", {
+      message: "Cron job test",
+    });
+
+    await sidetrack.runJobs({ queue: ["cronTest"] });
+
+    // Check if a job was inserted and completed
+    const jobs = await sidetrack.listJobs({ queue: ["cronTest"] });
+    expect(jobs.length).toBeGreaterThanOrEqual(1);
+
+    const completedJobs = jobs.filter((job) => job.status === "completed");
+    expect(completedJobs.length).toBeGreaterThanOrEqual(1);
+
+    const lastCompletedJob = completedJobs[completedJobs.length - 1];
+    expect(lastCompletedJob.payload).toEqual({ message: "Cron job test" });
+  });
 });

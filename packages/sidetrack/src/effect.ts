@@ -6,6 +6,8 @@ import * as Layer from "effect/Layer";
 import { fromIterableWith } from "effect/Record";
 import * as Ref from "effect/Ref";
 import * as Schedule from "effect/Schedule";
+import * as Record from "effect/Record";
+import * as Stream from "effect/Stream";
 import pg from "pg";
 
 import { SidetrackDatabaseClient, usePg } from "./client";
@@ -25,7 +27,12 @@ import {
   SidetrackQueuesGenericType,
   SidetrackRunJobOptions,
   SidetrackRunJobsOptions,
+  SidetrackCronJobOptions,
+  SidetrackDeactivateCronScheduleOptions,
+  SidetrackDeleteCronScheduleOptions,
 } from "./types";
+import { Cron } from "effect";
+import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 
 export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   cancelJob: (
@@ -54,6 +61,40 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
    * Turn off polling
    */
   stop: () => Effect.Effect<void>;
+  /**
+   * Schedule a cron job on a queue
+   * @param queueName - The queue to schedule the cron job on
+   * @param cronExpression - A 5 part cron expression
+   */
+  scheduleCron: <K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    payload: Queues[K],
+    options?: SidetrackCronJobOptions,
+  ) => Effect.Effect<SidetrackCronJobs, Cron.ParseError>;
+
+  /**
+   * Deactivate a cron schedule. This prevents the cron schedule from creating new jobs.
+   * @param queueName - The queue to deactivate the cron job from
+   * @param cronExpression - The cron expression to deactivate
+   */
+  deactivateCronSchedule: <K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeactivateCronScheduleOptions,
+  ) => Effect.Effect<void>;
+
+  /**
+   * Delete a cron schedule. This removes the cron job from the database.
+   * @param queueName - The queue to delete the cron job from
+   * @param cronExpression - The cron expression to delete
+   */
+  deleteCronSchedule: <K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeleteCronScheduleOptions,
+  ) => Effect.Effect<void>;
+
   /**
    * Utilities meant to be used with tests only
    */
@@ -117,6 +158,11 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       Fiber.void,
     );
 
+    // TODO should we use a hashmap or supervisor? We'll need to convert this layer into an Effect
+    const cronFibers = Ref.unsafeMake(
+      Record.empty<string, Fiber.Fiber<unknown, unknown>>(),
+    );
+
     const startPolling = () =>
       Effect.promise(() =>
         dbClient.execute<SidetrackJobs>(
@@ -176,7 +222,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           );
         return Effect.promise(() =>
           runMigrations(databaseOptions.connectionString),
-        ).pipe(Effect.flatMap(() => startPolling()));
+        )
+          .pipe(Effect.flatMap(() => startPolling()))
+          .pipe(Effect.flatMap(() => startCronSchedules()));
       };
 
     const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
@@ -187,6 +235,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.asVoid);
 
+    // TODO should we return the deleted job or the number of rows deleted? There is a difference between a job actually being deleted and a job not being found
     const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
       Effect.promise(() =>
         (options?.dbClient || dbClient).execute(
@@ -198,6 +247,14 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
     const stop = () =>
       Ref.get(pollingFiber)
         .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
+        .pipe(
+          Effect.flatMap(() => Ref.get(cronFibers)),
+          Effect.flatMap((fibers) =>
+            Effect.forEach(Record.values(fibers), (fiber) =>
+              Fiber.interrupt(fiber),
+            ),
+          ),
+        )
         .pipe(Effect.asVoid);
 
     const runHandler = (
@@ -287,13 +344,21 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       payload,
       current_attempt,
       max_attempts,
-      scheduled_at
-          ) VALUES ('scheduled', $1, $2, 0, $3, $4) RETURNING *`,
+      scheduled_at,
+      unique_key
+          ) VALUES ('scheduled', $1, $2, 0, $3, $4, $5)
+          ${
+            options?.suppressDuplicateUniqueKeyErrors
+              ? "ON CONFLICT (unique_key) DO NOTHING"
+              : ""
+          }
+          RETURNING *`,
           [
             queueName,
             payload,
             queues[queueName].options?.maxAttempts ?? 1,
             options?.scheduledAt ?? new Date(),
+            options?.uniqueKey,
           ],
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
@@ -305,6 +370,104 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           [jobId],
         ),
       ).pipe(Effect.map((result) => result.rows[0]));
+
+    const scheduleCron = <K extends keyof Queues>(
+      queueName: K,
+      cronExpression: string,
+      payload: Queues[K],
+      options?: SidetrackCronJobOptions,
+    ) =>
+      Cron.parse(cronExpression)
+        .pipe(
+          Effect.flatMap((_cron) =>
+            Effect.promise(() =>
+              (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
+                `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (queue, cron_expression) DO UPDATE
+           SET payload = $3 RETURNING *`,
+                [queueName, cronExpression, payload],
+              ),
+            ),
+          ),
+        )
+
+        .pipe(
+          Effect.map((result) => result.rows[0]),
+          Effect.tap((cronJob) => startCronJob(cronJob, options)),
+        );
+
+    /**
+     * @internal
+     */
+    const startCronSchedules = () =>
+      Effect.promise(() =>
+        dbClient.execute<SidetrackCronJobs>(
+          `SELECT * FROM sidetrack_cron_jobs`,
+        ),
+      ).pipe(
+        Effect.flatMap((result) =>
+          Effect.forEach(
+            result.rows,
+            (cronJob) => startCronJob(cronJob, cronJob.payload as any),
+            { concurrency: "inherit" },
+          ),
+        ),
+      );
+
+    /**
+     * @internal
+     */
+    const startCronJob = (
+      cronJob: SidetrackCronJobs,
+      options?: SidetrackCronJobOptions,
+    ) => {
+      // This grabs the interval within which the cron job is running, and uses that as a unique key so multiple cron jobs on the same schedule don't conflict
+      // alternatively, we could explore using cron.next and just using Effect.schedule instead of draining a stream
+      return Stream.fromSchedule(Schedule.cron(cronJob.cron_expression)).pipe(
+        Stream.mapEffect((value) =>
+          insertJob(cronJob.queue, cronJob.payload as any, {
+            ...options,
+            uniqueKey: value.toString(),
+            suppressDuplicateUniqueKeyErrors: true,
+          }),
+        ),
+        Stream.catchAllCause(Effect.logError),
+        Stream.runDrain,
+        Effect.forkDaemon,
+        Effect.flatMap((fiber) =>
+          Ref.update(cronFibers, (fibers) =>
+            Record.set(fibers, cronJob.id, fiber),
+          ),
+        ),
+      );
+    };
+
+    // TODO should we return the updated cron job or the number of rows updated? There is a difference between a cron job actually being updated and a cron job not being found
+    const deactivateCronSchedule = <K extends keyof Queues>(
+      queueName: K,
+      cronExpression: string,
+      options?: SidetrackDeactivateCronScheduleOptions,
+    ) =>
+      Effect.promise(() =>
+        (options?.dbClient || dbClient).execute(
+          `UPDATE sidetrack_cron_jobs SET status = 'inactive' WHERE queue = $1 AND cron_expression = $2`,
+          [queueName, cronExpression],
+        ),
+      ).pipe(Effect.asVoid);
+
+    // TODO should we return the deleted cron job or the number of rows deleted? There is a difference between a cron job actually being deleted and a cron job not being found
+    const deleteCronSchedule = <K extends keyof Queues>(
+      queueName: K,
+      cronExpression: string,
+      options?: SidetrackDeleteCronScheduleOptions,
+    ) =>
+      Effect.promise(() =>
+        (options?.dbClient || dbClient).execute(
+          `DELETE FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2`,
+          [queueName, cronExpression],
+        ),
+      ).pipe(Effect.asVoid);
 
     const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
       Effect.promise(() =>
@@ -432,12 +595,15 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       insertJob,
       start,
       stop,
+      deactivateCronSchedule,
+      deleteCronSchedule,
       testUtils: {
         listJobStatuses,
         listJobs,
         runJob,
-        runJobs: runJobs,
+        runJobs,
       },
+      scheduleCron,
     };
   });
 }
