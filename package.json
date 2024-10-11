@@ -39,7 +39,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-simple-import-sort": "12.1.1",
     "eslint-plugin-sort-keys": "2.3.5",
-    "eslint-plugin-typescript-sort-keys": "3.2.0",
+    "eslint-plugin-typescript-sort-keys": "3.3.0",
     "husky": "9.1.6",
     "prettier": "3.3.3",
     "prettier-plugin-sort-json": "4.0.0",
