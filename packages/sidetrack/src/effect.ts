@@ -191,27 +191,27 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             next_jobs
         ) RETURNING *`,
         ),
-      )
-        .pipe(Effect.map((result) => result.rows))
-        .pipe(
-          Effect.flatMap((result) =>
-            Effect.forEach(
-              result,
-              (job) =>
-                runHandler(job)
-                  .pipe(Effect.catchAllCause(Effect.logError))
-                  .pipe(Effect.forkDaemon),
-              {
-                concurrency: "inherit",
-              },
-            ),
+      ).pipe(
+        Effect.map((result) => result.rows),
+        Effect.flatMap((result) =>
+          Effect.forEach(
+            result,
+            (job) =>
+              runHandler(job).pipe(
+                Effect.catchAllCause(Effect.logError),
+                Effect.forkDaemon,
+              ),
+            {
+              concurrency: "inherit",
+            },
           ),
-        )
-        // Decrease polling time potentially?
-        .pipe(Effect.repeat(Schedule.spaced(Duration.millis(500))))
-        .pipe(Effect.catchAllCause(Effect.logError))
-        .pipe(Effect.forkDaemon)
-        .pipe(Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)));
+        ),
+        // TODO customize polling and decrease polling time potentially?
+        Effect.repeat(Schedule.spaced(Duration.millis(500))),
+        Effect.catchAllCause(Effect.logError),
+        Effect.forkDaemon,
+        Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)),
+      );
 
     const start = () =>
       // TODO migrations can't be performed with a custom client currently
@@ -222,9 +222,10 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           );
         return Effect.promise(() =>
           runMigrations(databaseOptions.connectionString),
-        )
-          .pipe(Effect.flatMap(() => startPolling()))
-          .pipe(Effect.flatMap(() => startCronSchedules()));
+        ).pipe(
+          Effect.flatMap(() => startPolling()),
+          Effect.flatMap(() => startCronSchedules()),
+        );
       };
 
     const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
@@ -245,17 +246,19 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       ).pipe(Effect.asVoid);
 
     const stop = () =>
-      Ref.get(pollingFiber)
-        .pipe(Effect.flatMap((fiber) => Fiber.interrupt(fiber)))
-        .pipe(
-          Effect.flatMap(() => Ref.get(cronFibers)),
+      Effect.all([
+        Ref.get(pollingFiber).pipe(
+          Effect.flatMap((fiber) => Fiber.interrupt(fiber)),
+        ),
+        Ref.get(cronFibers).pipe(
           Effect.flatMap((fibers) =>
-            Effect.forEach(Record.values(fibers), (fiber) =>
-              Fiber.interrupt(fiber),
+            Effect.all(
+              Record.values(fibers).map((fiber) => Fiber.interrupt(fiber)),
+              { concurrency: "inherit" },
             ),
           ),
-        )
-        .pipe(Effect.asVoid);
+        ),
+      ]).pipe(Effect.asVoid);
 
     const runHandler = (
       job: SidetrackJobs,
@@ -267,69 +270,66 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         },
         try: () =>
           queues[job.queue].handler(job as SidetrackJob<Queues[string]>),
-      })
-        .pipe(
-          Effect.flatMap(() =>
-            Effect.promise(() =>
-              (options?.dbClient ?? dbClient).execute(
-                `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
-                [job.id],
-              ),
+      }).pipe(
+        Effect.flatMap(() =>
+          Effect.promise(() =>
+            (options?.dbClient ?? dbClient).execute(
+              `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
+              [job.id],
             ),
           ),
-        )
-        .pipe(
-          Effect.catchTag("SidetrackHandlerError", (handlerError) =>
-            Effect.promise(() => {
-              if (job.current_attempt + 1 < job.max_attempts) {
-                // Exponential backoff with jitter
-                // Based of the historic Resque/Sidekiq algorithm
+        ),
+        Effect.catchTag("SidetrackHandlerError", (handlerError) =>
+          Effect.promise(() => {
+            if (job.current_attempt + 1 < job.max_attempts) {
+              // Exponential backoff with jitter
+              // Based of the historic Resque/Sidekiq algorithm
 
-                const backoff = Math.trunc(
-                  Math.pow(job.current_attempt + 1, 4) +
-                    15 +
-                    // Number between 1 and 30
-                    Math.floor(Math.random() * (30 - 1 + 1) + 1) *
-                      job.current_attempt +
-                    1,
-                );
+              const backoff = Math.trunc(
+                Math.pow(job.current_attempt + 1, 4) +
+                  15 +
+                  // Number between 1 and 30
+                  Math.floor(Math.random() * (30 - 1 + 1) + 1) *
+                    job.current_attempt +
+                  1,
+              );
 
-                return (options?.dbClient ?? dbClient).execute(
-                  `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
+              return (options?.dbClient ?? dbClient).execute(
+                `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
                               ELSE errors
                           END) || $2::jsonb WHERE id = $1`,
-                  [
-                    job.id,
-                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
-                    JSON.stringify(
-                      handlerError.error,
-                      Object.getOwnPropertyNames(handlerError.error),
-                    ),
-                  ],
-                );
-              } else {
-                return (options?.dbClient ?? dbClient).execute(
-                  `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
+                [
+                  job.id,
+                  // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                  JSON.stringify(
+                    handlerError.error,
+                    Object.getOwnPropertyNames(handlerError.error),
+                  ),
+                ],
+              );
+            } else {
+              return (options?.dbClient ?? dbClient).execute(
+                `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
                         END) || $2::jsonb WHERE id = $1`,
-                  [
-                    job.id,
-                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
-                    JSON.stringify(
-                      handlerError.error,
-                      Object.getOwnPropertyNames(handlerError.error),
-                    ),
-                  ],
-                );
-              }
-            }),
-          ),
-        )
-        .pipe(Effect.asVoid);
+                [
+                  job.id,
+                  // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                  JSON.stringify(
+                    handlerError.error,
+                    Object.getOwnPropertyNames(handlerError.error),
+                  ),
+                ],
+              );
+            }
+          }),
+        ),
+        Effect.asVoid,
+      );
 
     const insertJob = <K extends keyof Queues>(
       queueName: K,
@@ -346,7 +346,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       max_attempts,
       scheduled_at,
       unique_key
-          ) VALUES ('scheduled', $1, $2, 0, $3, $4, $5)
+          ) VALUES ('scheduled', $1, $2, 0, COALESCE($3, 1), COALESCE($4, NOW()), $5)
           ${
             options?.suppressDuplicateUniqueKeyErrors
               ? "ON CONFLICT (unique_key) DO NOTHING"
@@ -356,8 +356,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           [
             queueName,
             payload,
-            queues[queueName].options?.maxAttempts ?? 1,
-            options?.scheduledAt ?? new Date(),
+            queues[queueName].options?.maxAttempts,
+            options?.scheduledAt,
             options?.uniqueKey,
           ],
         ),
@@ -377,25 +377,21 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       payload: Queues[K],
       options?: SidetrackCronJobOptions,
     ) =>
-      Cron.parse(cronExpression)
-        .pipe(
-          Effect.flatMap((_cron) =>
-            Effect.promise(() =>
-              (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
-                `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload)
+      Cron.parse(cronExpression).pipe(
+        Effect.flatMap((_cron) =>
+          Effect.promise(() =>
+            (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
+              `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload)
            VALUES ($1, $2, $3)
            ON CONFLICT (queue, cron_expression) DO UPDATE
            SET payload = $3 RETURNING *`,
-                [queueName, cronExpression, payload],
-              ),
+              [queueName, cronExpression, payload],
             ),
           ),
-        )
-
-        .pipe(
-          Effect.map((result) => result.rows[0]),
-          Effect.tap((cronJob) => startCronJob(cronJob, options)),
-        );
+        ),
+        Effect.map((result) => result.rows[0]),
+        Effect.tap((cronJob) => startCronJob(cronJob, options)),
+      );
 
     /**
      * @internal
@@ -501,8 +497,10 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       )
 
-        .pipe(Effect.map((result) => result.rows[0]))
-        .pipe(Effect.flatMap((job) => runHandler(job, options)));
+        .pipe(
+          Effect.map((result) => result.rows[0]),
+          Effect.flatMap((job) => runHandler(job, options)),
+        );
 
     const runJobs = <K extends keyof Queues>(
       options?: SidetrackRunJobsOptions<Queues, K> | undefined,
@@ -545,15 +543,15 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       )
 
-        .pipe(Effect.map((result) => result.rows))
         .pipe(
+          Effect.map((result) => result.rows),
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => runHandler(job, options), {
               concurrency: "inherit",
             }),
           ),
-        )
-        .pipe(Effect.asVoid);
+          Effect.asVoid,
+        );
 
     const listJobs = <K extends keyof Queues>(
       options?: SidetrackListJobsOptions<Queues, K>,

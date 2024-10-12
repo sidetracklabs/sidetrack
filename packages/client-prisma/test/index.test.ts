@@ -25,33 +25,33 @@ describe("jobs", () => {
       },
     });
 
-    const transactionClient = new PrismaClient();
+    const prismaClient = new PrismaClient();
 
     // insert and run job API
-    const job = await transactionClient.$transaction(async (prisma) => {
+    const job = await prismaClient.$transaction(async (prismaTx) => {
       const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
-        { dbClient: usePrisma(prisma) },
+        { dbClient: usePrisma(prismaTx) },
       );
       expect(await sidetrack.getJob(job.id)).toBeUndefined();
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
           })
         ).id,
       ).toBe(job.id);
 
       await sidetrack.runJob(job.id, {
-        dbClient: usePrisma(prisma),
+        dbClient: usePrisma(prismaTx),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
           })
         ).status,
       ).toBe("completed");
@@ -82,60 +82,60 @@ describe("jobs", () => {
       },
     });
 
-    const transactionClient = new PrismaClient();
+    const prismaClient = new PrismaClient();
 
     // insert and run job API
-    await transactionClient.$transaction(async (prisma) => {
+    await prismaClient.$transaction(async (prismaTx) => {
       const job = await sidetrack.insertJob(
         "test",
         { id: "string" },
-        { dbClient: usePrisma(prisma) },
+        { dbClient: usePrisma(prismaTx) },
       );
       expect(await sidetrack.getJob(job.id)).toBeUndefined();
 
       await sidetrack.runJob(job.id, {
-        dbClient: usePrisma(prisma),
+        dbClient: usePrisma(prismaTx),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
           })
         ).status,
       ).toBe("retrying");
 
       await sidetrack.runJob(job.id, {
-        dbClient: usePrisma(prisma),
+        dbClient: usePrisma(prismaTx),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
           })
         ).status,
       ).toBe("failed");
 
       await sidetrack.cancelJob(job.id, {
-        dbClient: usePrisma(prisma),
+        dbClient: usePrisma(prismaTx),
       });
 
       expect(
         (
           await sidetrack.getJob(job.id, {
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
           })
         ).status,
       ).toBe("cancelled");
 
       await sidetrack.deleteJob(job.id, {
-        dbClient: usePrisma(prisma),
+        dbClient: usePrisma(prismaTx),
       });
 
       expect(
         await sidetrack.getJob(job.id, {
-          dbClient: usePrisma(prisma),
+          dbClient: usePrisma(prismaTx),
         }),
       ).toBe(undefined);
 
@@ -166,32 +166,32 @@ describe("jobs", () => {
       },
     });
 
-    const transactionClient = new PrismaClient();
+    const prismaClient = new PrismaClient();
 
     // insert and run job API
-    await transactionClient.$transaction(async (prisma) => {
+    await prismaClient.$transaction(async (prismaTx) => {
       await sidetrack.insertJob(
         "one",
         { id: "hello world" },
-        { dbClient: usePrisma(prisma) },
+        { dbClient: usePrisma(prismaTx) },
       );
 
       await sidetrack.insertJob(
         "one",
         { id: "hello universe" },
-        { dbClient: usePrisma(prisma) },
+        { dbClient: usePrisma(prismaTx) },
       );
 
       await sidetrack.insertJob(
         "two",
         { id: "hello universe" },
-        { dbClient: usePrisma(prisma) },
+        { dbClient: usePrisma(prismaTx) },
       );
 
       expect(
         (
           await sidetrack.listJobs({
-            dbClient: usePrisma(prisma),
+            dbClient: usePrisma(prismaTx),
             queue: ["one", "two"],
           })
         ).length,

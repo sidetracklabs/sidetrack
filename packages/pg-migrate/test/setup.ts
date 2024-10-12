@@ -1,9 +1,9 @@
 import { beforeAll } from "vitest";
 
-import pg_migrate from "../src/index";
+import { migrate } from "../src/index";
 
 beforeAll(async () => {
-  await pg_migrate({
+  await migrate({
     databaseUrl: process.env["DATABASE_URL"]!,
     dir: "migrations",
     direction: "up",

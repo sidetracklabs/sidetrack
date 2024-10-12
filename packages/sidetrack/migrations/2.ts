@@ -15,7 +15,7 @@ export default {
         cron_expression TEXT NOT NULL,
         payload JSONB NOT NULL,
         status sidetrack_cron_job_status_enum NOT NULL DEFAULT 'active',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        inserted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         UNIQUE(queue, cron_expression)
       );

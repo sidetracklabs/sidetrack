@@ -6,4 +6,4 @@ import { MigrationBuilder, RunnerOption } from "./types";
 
 export { Migration, MigrationBuilder, Name, RunMigration, RunnerOption, Sql };
 
-export default runner;
+export { runner as migrate };

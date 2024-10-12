@@ -9,7 +9,6 @@ import {
 } from "./effect";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
-import { makeAppRuntime } from "./runtime";
 import {
   SidetrackCancelJobOptions,
   SidetrackCronJobOptions,
@@ -46,7 +45,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     this.sidetrackLayer = makeLayer(options);
 
     this.runtime = Effect.runSync(
-      Effect.scoped(makeAppRuntime(this.sidetrackLayer)),
+      Effect.scoped(Layer.toRuntime(this.sidetrackLayer)),
     );
 
     this.customRunPromise = <R extends SidetrackService<Queues>, E, A>(
