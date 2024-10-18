@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await */
 import pg from "pg";
-import { afterAll,beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { SidetrackTest, usePg } from "../src";
 
@@ -65,7 +65,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (job) => {
+            handler: async (_payload, { job }) => {
               expect(job.status).toBe("running");
               expect(job.payload).toMatchObject({ id: "hello success" });
             },

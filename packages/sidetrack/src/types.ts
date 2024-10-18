@@ -79,7 +79,10 @@ export type SidetrackJob<Payload extends JsonValue> = Omit<
 
 export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
   [K in keyof Queues]: {
-    handler: (job: SidetrackJob<Queues[K]>) => Promise<unknown>;
+    handler: (
+      payload: Queues[K],
+      context: { job: SidetrackJob<Queues[K]> },
+    ) => Promise<unknown>;
     options?: {
       maxAttempts?: number;
     };

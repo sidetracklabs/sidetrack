@@ -269,7 +269,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           return new SidetrackHandlerError(e);
         },
         try: () =>
-          queues[job.queue].handler(job as SidetrackJob<Queues[string]>),
+          queues[job.queue].handler(job.payload as Queues[string], {
+            job: job as SidetrackJob<Queues[string]>,
+          }),
       }).pipe(
         Effect.flatMap(() =>
           Effect.promise(() =>
