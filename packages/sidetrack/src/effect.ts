@@ -154,6 +154,30 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             );
           })());
 
+    const globalPayloadTransformer = layerOptions.payloadTransformer;
+
+    const payloadSerializer = <K extends keyof Queues>(
+      queueName: K,
+      payload: Queues[K],
+    ) =>
+      queues[queueName].payloadTransformer
+        ? (queues[queueName].payloadTransformer.serialize(payload) as Queues[K])
+        : globalPayloadTransformer
+          ? (globalPayloadTransformer.serialize(payload) as Queues[K])
+          : payload;
+
+    const payloadDeserializer = <K extends keyof Queues>(
+      queueName: K,
+      payload: Queues[K],
+    ) =>
+      queues[queueName].payloadTransformer
+        ? (queues[queueName].payloadTransformer.deserialize(
+            payload,
+          ) as Queues[K])
+        : globalPayloadTransformer
+          ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
+          : payload;
+
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
       Fiber.void,
     );
@@ -269,9 +293,12 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           return new SidetrackJobRunError(e);
         },
         try: () =>
-          queues[job.queue].run(job.payload as Queues[string], {
-            job: job as SidetrackJob<Queues[string]>,
-          }),
+          queues[job.queue].run(
+            payloadDeserializer(job.queue, job.payload as Queues[string]),
+            {
+              job: job as SidetrackJob<Queues[string]>,
+            },
+          ),
       }).pipe(
         Effect.flatMap(() =>
           Effect.promise(() =>
@@ -357,7 +384,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           RETURNING *`,
           [
             queueName,
-            payload,
+            payloadSerializer(queueName, payload),
             queues[queueName].options?.maxAttempts,
             options?.scheduledAt,
             options?.uniqueKey,
