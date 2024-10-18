@@ -64,6 +64,7 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
     connectionString: string;
   };
   dbClient?: SidetrackDatabaseClient;
+  payloadTransformer?: SidetrackPayloadTransformer;
   queues: SidetrackQueues<Queues>;
 }
 
@@ -82,6 +83,7 @@ export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
     options?: {
       maxAttempts?: number;
     };
+    payloadTransformer?: SidetrackPayloadTransformer;
     run: (
       payload: Queues[K],
       context: { job: SidetrackJob<Queues[K]> },
@@ -93,3 +95,17 @@ export type SidetrackQueuesGenericType = Record<
   string,
   Record<string, JsonValue>
 >;
+
+export interface SidetrackPayloadTransformer {
+  /**
+   * Transform payload prior to running the job.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deserialize<T>(payload: T): any;
+
+  /**
+   * Transform payload prior to storing in the database
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  serialize<T>(payload: T): any;
+}
