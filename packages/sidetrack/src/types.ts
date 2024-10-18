@@ -6,8 +6,8 @@ import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 export interface SidetrackInsertJobOptions {
   dbClient?: SidetrackDatabaseClient;
   scheduledAt?: Date;
-  uniqueKey?: string;
   suppressDuplicateUniqueKeyErrors?: boolean;
+  uniqueKey?: string;
 }
 
 export interface SidetrackCronJobOptions {

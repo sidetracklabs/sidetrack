@@ -86,7 +86,7 @@ export class Migration implements RunMigration {
   static async create(
     name: string,
     directory: string,
-    _language?: CreateOptions | "js" | "sql" | "ts" | undefined,
+    _language?: CreateOptions | "js" | "sql" | "ts"  ,
     _ignorePattern?: string,
     _filenameFormat?: FilenameFormat,
   ) {

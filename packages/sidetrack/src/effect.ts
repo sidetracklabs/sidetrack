@@ -1,21 +1,26 @@
+import { Cron } from "effect";
 import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 import * as Layer from "effect/Layer";
 import { fromIterableWith } from "effect/Record";
+import * as Record from "effect/Record";
 import * as Ref from "effect/Ref";
 import * as Schedule from "effect/Schedule";
-import * as Record from "effect/Record";
 import * as Stream from "effect/Stream";
 import pg from "pg";
 
 import { SidetrackDatabaseClient, usePg } from "./client";
 import { runMigrations } from "./migrations";
+import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import {
   SidetrackCancelJobOptions,
+  SidetrackCronJobOptions,
+  SidetrackDeactivateCronScheduleOptions,
+  SidetrackDeleteCronScheduleOptions,
   SidetrackDeleteJobOptions,
   SidetrackGetJobOptions,
   SidetrackHandlerError,
@@ -27,17 +32,32 @@ import {
   SidetrackQueuesGenericType,
   SidetrackRunJobOptions,
   SidetrackRunJobsOptions,
-  SidetrackCronJobOptions,
-  SidetrackDeactivateCronScheduleOptions,
-  SidetrackDeleteCronScheduleOptions,
 } from "./types";
-import { Cron } from "effect";
-import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 
 export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   cancelJob: (
     jobId: string,
     options?: SidetrackCancelJobOptions,
+  ) => Effect.Effect<void>;
+  /**
+   * Deactivate a cron schedule. This prevents the cron schedule from creating new jobs.
+   * @param queueName - The queue to deactivate the cron job from
+   * @param cronExpression - The cron expression to deactivate
+   */
+  deactivateCronSchedule: <K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeactivateCronScheduleOptions,
+  ) => Effect.Effect<void>;
+  /**
+   * Delete a cron schedule. This removes the cron job from the database.
+   * @param queueName - The queue to delete the cron job from
+   * @param cronExpression - The cron expression to delete
+   */
+  deleteCronSchedule: <K extends keyof Queues>(
+    queueName: K,
+    cronExpression: string,
+    options?: SidetrackDeleteCronScheduleOptions,
   ) => Effect.Effect<void>;
   deleteJob: (
     jobId: string,
@@ -47,20 +67,12 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     jobId: string,
     options?: SidetrackGetJobOptions,
   ) => Effect.Effect<SidetrackJobs>;
+
   insertJob: <K extends keyof Queues>(
     queueName: K,
     payload: Queues[K],
     options?: SidetrackInsertJobOptions,
   ) => Effect.Effect<SidetrackJobs>;
-  /**
-   * Automatically run migrations and start polling the DB for jobs
-   */
-  start: () => Effect.Effect<void>;
-
-  /**
-   * Turn off polling
-   */
-  stop: () => Effect.Effect<void>;
   /**
    * Schedule a cron job on a queue
    * @param queueName - The queue to schedule the cron job on
@@ -74,26 +86,14 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   ) => Effect.Effect<SidetrackCronJobs, Cron.ParseError>;
 
   /**
-   * Deactivate a cron schedule. This prevents the cron schedule from creating new jobs.
-   * @param queueName - The queue to deactivate the cron job from
-   * @param cronExpression - The cron expression to deactivate
+   * Automatically run migrations and start polling the DB for jobs
    */
-  deactivateCronSchedule: <K extends keyof Queues>(
-    queueName: K,
-    cronExpression: string,
-    options?: SidetrackDeactivateCronScheduleOptions,
-  ) => Effect.Effect<void>;
+  start: () => Effect.Effect<void>;
 
   /**
-   * Delete a cron schedule. This removes the cron job from the database.
-   * @param queueName - The queue to delete the cron job from
-   * @param cronExpression - The cron expression to delete
+   * Turn off polling
    */
-  deleteCronSchedule: <K extends keyof Queues>(
-    queueName: K,
-    cronExpression: string,
-    options?: SidetrackDeleteCronScheduleOptions,
-  ) => Effect.Effect<void>;
+  stop: () => Effect.Effect<void>;
 
   /**
    * Utilities meant to be used with tests only
@@ -109,7 +109,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
      * Test utility to get a list of jobs
      */
     listJobs: <K extends keyof Queues>(
-      options?: SidetrackListJobsOptions<Queues, K> | undefined,
+      options?: SidetrackListJobsOptions<Queues, K>,
     ) => Effect.Effect<SidetrackJobs[]>;
     /**
      * Test utility to run a job manually without polling
@@ -122,7 +122,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
      * Test utility to run all jobs in a queue manually without polling
      */
     runJobs: <K extends keyof Queues>(
-      options?: SidetrackRunJobsOptions<Queues, K> | undefined,
+      options?: SidetrackRunJobsOptions<Queues, K>,
     ) => Effect.Effect<void, unknown>;
   };
 }
@@ -403,11 +403,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(
         Effect.flatMap((result) =>
-          Effect.forEach(
-            result.rows,
-            (cronJob) => startCronJob(cronJob, cronJob.payload as any),
-            { concurrency: "inherit" },
-          ),
+          Effect.forEach(result.rows, (cronJob) => startCronJob(cronJob), {
+            concurrency: "inherit",
+          }),
         ),
       );
 
@@ -422,10 +420,11 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       // alternatively, we could explore using cron.next and just using Effect.schedule instead of draining a stream
       return Stream.fromSchedule(Schedule.cron(cronJob.cron_expression)).pipe(
         Stream.mapEffect((value) =>
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
           insertJob(cronJob.queue, cronJob.payload as any, {
             ...options,
-            uniqueKey: value.toString(),
             suppressDuplicateUniqueKeyErrors: true,
+            uniqueKey: value.toString(),
           }),
         ),
         Stream.catchAllCause(Effect.logError),
@@ -503,7 +502,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         );
 
     const runJobs = <K extends keyof Queues>(
-      options?: SidetrackRunJobsOptions<Queues, K> | undefined,
+      options?: SidetrackRunJobsOptions<Queues, K>,
     ) =>
       Effect.promise(() =>
         (options?.dbClient ?? dbClient).execute<SidetrackJobs>(
@@ -588,20 +587,20 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     return {
       cancelJob,
+      deactivateCronSchedule,
+      deleteCronSchedule,
       deleteJob,
       getJob,
       insertJob,
+      scheduleCron,
       start,
       stop,
-      deactivateCronSchedule,
-      deleteCronSchedule,
       testUtils: {
         listJobStatuses,
         listJobs,
         runJob,
         runJobs,
       },
-      scheduleCron,
     };
   });
 }

@@ -7,6 +7,7 @@ import {
   makeLayer,
   SidetrackService,
 } from "./effect";
+import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import {
@@ -24,7 +25,6 @@ import {
   SidetrackRunJobOptions,
   SidetrackRunJobsOptions,
 } from "./types";
-import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 
 /**
  * Main class that contains all the primary methods for interacting with Sidetrack
@@ -174,7 +174,7 @@ export class SidetrackTest<
    * Test utility to get a list of jobs
    */
   async listJobs<K extends keyof Queues>(
-    options?: SidetrackListJobsOptions<Queues, K> | undefined,
+    options?: SidetrackListJobsOptions<Queues, K>  ,
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>

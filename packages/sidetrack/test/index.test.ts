@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await */
 import pg from "pg";
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll,beforeAll, describe, expect, it } from "vitest";
 
 import { SidetrackTest, usePg } from "../src";
 
@@ -308,8 +308,8 @@ describe.concurrent("jobs", () => {
       expect(jobsAfterSchedule[0].payload).toEqual({ message: "Future job" });
 
       await sidetrack.runJobs({
-        queue: ["scheduled"],
         includeFutureJobs: true,
+        queue: ["scheduled"],
       });
 
       const jobsAfterRun = await sidetrack.listJobs({
