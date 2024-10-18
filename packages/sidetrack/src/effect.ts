@@ -23,9 +23,9 @@ import {
   SidetrackDeleteCronScheduleOptions,
   SidetrackDeleteJobOptions,
   SidetrackGetJobOptions,
-  SidetrackHandlerError,
   SidetrackInsertJobOptions,
   SidetrackJob,
+  SidetrackJobRunError,
   SidetrackListJobsOptions,
   SidetrackListJobStatusesOptions,
   SidetrackOptions,
@@ -197,7 +197,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           Effect.forEach(
             result,
             (job) =>
-              runHandler(job).pipe(
+              executeJobRunner(job).pipe(
                 Effect.catchAllCause(Effect.logError),
                 Effect.forkDaemon,
               ),
@@ -260,16 +260,16 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ]).pipe(Effect.asVoid);
 
-    const runHandler = (
+    const executeJobRunner = (
       job: SidetrackJobs,
       options?: { dbClient?: SidetrackDatabaseClient },
     ) =>
       Effect.tryPromise({
         catch: (e) => {
-          return new SidetrackHandlerError(e);
+          return new SidetrackJobRunError(e);
         },
         try: () =>
-          queues[job.queue].handler(job.payload as Queues[string], {
+          queues[job.queue].run(job.payload as Queues[string], {
             job: job as SidetrackJob<Queues[string]>,
           }),
       }).pipe(
@@ -281,7 +281,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             ),
           ),
         ),
-        Effect.catchTag("SidetrackHandlerError", (handlerError) =>
+        Effect.catchTag("SidetrackJobRunError", (jobRunError) =>
           Effect.promise(() => {
             if (job.current_attempt + 1 < job.max_attempts) {
               // Exponential backoff with jitter
@@ -306,8 +306,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   job.id,
                   // TODO make sure we handle cases where this is not an Error, and also not serializable?
                   JSON.stringify(
-                    handlerError.error,
-                    Object.getOwnPropertyNames(handlerError.error),
+                    jobRunError.error,
+                    Object.getOwnPropertyNames(jobRunError.error),
                   ),
                 ],
               );
@@ -322,8 +322,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   job.id,
                   // TODO make sure we handle cases where this is not an Error, and also not serializable?
                   JSON.stringify(
-                    handlerError.error,
-                    Object.getOwnPropertyNames(handlerError.error),
+                    jobRunError.error,
+                    Object.getOwnPropertyNames(jobRunError.error),
                   ),
                 ],
               );
@@ -500,7 +500,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
         .pipe(
           Effect.map((result) => result.rows[0]),
-          Effect.flatMap((job) => runHandler(job, options)),
+          Effect.flatMap((job) => executeJobRunner(job, options)),
         );
 
     const runJobs = <K extends keyof Queues>(
@@ -547,7 +547,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         .pipe(
           Effect.map((result) => result.rows),
           Effect.flatMap((result) =>
-            Effect.forEach(result, (job) => runHandler(job, options), {
+            Effect.forEach(result, (job) => executeJobRunner(job, options), {
               concurrency: "inherit",
             }),
           ),

@@ -42,12 +42,12 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
           wallet: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
@@ -65,7 +65,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (_payload, { job }) => {
+            run: async (_payload, { job }) => {
               expect(job.status).toBe("running");
               expect(job.payload).toMatchObject({ id: "hello success" });
             },
@@ -84,7 +84,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (_payload) => {
+            run: async (_payload) => {
               throw new Error("Hello failed");
             },
           },
@@ -102,10 +102,10 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (_payload) => {
+            options: { maxAttempts: 2 },
+            run: async (_payload) => {
               throw new Error("Hello failed");
             },
-            options: { maxAttempts: 2 },
           },
         },
       });
@@ -125,7 +125,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (_payload) => {
+            run: async (_payload) => {
               throw new Error("Hello failed");
             },
           },
@@ -150,7 +150,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (_payload) => {
+            run: async (_payload) => {
               throw new Error("Hello failed");
             },
           },
@@ -176,7 +176,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
@@ -200,7 +200,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
@@ -225,12 +225,12 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           one: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
           two: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
@@ -255,7 +255,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           one: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },
@@ -277,7 +277,7 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           scheduled: {
-            handler: async (payload) => {
+            run: async (payload) => {
               return payload;
             },
           },

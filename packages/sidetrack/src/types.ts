@@ -67,8 +67,8 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   queues: SidetrackQueues<Queues>;
 }
 
-export class SidetrackHandlerError {
-  readonly _tag = "SidetrackHandlerError";
+export class SidetrackJobRunError {
+  readonly _tag = "SidetrackJobRunError";
   constructor(readonly error: unknown) {}
 }
 
@@ -79,13 +79,13 @@ export type SidetrackJob<Payload extends JsonValue> = Omit<
 
 export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
   [K in keyof Queues]: {
-    handler: (
-      payload: Queues[K],
-      context: { job: SidetrackJob<Queues[K]> },
-    ) => Promise<unknown>;
     options?: {
       maxAttempts?: number;
     };
+    run: (
+      payload: Queues[K],
+      context: { job: SidetrackJob<Queues[K]> },
+    ) => Promise<unknown>;
   };
 };
 

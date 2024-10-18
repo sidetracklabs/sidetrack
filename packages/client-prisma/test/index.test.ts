@@ -18,7 +18,7 @@ describe("jobs", () => {
       dbClient: usePrisma(new PrismaClient()),
       queues: {
         test: {
-          handler: async (payload) => {
+          run: async (payload) => {
             return payload;
           },
         },
@@ -72,11 +72,11 @@ describe("jobs", () => {
       dbClient: usePrisma(new PrismaClient()),
       queues: {
         test: {
-          handler: async (_payload) => {
-            throw new Error("failure");
-          },
           options: {
             maxAttempts: 2,
+          },
+          run: async (_payload) => {
+            throw new Error("failure");
           },
         },
       },
@@ -154,12 +154,12 @@ describe("jobs", () => {
       dbClient: usePrisma(new PrismaClient()),
       queues: {
         one: {
-          handler: async (payload) => {
+          run: async (payload) => {
             return payload;
           },
         },
         two: {
-          handler: async (payload) => {
+          run: async (payload) => {
             return payload;
           },
         },
