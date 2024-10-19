@@ -64,6 +64,7 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
     connectionString: string;
   };
   dbClient?: SidetrackDatabaseClient;
+  pollingIntervalMs?: number;
   queues: SidetrackQueues<Queues>;
 }
 
