@@ -1,5 +1,4 @@
 import { Duration } from "effect";
-import { JsonValue } from "type-fest";
 
 import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
@@ -79,12 +78,12 @@ export class SidetrackJobRunError {
   constructor(readonly error: unknown) {}
 }
 
-export type SidetrackJob<Payload extends JsonValue> = Omit<
+export type SidetrackJob<Payload extends unknown> = Omit<
   SidetrackJobs,
   "payload"
 > & { payload: Payload };
 
-export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
+export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   [K in keyof Queues]: {
     options?: {
       maxAttempts?: number;
@@ -99,7 +98,7 @@ export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
 
 export type SidetrackQueuesGenericType = Record<
   string,
-  Record<string, JsonValue>
+  Record<string, unknown>
 >;
 
 export interface SidetrackPayloadTransformer {

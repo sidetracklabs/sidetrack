@@ -139,9 +139,6 @@ importers:
       pg:
         specifier: 8.13.0
         version: 8.13.0
-      type-fest:
-        specifier: 4.26.1
-        version: 4.26.1
       vite:
         specifier: 5.4.9
         version: 5.4.9(@types/node@22.5.2)
@@ -176,9 +173,6 @@ importers:
       kanel:
         specifier: 3.10.1
         version: 3.10.1
-      type-fest:
-        specifier: 4.26.1
-        version: 4.26.1
       vite:
         specifier: 5.4.9
         version: 5.4.9(@types/node@22.5.2)
@@ -3247,10 +3241,6 @@ packages:
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
-
-  type-fest@4.26.1:
-    resolution: {integrity: sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg==}
-    engines: {node: '>=16'}
 
   typed-array-buffer@1.0.2:
     resolution: {integrity: sha512-gEymJYKZtKXzzBzM4jqa9w6Q1Jjm7x2d+sh19AdsD4wqnMPDYyvwpsIc2Q/835kHuo3BEQ7CjelGhfTsoBb2MQ==}
@@ -6672,8 +6662,6 @@ snapshots:
       prelude-ls: 1.2.1
 
   type-fest@0.21.3: {}
-
-  type-fest@4.26.1: {}
 
   typed-array-buffer@1.0.2:
     dependencies:
