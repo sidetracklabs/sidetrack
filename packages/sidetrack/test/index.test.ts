@@ -320,4 +320,53 @@ describe.concurrent("jobs", () => {
       expect(jobsAfterRun[0].payload).toEqual({ message: "Future job" });
     });
   });
+
+  it("payload transformer works", async () => {
+    await runInTransaction(async (client) => {
+      const sidetrack = new SidetrackTest<{
+        test: { date: Date };
+      }>({
+        dbClient: usePg(client),
+        payloadTransformer: {
+          serialize: (payload) => {
+            if ((payload as any).date instanceof Date) {
+              return {
+                ...payload,
+                date: (payload as any).date.toISOString(),
+              };
+            }
+            return payload;
+          },
+          deserialize: (payload) => {
+            if (typeof (payload as any).date === "string") {
+              return {
+                ...payload,
+                date: new Date((payload as any).date),
+              };
+            }
+            return payload;
+          },
+        },
+        queues: {
+          test: {
+            run: async (payload, { job }) => {
+              expect(payload.date).toBeInstanceOf(Date);
+              // The original payload is serialized, so the job payload is a string
+              expect((job.payload as any).date).toBeTypeOf("string");
+              return payload;
+            },
+          },
+        },
+      });
+
+      const date = new Date();
+      const job = await sidetrack.insertJob("test", { date });
+
+      const retrievedJob = await sidetrack.getJob(job.id);
+      expect((retrievedJob.payload as any).date).toBeTypeOf("string");
+
+      await sidetrack.runJob(job.id);
+      expect((await sidetrack.getJob(job.id)).status).toBe("completed");
+    });
+  });
 });

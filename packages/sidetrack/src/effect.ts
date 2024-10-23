@@ -154,7 +154,35 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
             );
           })());
 
-    const pollingIntervalMs = layerOptions.pollingIntervalMs ?? 2000;
+    const globalPayloadTransformer = layerOptions.payloadTransformer;
+
+    const payloadSerializer = <K extends keyof Queues>(
+      queueName: K,
+      payload: Queues[K],
+    ) =>
+      queues[queueName].payloadTransformer
+        ? (queues[queueName].payloadTransformer.serialize(payload) as Queues[K])
+        : globalPayloadTransformer
+          ? (globalPayloadTransformer.serialize(payload) as Queues[K])
+          : payload;
+
+    const payloadDeserializer = <K extends keyof Queues>(
+      queueName: K,
+      payload: Queues[K],
+    ) =>
+      queues[queueName].payloadTransformer
+        ? (queues[queueName].payloadTransformer.deserialize(
+            payload,
+          ) as Queues[K])
+        : globalPayloadTransformer
+          ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
+          : payload;
+
+    const pollingIntervalMs = Duration.isDuration(layerOptions.pollingInterval)
+      ? layerOptions.pollingInterval
+      : layerOptions.pollingInterval
+        ? Duration.millis(layerOptions.pollingInterval)
+        : Duration.millis(2000);
 
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
       Fiber.void,
@@ -209,7 +237,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           ),
         ),
         // TODO customize polling and decrease polling time potentially?
-        Effect.repeat(Schedule.spaced(Duration.millis(pollingIntervalMs))),
+        Effect.repeat(Schedule.spaced(pollingIntervalMs)),
         Effect.catchAllCause(Effect.logError),
         Effect.forkDaemon,
         Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)),
@@ -271,9 +299,12 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           return new SidetrackJobRunError(e);
         },
         try: () =>
-          queues[job.queue].run(job.payload as Queues[string], {
-            job: job as SidetrackJob<Queues[string]>,
-          }),
+          queues[job.queue].run(
+            payloadDeserializer(job.queue, job.payload as Queues[string]),
+            {
+              job: job as SidetrackJob<Queues[string]>,
+            },
+          ),
       }).pipe(
         Effect.flatMap(() =>
           Effect.promise(() =>
@@ -359,7 +390,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           RETURNING *`,
           [
             queueName,
-            payload,
+            payloadSerializer(queueName, payload),
             queues[queueName].options?.maxAttempts,
             options?.scheduledAt,
             options?.uniqueKey,

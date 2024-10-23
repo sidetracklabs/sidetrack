@@ -1,4 +1,4 @@
-import { JsonValue } from "type-fest";
+import { Duration } from "effect";
 
 import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
@@ -64,7 +64,12 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
     connectionString: string;
   };
   dbClient?: SidetrackDatabaseClient;
-  pollingIntervalMs?: number;
+  payloadTransformer?: SidetrackPayloadTransformer;
+  /**
+   * Number of milliseconds to wait between polling for new jobs
+   * Alternatively, pass in an Effect.Duration of any duration
+   */
+  pollingInterval?: Duration.Duration | number;
   queues: SidetrackQueues<Queues>;
 }
 
@@ -73,16 +78,17 @@ export class SidetrackJobRunError {
   constructor(readonly error: unknown) {}
 }
 
-export type SidetrackJob<Payload extends JsonValue> = Omit<
+export type SidetrackJob<Payload extends unknown> = Omit<
   SidetrackJobs,
   "payload"
 > & { payload: Payload };
 
-export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
+export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   [K in keyof Queues]: {
     options?: {
       maxAttempts?: number;
     };
+    payloadTransformer?: SidetrackPayloadTransformer;
     run: (
       payload: Queues[K],
       context: { job: SidetrackJob<Queues[K]> },
@@ -92,5 +98,19 @@ export type SidetrackQueues<Queues extends Record<string, JsonValue>> = {
 
 export type SidetrackQueuesGenericType = Record<
   string,
-  Record<string, JsonValue>
+  Record<string, unknown>
 >;
+
+export interface SidetrackPayloadTransformer {
+  /**
+   * Transform payload prior to running the job.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deserialize<T>(payload: T): any;
+
+  /**
+   * Transform payload prior to storing in the database
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  serialize<T>(payload: T): any;
+}
