@@ -178,6 +178,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
           : payload;
 
+    const pollingIntervalMs = layerOptions.pollingIntervalMs ?? 2000;
+
     const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
       Fiber.void,
     );
@@ -231,7 +233,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           ),
         ),
         // TODO customize polling and decrease polling time potentially?
-        Effect.repeat(Schedule.spaced(Duration.millis(500))),
+        Effect.repeat(Schedule.spaced(Duration.millis(pollingIntervalMs))),
         Effect.catchAllCause(Effect.logError),
         Effect.forkDaemon,
         Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)),
