@@ -1,3 +1,4 @@
+import { Duration } from "effect";
 import { JsonValue } from "type-fest";
 
 import { SidetrackDatabaseClient } from "./client";
@@ -65,7 +66,11 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   };
   dbClient?: SidetrackDatabaseClient;
   payloadTransformer?: SidetrackPayloadTransformer;
-  pollingIntervalMs?: number;
+  /**
+   * Number of milliseconds to wait between polling for new jobs
+   * Alternatively, pass in an Effect.Duration of any duration
+   */
+  pollingInterval?: Duration.Duration | number;
   queues: SidetrackQueues<Queues>;
 }
 
