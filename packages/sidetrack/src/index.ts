@@ -174,7 +174,7 @@ export class SidetrackTest<
    * Test utility to get a list of jobs
    */
   async listJobs<K extends keyof Queues>(
-    options?: SidetrackListJobsOptions<Queues, K>  ,
+    options?: SidetrackListJobsOptions<Queues, K>,
   ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>

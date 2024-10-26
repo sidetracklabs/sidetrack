@@ -54,7 +54,9 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      const job = await sidetrack.insertJob("test", { id: "string" });
+      const job = await sidetrack.insertJob("test", {
+        id: "accepts a database client",
+      });
       expect((await sidetrack.getJob(job.id)).status).toBe("scheduled");
     });
   });
@@ -67,12 +69,12 @@ describe.concurrent("jobs", () => {
           test: {
             run: async (_payload, { job }) => {
               expect(job.status).toBe("running");
-              expect(job.payload).toMatchObject({ id: "hello success" });
+              expect(job.payload).toMatchObject({ id: "run job succeeds" });
             },
           },
         },
       });
-      const job = await sidetrack.insertJob("test", { id: "hello success" });
+      const job = await sidetrack.insertJob("test", { id: "run job succeeds" });
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("completed");
     });
@@ -90,7 +92,7 @@ describe.concurrent("jobs", () => {
           },
         },
       });
-      const job = await sidetrack.insertJob("test", { id: "hello fail" });
+      const job = await sidetrack.insertJob("test", { id: "run job fails" });
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("failed");
     });
@@ -102,14 +104,14 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            options: { maxAttempts: 2 },
+            maxAttempts: 2,
             run: async (_payload) => {
               throw new Error("Hello failed");
             },
           },
         },
       });
-      let job = await sidetrack.insertJob("test", { id: "hello fail" });
+      let job = await sidetrack.insertJob("test", { id: "job gets retried" });
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("retrying");
       await sidetrack.runJob(job.id);
@@ -131,7 +133,7 @@ describe.concurrent("jobs", () => {
           },
         },
       });
-      let job = await sidetrack.insertJob("test", { id: "hello fail" });
+      let job = await sidetrack.insertJob("test", { id: "job gets cancelled" });
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("failed");
 
@@ -157,7 +159,7 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      let job = await sidetrack.insertJob("test", { id: "hello fail" });
+      let job = await sidetrack.insertJob("test", { id: "job gets deleted" });
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("failed");
 
@@ -183,7 +185,7 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      const job = await sidetrack.insertJob("test", { id: "hello fail" });
+      const job = await sidetrack.insertJob("test", { id: "run job works" });
 
       expect((await sidetrack.getJob(job.id)).status).toBe("scheduled");
 
@@ -207,7 +209,7 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      const job = await sidetrack.insertJob("test", { id: "hello world" });
+      const job = await sidetrack.insertJob("test", { id: "run queue works" });
 
       expect((await sidetrack.getJob(job.id)).status).toBe("scheduled");
 
@@ -237,9 +239,9 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      await sidetrack.insertJob("one", { id: "hello world" });
-      await sidetrack.insertJob("one", { id: "hello universe" });
-      await sidetrack.insertJob("two", { id: "hello universe" });
+      await sidetrack.insertJob("one", { id: "list job works one first" });
+      await sidetrack.insertJob("one", { id: "list job works one second" });
+      await sidetrack.insertJob("two", { id: "list job works two" });
 
       expect((await sidetrack.listJobs({ queue: ["one", "two"] })).length).toBe(
         3,
@@ -262,8 +264,8 @@ describe.concurrent("jobs", () => {
         },
       });
 
-      await sidetrack.insertJob("one", { id: "hello world" });
-      await sidetrack.insertJob("one", { id: "hello universe" });
+      await sidetrack.insertJob("one", { id: "list job status works first" });
+      await sidetrack.insertJob("one", { id: "list job status works second" });
 
       expect((await sidetrack.listJobStatuses()).scheduled).toBe(2);
     });
@@ -328,20 +330,24 @@ describe.concurrent("jobs", () => {
       }>({
         dbClient: usePg(client),
         payloadTransformer: {
-          serialize: (payload) => {
-            if ((payload as any).date instanceof Date) {
+          deserialize: (payload) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            if (typeof (payload as any).date === "string") {
               return {
                 ...payload,
-                date: (payload as any).date.toISOString(),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                date: new Date((payload as any).date),
               };
             }
             return payload;
           },
-          deserialize: (payload) => {
-            if (typeof (payload as any).date === "string") {
+          serialize: (payload) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            if ((payload as any).date instanceof Date) {
               return {
                 ...payload,
-                date: new Date((payload as any).date),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                date: (payload as any).date.toISOString(),
               };
             }
             return payload;
@@ -352,6 +358,7 @@ describe.concurrent("jobs", () => {
             run: async (payload, { job }) => {
               expect(payload.date).toBeInstanceOf(Date);
               // The original payload is serialized, so the job payload is a string
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
               expect((job.payload as any).date).toBeTypeOf("string");
               return payload;
             },
@@ -363,6 +370,7 @@ describe.concurrent("jobs", () => {
       const job = await sidetrack.insertJob("test", { date });
 
       const retrievedJob = await sidetrack.getJob(job.id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       expect((retrievedJob.payload as any).date).toBeTypeOf("string");
 
       await sidetrack.runJob(job.id);

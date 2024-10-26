@@ -59,6 +59,8 @@ export interface SidetrackRunJobsOptions<
   queue?: K | K[] | undefined;
 }
 
+export type PollingInterval = Duration.Duration | number;
+
 export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   databaseOptions?: {
     connectionString: string;
@@ -69,7 +71,7 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
    * Number of milliseconds to wait between polling for new jobs
    * Alternatively, pass in an Effect.Duration of any duration
    */
-  pollingInterval?: Duration.Duration | number;
+  pollingInterval?: PollingInterval;
   queues: SidetrackQueues<Queues>;
 }
 
@@ -78,17 +80,19 @@ export class SidetrackJobRunError {
   constructor(readonly error: unknown) {}
 }
 
-export type SidetrackJob<Payload extends unknown> = Omit<
-  SidetrackJobs,
-  "payload"
-> & { payload: Payload };
+export type SidetrackJob<Payload> = Omit<SidetrackJobs, "payload"> & {
+  payload: Payload;
+};
 
 export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   [K in keyof Queues]: {
-    options?: {
-      maxAttempts?: number;
-    };
+    maxAttempts?: number;
     payloadTransformer?: SidetrackPayloadTransformer;
+    /**
+     * Number of milliseconds to wait between polling for new jobs
+     * Alternatively, pass in an Effect.Duration of any duration
+     */
+    pollingInterval?: PollingInterval;
     run: (
       payload: Queues[K],
       context: { job: SidetrackJob<Queues[K]> },

@@ -72,9 +72,7 @@ describe("jobs", () => {
       dbClient: usePrisma(new PrismaClient()),
       queues: {
         test: {
-          options: {
-            maxAttempts: 2,
-          },
+          maxAttempts: 2,
           run: async (_payload) => {
             throw new Error("failure");
           },

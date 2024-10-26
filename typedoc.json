@@ -1,9 +1,9 @@
 {
   "entryPointStrategy": "packages",
   "entryPoints": ["packages/*"],
+  "excludeInternal": true,
   "includeVersion": true,
   "name": "Sidetrack",
   "out": "docs",
-  "excludeInternal": true,
   "plugin": ["typedoc-github-theme"]
 }

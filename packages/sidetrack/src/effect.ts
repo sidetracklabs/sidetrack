@@ -6,9 +6,9 @@ import * as Fiber from "effect/Fiber";
 import * as Layer from "effect/Layer";
 import { fromIterableWith } from "effect/Record";
 import * as Record from "effect/Record";
-import * as Ref from "effect/Ref";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
+import * as Supervisor from "effect/Supervisor";
 import pg from "pg";
 
 import { SidetrackDatabaseClient, usePg } from "./client";
@@ -17,6 +17,7 @@ import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
 import {
+  PollingInterval,
   SidetrackCancelJobOptions,
   SidetrackCronJobOptions,
   SidetrackDeactivateCronScheduleOptions,
@@ -127,6 +128,16 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   };
 }
 
+const pollingIntervalMs = (
+  pollingInterval?: PollingInterval,
+  defaultValue = 2000,
+) =>
+  Duration.isDuration(pollingInterval)
+    ? pollingInterval
+    : pollingInterval
+      ? Duration.millis(pollingInterval)
+      : Duration.millis(defaultValue);
+
 export const createSidetrackServiceTag = <
   Queues extends SidetrackQueuesGenericType,
 >() =>
@@ -144,6 +155,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       !layerOptions.dbClient && databaseOptions
         ? new pg.Pool(databaseOptions)
         : undefined;
+
     const dbClient: SidetrackDatabaseClient =
       layerOptions.dbClient ??
       (pool
@@ -178,25 +190,22 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
           : payload;
 
-    const pollingIntervalMs = Duration.isDuration(layerOptions.pollingInterval)
-      ? layerOptions.pollingInterval
-      : layerOptions.pollingInterval
-        ? Duration.millis(layerOptions.pollingInterval)
-        : Duration.millis(2000);
+    const pollingInterval = pollingIntervalMs(layerOptions.pollingInterval);
 
-    const pollingFiber = Ref.unsafeMake<Fiber.Fiber<unknown, unknown>>(
-      Fiber.void,
-    );
+    const pollingSupervisor = Supervisor.unsafeTrack();
 
-    // TODO should we use a hashmap or supervisor? We'll need to convert this layer into an Effect
-    const cronFibers = Ref.unsafeMake(
-      Record.empty<string, Fiber.Fiber<unknown, unknown>>(),
-    );
+    const cronSupervisor = Supervisor.unsafeTrack();
 
+    /**
+     * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
+     */
     const startPolling = () =>
-      Effect.promise(() =>
-        dbClient.execute<SidetrackJobs>(
-          `WITH next_jobs AS (
+      Effect.forEach(
+        Record.toEntries(queues),
+        ([queueName, queue]) =>
+          Effect.promise(() =>
+            dbClient.execute<SidetrackJobs>(
+              `WITH next_jobs AS (
         SELECT
           id
         FROM
@@ -204,6 +213,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         WHERE
           (status = 'scheduled' or status = 'retrying')
           AND scheduled_at <= NOW()
+          AND queue = $1
         ORDER BY
           scheduled_at
         FOR UPDATE SKIP LOCKED
@@ -220,27 +230,35 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           FROM
             next_jobs
         ) RETURNING *`,
-        ),
-      ).pipe(
-        Effect.map((result) => result.rows),
-        Effect.flatMap((result) =>
-          Effect.forEach(
-            result,
-            (job) =>
-              executeJobRunner(job).pipe(
-                Effect.catchAllCause(Effect.logError),
-                Effect.forkDaemon,
+              [queueName],
+            ),
+          ).pipe(
+            Effect.map((result) => result.rows),
+            Effect.flatMap((result) =>
+              Effect.forEach(
+                result,
+                (job) =>
+                  executeJobRunner(job).pipe(
+                    Effect.catchAllCause(Effect.logError),
+                    Effect.forkDaemon,
+                  ),
+                {
+                  concurrency: "inherit",
+                },
               ),
-            {
-              concurrency: "inherit",
-            },
+            ),
+            Effect.repeat(
+              Schedule.spaced(
+                queue.pollingInterval
+                  ? pollingIntervalMs(queue.pollingInterval)
+                  : pollingInterval,
+              ),
+            ),
+            Effect.catchAllCause(Effect.logError),
+            Effect.supervised(pollingSupervisor),
+            Effect.fork,
           ),
-        ),
-        // TODO customize polling and decrease polling time potentially?
-        Effect.repeat(Schedule.spaced(pollingIntervalMs)),
-        Effect.catchAllCause(Effect.logError),
-        Effect.forkDaemon,
-        Effect.flatMap((fiber) => Ref.update(pollingFiber, () => fiber)),
+        { concurrency: "inherit" },
       );
 
     const start = () =>
@@ -276,19 +294,17 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       ).pipe(Effect.asVoid);
 
     const stop = () =>
-      Effect.all([
-        Ref.get(pollingFiber).pipe(
-          Effect.flatMap((fiber) => Fiber.interrupt(fiber)),
-        ),
-        Ref.get(cronFibers).pipe(
-          Effect.flatMap((fibers) =>
-            Effect.all(
-              Record.values(fibers).map((fiber) => Fiber.interrupt(fiber)),
-              { concurrency: "inherit" },
-            ),
+      Effect.all(
+        [
+          Effect.flatMap(pollingSupervisor.value, (fibers) =>
+            Fiber.interruptAll(fibers),
           ),
-        ),
-      ]).pipe(Effect.asVoid);
+          Effect.flatMap(cronSupervisor.value, (fibers) =>
+            Fiber.interruptAll(fibers),
+          ),
+        ],
+        { concurrency: "inherit" },
+      ).pipe(Effect.asVoid);
 
     const executeJobRunner = (
       job: SidetrackJobs,
@@ -391,7 +407,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           [
             queueName,
             payloadSerializer(queueName, payload),
-            queues[queueName].options?.maxAttempts,
+            queues[queueName]?.maxAttempts,
             options?.scheduledAt,
             options?.uniqueKey,
           ],
@@ -464,12 +480,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
         Stream.catchAllCause(Effect.logError),
         Stream.runDrain,
-        Effect.forkDaemon,
-        Effect.flatMap((fiber) =>
-          Ref.update(cronFibers, (fibers) =>
-            Record.set(fibers, cronJob.id, fiber),
-          ),
-        ),
+        Effect.supervised(cronSupervisor),
+        Effect.fork,
       );
     };
 
