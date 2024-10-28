@@ -69,7 +69,7 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   payloadTransformer?: SidetrackPayloadTransformer;
   /**
    * Number of milliseconds to wait between polling for new jobs
-   * Alternatively, pass in an Effect.Duration of any duration
+   * Alternatively, pass in an Duration (@link https://effect-ts.github.io/effect/effect/Duration.ts.html)
    */
   pollingInterval?: PollingInterval;
   queues: SidetrackQueues<Queues>;
@@ -90,7 +90,7 @@ export type SidetrackQueues<Queues extends Record<string, unknown>> = {
     payloadTransformer?: SidetrackPayloadTransformer;
     /**
      * Number of milliseconds to wait between polling for new jobs
-     * Alternatively, pass in an Effect.Duration of any duration
+     * Alternatively, pass in an Duration (@link https://effect-ts.github.io/effect/effect/Duration.ts.html)
      */
     pollingInterval?: PollingInterval;
     run: (
