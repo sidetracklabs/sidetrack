@@ -27,7 +27,7 @@
     "@commitlint/cli": "19.5.0",
     "@commitlint/config-conventional": "19.5.0",
     "@eslint/compat": "1.2.3",
-    "@eslint/eslintrc": "3.1.0",
+    "@eslint/eslintrc": "3.2.0",
     "@eslint/js": "9.14.0",
     "@manypkg/cli": "0.23.0",
     "@typescript-eslint/eslint-plugin": "8.13.0",
