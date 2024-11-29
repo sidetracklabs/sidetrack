@@ -44,7 +44,7 @@
     "prettier": "3.3.3",
     "prettier-plugin-sort-json": "4.0.0",
     "tsup": "8.3.5",
-    "turbo": "2.2.3",
+    "turbo": "2.3.3",
     "typedoc": "0.26.11",
     "typedoc-github-theme": "0.1.2",
     "typescript": "5.7.2"
