@@ -155,8 +155,8 @@ importers:
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 3.9.2
-        version: 3.9.2
+        specifier: 3.11.4
+        version: 3.11.4
       pg:
         specifier: ^8.12.0
         version: 8.12.0
@@ -1459,8 +1459,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.9.2:
-    resolution: {integrity: sha512-1sx/v1HTWHTodXfzWxAFg+SCF+ACgpJVruaAMIh/NmDVvrUsf0x9PzpXvkgJUbQ1fMdmKYK//FqxeHSQ+Zxv/Q==}
+  effect@3.11.4:
+    resolution: {integrity: sha512-0tooO72Ii109A1SUY2A73hnO3y4AoglWupbBwaUHitV/B13/EVWRhWfuEDpKjJaEDNj96fhkeU8UCWvFrh6aSg==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -1682,6 +1682,10 @@ packages:
     resolution: {integrity: sha512-0PEaTKQ9ND0nwaSQiSEadmInjAiU9iRe7aR+P++o2QPniTPBQeY6q5U85V9b9IzJg1iaJzlkm6bUgDE6XecTtw==}
     engines: {node: '>=16.0.0'}
     hasBin: true
+
+  fast-check@3.23.1:
+    resolution: {integrity: sha512-u/MudsoQEgBUZgR5N1v87vEgybeVYus9VnDVaIkxkkGP2jt54naghQ3PCQHJiogS8U/GavZCUPFfx3Xkp+NaHw==}
+    engines: {node: '>=8.0.0'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -2742,6 +2746,9 @@ packages:
   punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
+
+  pure-rand@6.1.0:
+    resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -4721,7 +4728,9 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.9.2: {}
+  effect@3.11.4:
+    dependencies:
+      fast-check: 3.23.1
 
   emoji-regex@8.0.0: {}
 
@@ -5070,6 +5079,10 @@ snapshots:
       - sqlite3
       - supports-color
       - tedious
+
+  fast-check@3.23.1:
+    dependencies:
+      pure-rand: 6.1.0
 
   fast-deep-equal@3.1.3: {}
 
@@ -6076,6 +6089,8 @@ snapshots:
   punycode.js@2.3.1: {}
 
   punycode@2.3.0: {}
+
+  pure-rand@6.1.0: {}
 
   queue-microtask@1.2.3: {}
 
