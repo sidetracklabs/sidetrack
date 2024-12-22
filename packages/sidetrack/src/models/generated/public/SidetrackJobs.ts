@@ -36,6 +36,8 @@ export default interface SidetrackJobs {
   completed_at: Date | null;
 
   cron_job_id: SidetrackCronJobsId | null;
+
+  unique_key: string | null;
 }
 
 /** Represents the initializer for the table public.sidetrack_jobs */
@@ -70,6 +72,8 @@ export interface SidetrackJobsInitializer {
   completed_at?: Date | null;
 
   cron_job_id?: SidetrackCronJobsId | null;
+
+  unique_key?: string | null;
 }
 
 /** Represents the mutator for the table public.sidetrack_jobs */
@@ -101,4 +105,6 @@ export interface SidetrackJobsMutator {
   completed_at?: Date | null;
 
   cron_job_id?: SidetrackCronJobsId | null;
+
+  unique_key?: string | null;
 }

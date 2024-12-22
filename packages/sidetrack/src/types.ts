@@ -12,6 +12,7 @@ export interface SidetrackInsertJobOptions {
 
 export interface SidetrackCronJobOptions {
   dbClient?: SidetrackDatabaseClient;
+  timezone?: string;
 }
 
 export interface SidetrackDeactivateCronScheduleOptions {
