@@ -13,6 +13,7 @@ export default {
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         queue TEXT NOT NULL,
         cron_expression TEXT NOT NULL,
+        timezone TEXT,
         payload JSONB NOT NULL,
         status sidetrack_cron_job_status_enum NOT NULL DEFAULT 'active',
         inserted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
