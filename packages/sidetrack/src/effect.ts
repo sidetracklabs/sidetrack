@@ -1,5 +1,6 @@
 import { Cron } from "effect";
 import * as Context from "effect/Context";
+import * as DateTime from "effect/DateTime";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -428,15 +429,20 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       payload: Queues[K],
       options?: SidetrackCronJobOptions,
     ) =>
-      Cron.parse(cronExpression).pipe(
+      Cron.parse(
+        cronExpression,
+        options?.timezone
+          ? DateTime.zoneUnsafeMakeNamed(options.timezone)
+          : undefined,
+      ).pipe(
         Effect.flatMap((_cron) =>
           Effect.promise(() =>
             (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
-              `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload)
-           VALUES ($1, $2, $3)
+              `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload, timezone)
+           VALUES ($1, $2, $3, $4)
            ON CONFLICT (queue, cron_expression) DO UPDATE
            SET payload = $3 RETURNING *`,
-              [queueName, cronExpression, payload],
+              [queueName, cronExpression, payload, options?.timezone],
             ),
           ),
         ),
@@ -469,20 +475,29 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
     ) => {
       // This grabs the interval within which the cron job is running, and uses that as a unique key so multiple cron jobs on the same schedule don't conflict
       // alternatively, we could explore using cron.next and just using Effect.schedule instead of draining a stream
-      return Stream.fromSchedule(Schedule.cron(cronJob.cron_expression)).pipe(
-        Stream.mapEffect((value) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-          insertJob(cronJob.queue, cronJob.payload as any, {
-            ...options,
-            suppressDuplicateUniqueKeyErrors: true,
-            uniqueKey: value.toString(),
-          }),
-        ),
-        Stream.catchAllCause(Effect.logError),
-        Stream.runDrain,
-        Effect.supervised(cronSupervisor),
-        Effect.fork,
-      );
+      return Cron.parse(
+        cronJob.cron_expression,
+        cronJob.timezone
+          ? DateTime.zoneUnsafeMakeNamed(cronJob.timezone)
+          : undefined,
+      )
+        .pipe(
+          Stream.flatMap((cron) => Stream.fromSchedule(Schedule.cron(cron))),
+        )
+        .pipe(
+          Stream.mapEffect((value) =>
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+            insertJob(cronJob.queue, cronJob.payload as any, {
+              ...options,
+              suppressDuplicateUniqueKeyErrors: true,
+              uniqueKey: value.toString(),
+            }),
+          ),
+          Stream.catchAllCause(Effect.logError),
+          Stream.runDrain,
+          Effect.supervised(cronSupervisor),
+          Effect.fork,
+        );
     };
 
     // TODO should we return the updated cron job or the number of rows updated? There is a difference between a cron job actually being updated and a cron job not being found
