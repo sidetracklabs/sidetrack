@@ -66,7 +66,7 @@
     "@vitest/coverage-v8": "2.1.8",
     "dotenv-cli": "7.4.4",
     "kanel": "3.10.3",
-    "vite": "6.0.5",
+    "vite": "6.0.7",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "2.1.8"
   }
