@@ -53,7 +53,7 @@
     "@prisma/client": "5.22.0",
     "@types/uuid": "10.0.0",
     "@vitest/coverage-v8": "2.1.8",
-    "dotenv-cli": "7.4.4",
+    "dotenv-cli": "8.0.0",
     "prisma": "5.22.0",
     "sidetrack": "workspace:*",
     "vite": "6.0.7",
