@@ -155,8 +155,8 @@ importers:
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 3.11.9
-        version: 3.11.9
+        specifier: 3.12.7
+        version: 3.12.7
       pg:
         specifier: ^8.12.0
         version: 8.12.0
@@ -1621,8 +1621,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.11.9:
-    resolution: {integrity: sha512-BeEOFVpe+f7S9mTiA2CLIzi1ywxgF1fUbcAank4jwdd6P0ZHQhaW3XVPZ7vkCNDTqmJs2f/gN2uV+Yw0ZqfDng==}
+  effect@3.12.7:
+    resolution: {integrity: sha512-BsDTgSjLbL12g0+vGn5xkOgOVhRSaR3VeHmjcUb0gLvpXACJ9OgmlfeH+/FaAZwM5+omIF3I/j1gC5KJrbK1Aw==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -5047,7 +5047,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.11.9:
+  effect@3.12.7:
     dependencies:
       fast-check: 3.23.2
 
