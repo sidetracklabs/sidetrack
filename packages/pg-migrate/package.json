@@ -49,11 +49,11 @@
     "mkdirp": "~3.0.1"
   },
   "devDependencies": {
-    "@types/pg": "8.11.10",
+    "@types/pg": "8.11.11",
     "@vitest/coverage-v8": "2.1.8",
     "dotenv-cli": "7.4.4",
     "pg": "8.13.1",
-    "vite": "6.0.7",
+    "vite": "6.0.11",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "2.1.8"
   },

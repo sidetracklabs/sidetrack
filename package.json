@@ -23,10 +23,10 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.5.0",
-    "@changesets/cli": "2.27.11",
+    "@changesets/cli": "2.27.12",
     "@commitlint/cli": "19.6.1",
     "@commitlint/config-conventional": "19.6.0",
-    "@eslint/compat": "1.2.4",
+    "@eslint/compat": "1.2.6",
     "@eslint/eslintrc": "3.2.0",
     "@eslint/js": "9.17.0",
     "@manypkg/cli": "0.23.0",
@@ -43,11 +43,11 @@
     "husky": "9.1.7",
     "prettier": "3.4.2",
     "prettier-plugin-sort-json": "4.1.1",
-    "tsup": "8.3.5",
+    "tsup": "8.3.6",
     "turbo": "2.3.3",
     "typedoc": "0.27.6",
     "typedoc-github-theme": "0.2.1",
     "typescript": "5.7.3"
   },
-  "packageManager": "pnpm@9.15.3"
+  "packageManager": "pnpm@9.15.5"
 }
