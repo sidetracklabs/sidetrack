@@ -63,11 +63,11 @@
   },
   "devDependencies": {
     "@types/pg": "8.11.11",
-    "@vitest/coverage-v8": "2.1.8",
+    "@vitest/coverage-v8": "3.0.4",
     "dotenv-cli": "7.4.4",
     "kanel": "3.10.3",
     "vite": "6.0.11",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "2.1.8"
+    "vitest": "3.0.4"
   }
 }
