@@ -20,8 +20,8 @@
     {
       "groupName": "all patches",
       "groupSlug": "all-patch",
-      "matchUpdateTypes": ["patch"],
-      "matchPackageNames": ["*"]
+      "matchPackageNames": ["*"],
+      "matchUpdateTypes": ["patch"]
     }
   ],
   "platformAutomerge": true

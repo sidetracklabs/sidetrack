@@ -43,8 +43,12 @@ export interface SidetrackListJobsOptions<
   queue?: K | K[] | undefined;
 }
 
-export interface SidetrackListJobStatusesOptions {
+export interface SidetrackListJobStatusesOptions<
+  Queues extends SidetrackQueuesGenericType,
+  K extends keyof Queues,
+> {
   dbClient?: SidetrackDatabaseClient;
+  queue?: K | K[] | undefined;
 }
 
 export interface SidetrackRunJobOptions {

@@ -1,4 +1,4 @@
-import { Cron } from "effect";
+import { Cron, pipe } from "effect";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Duration from "effect/Duration";
@@ -9,7 +9,6 @@ import { fromIterableWith } from "effect/Record";
 import * as Record from "effect/Record";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import * as Supervisor from "effect/Supervisor";
 import pg from "pg";
 
 import { SidetrackDatabaseClient, usePg } from "./client";
@@ -78,7 +77,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   /**
    * Schedule a cron job on a queue
    * @param queueName - The queue to schedule the cron job on
-   * @param cronExpression - A 5 part cron expression
+   * @param cronExpression - A 5 or 6 part cron expression
    */
   scheduleCron: <K extends keyof Queues>(
     queueName: K,
@@ -104,8 +103,8 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
     /**
      * Test utility to get a list of job statuses and their counts
      */
-    listJobStatuses: (
-      options?: SidetrackListJobStatusesOptions,
+    listJobStatuses: <K extends keyof Queues>(
+      options?: SidetrackListJobStatusesOptions<Queues, K>,
     ) => Effect.Effect<Record<SidetrackJobStatusEnum, number>>;
     /**
      * Test utility to get a list of jobs
@@ -193,9 +192,10 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const pollingInterval = pollingIntervalMs(layerOptions.pollingInterval);
 
-    const pollingSupervisor = Supervisor.unsafeTrack();
-
-    const cronSupervisor = Supervisor.unsafeTrack();
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    const pollingFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    const cronFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
 
     /**
      * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
@@ -256,31 +256,42 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
               ),
             ),
             Effect.catchAllCause(Effect.logError),
-            Effect.supervised(pollingSupervisor),
-            Effect.fork,
+            Effect.forkDaemon,
+            Effect.tap((fiber) =>
+              Effect.sync(() => {
+                pollingFibers.push(fiber);
+              }),
+            ),
           ),
         { concurrency: "inherit" },
       );
 
     const start = () =>
-      // TODO migrations can't be performed with a custom client currently
-      {
-        if (!databaseOptions?.connectionString)
-          return Effect.dieMessage(
-            "No connection string provided, cannot run sidetrack migrations",
-          );
-
-        // Handle SIGTERM by stopping polling but allowing running jobs to complete
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        process.on("SIGTERM", () => Effect.runPromise(stop()));
-
-        return Effect.promise(() =>
-          runMigrations(databaseOptions.connectionString),
-        ).pipe(
-          Effect.flatMap(() => startPolling()),
-          Effect.flatMap(() => startCronSchedules()),
-        );
-      };
+      pipe(
+        !!databaseOptions?.connectionString,
+        Effect.if({
+          onFalse: () =>
+            // TODO migrations can't be performed with a custom client currently
+            Effect.logWarning(
+              "No connection string provided, cannot run sidetrack migrations",
+            ),
+          onTrue: () =>
+            Effect.promise(() =>
+              databaseOptions?.connectionString
+                ? runMigrations(databaseOptions.connectionString)
+                : Promise.resolve(),
+            ),
+        }),
+        Effect.flatMap(() => startPolling()),
+        Effect.flatMap(() => startCronSchedules()),
+        Effect.tap(() =>
+          Effect.sync(() =>
+            // Handle SIGTERM by stopping polling but allowing running jobs to complete
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            process.on("SIGTERM", () => Effect.runPromise(stop())),
+          ),
+        ),
+      );
 
     const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
       Effect.promise(() =>
@@ -301,16 +312,16 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
 
     const stop = () =>
       Effect.all(
-        [
-          Effect.flatMap(pollingSupervisor.value, (fibers) =>
-            Fiber.interruptAll(fibers),
-          ),
-          Effect.flatMap(cronSupervisor.value, (fibers) =>
-            Fiber.interruptAll(fibers),
-          ),
-        ],
-        { concurrency: "inherit" },
-      ).pipe(Effect.asVoid);
+        [Fiber.interruptAll(pollingFibers), Fiber.interruptAll(cronFibers)],
+        { concurrency: "inherit", discard: true },
+      ).pipe(
+        Effect.tap(() =>
+          Effect.sync(() => {
+            pollingFibers.length = 0;
+            cronFibers.length = 0;
+          }),
+        ),
+      );
 
     const executeJobRunner = (
       job: SidetrackJobs,
@@ -488,24 +499,25 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         cronJob.timezone
           ? DateTime.zoneUnsafeMakeNamed(cronJob.timezone)
           : undefined,
-      )
-        .pipe(
-          Stream.flatMap((cron) => Stream.fromSchedule(Schedule.cron(cron))),
-        )
-        .pipe(
-          Stream.mapEffect((value) =>
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-            insertJob(cronJob.queue, cronJob.payload as any, {
-              ...options,
-              suppressDuplicateUniqueKeyErrors: true,
-              uniqueKey: value.toString(),
-            }),
-          ),
-          Stream.catchAllCause(Effect.logError),
-          Stream.runDrain,
-          Effect.supervised(cronSupervisor),
-          Effect.fork,
-        );
+      ).pipe(
+        Stream.flatMap((cron) => Stream.fromSchedule(Schedule.cron(cron))),
+        Stream.mapEffect((value) =>
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+          insertJob(cronJob.queue, cronJob.payload as any, {
+            ...options,
+            suppressDuplicateUniqueKeyErrors: true,
+            uniqueKey: value.toString(),
+          }),
+        ),
+        Stream.catchAllCause(Effect.logError),
+        Stream.runDrain,
+        Effect.forkDaemon,
+        Effect.tap((fiber) =>
+          Effect.sync(() => {
+            cronFibers.push(fiber);
+          }),
+        ),
+      );
     };
 
     // TODO should we return the updated cron job or the number of rows updated? There is a difference between a cron job actually being updated and a cron job not being found
@@ -617,9 +629,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           Effect.flatMap((result) =>
             Effect.forEach(result, (job) => executeJobRunner(job, options), {
               concurrency: "inherit",
+              discard: true,
             }),
           ),
-          Effect.asVoid,
         );
 
     const listJobs = <K extends keyof Queues>(
@@ -639,7 +651,9 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.map((result) => result.rows));
 
-    const listJobStatuses = (options?: SidetrackListJobStatusesOptions) =>
+    const listJobStatuses = <K extends keyof Queues>(
+      options?: SidetrackListJobStatusesOptions<Queues, K>,
+    ) =>
       // get jobs and group by status
       Effect.promise(() =>
         (options?.dbClient || dbClient).execute<{
@@ -647,7 +661,14 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           status: SidetrackJobStatusEnum;
         }>(
           // unsafely cast to int for now because you probably won't have 2 billion jobs
-          `SELECT status, count(*)::integer FROM sidetrack_jobs GROUP BY status`,
+          `SELECT status, count(*)::integer FROM sidetrack_jobs ${
+            options?.queue
+              ? typeof options.queue === "string"
+                ? "WHERE queue = $1"
+                : "WHERE queue = ANY($1)"
+              : ""
+          } GROUP BY status`,
+          options?.queue ? [options?.queue] : undefined,
         ),
       ).pipe(
         Effect.map((result) =>
