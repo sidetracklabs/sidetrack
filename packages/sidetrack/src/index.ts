@@ -95,7 +95,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /**
    * Schedule a cron job on a queue
    * @param queueName - The queue to schedule the cron job on
-   * @param cronExpression - A 5 part cron expression
+   * @param cronExpression - A 5 or 6 part cron expression
    */
   async scheduleCron<K extends keyof Queues>(
     queueName: K,
@@ -186,7 +186,9 @@ export class SidetrackTest<
   /**
    * Test utility to get a list of job statuses and their counts
    */
-  async listJobStatuses(options?: SidetrackListJobStatusesOptions) {
+  async listJobStatuses<K extends keyof Queues>(
+    options?: SidetrackListJobStatusesOptions<Queues, K>,
+  ) {
     return this.customRunPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.testUtils.listJobStatuses(options),

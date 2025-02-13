@@ -3,38 +3,23 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { SidetrackTest, usePg } from "../src";
+import { createTestPool, runInTransaction } from "./utils";
 
 // TODO configure with global setup later: https://vitest.dev/config/#globalsetup
 
 describe.concurrent("jobs", () => {
   let pool: pg.Pool;
 
-  beforeAll(async () => {
-    pool = new pg.Pool({
-      connectionString: process.env["DATABASE_URL"],
-    });
+  beforeAll(() => {
+    pool = createTestPool();
   });
 
   afterAll(async () => {
     await pool.end();
   });
 
-  async function runInTransaction<T>(
-    callback: (client: pg.PoolClient) => Promise<T>,
-  ): Promise<T> {
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
-      const result = await callback(client);
-      await client.query("ROLLBACK");
-      return result;
-    } finally {
-      client.release();
-    }
-  }
-
   it("accepts a database client", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         test: { id: string };
         wallet: { amount: number };
@@ -42,14 +27,10 @@ describe.concurrent("jobs", () => {
         dbClient: usePg(client),
         queues: {
           test: {
-            run: async (payload) => {
-              return payload;
-            },
+            run: (payload) => Promise.resolve(payload),
           },
           wallet: {
-            run: async (payload) => {
-              return payload;
-            },
+            run: (payload) => Promise.resolve(payload),
           },
         },
       });
@@ -62,7 +43,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("run job succeeds", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest({
         dbClient: usePg(client),
         queues: {
@@ -81,7 +62,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("run job fails", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest({
         dbClient: usePg(client),
         queues: {
@@ -99,7 +80,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("job gets retried", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest({
         dbClient: usePg(client),
         queues: {
@@ -122,7 +103,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("job gets cancelled", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest({
         dbClient: usePg(client),
         queues: {
@@ -147,7 +128,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("job gets deleted", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest({
         dbClient: usePg(client),
         queues: {
@@ -171,7 +152,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("run job works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         test: { id: string };
       }>({
@@ -195,7 +176,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("run queue works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         test: { id: string };
       }>({
@@ -219,7 +200,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("list job works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         one: { id: string };
         two: { id: string };
@@ -250,7 +231,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("list job statuses works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         one: { id: string };
       }>({
@@ -267,12 +248,14 @@ describe.concurrent("jobs", () => {
       await sidetrack.insertJob("one", { id: "list job status works first" });
       await sidetrack.insertJob("one", { id: "list job status works second" });
 
-      expect((await sidetrack.listJobStatuses()).scheduled).toBe(2);
+      expect(
+        (await sidetrack.listJobStatuses({ queue: ["one"] })).scheduled,
+      ).toBe(2);
     });
   });
 
   it("job insertion with scheduledAt option works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         scheduled: { message: string };
       }>({
@@ -324,7 +307,7 @@ describe.concurrent("jobs", () => {
   });
 
   it("payload transformer works", async () => {
-    await runInTransaction(async (client) => {
+    await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
         test: { date: Date };
       }>({
