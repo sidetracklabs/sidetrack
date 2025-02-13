@@ -269,6 +269,11 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
           return Effect.dieMessage(
             "No connection string provided, cannot run sidetrack migrations",
           );
+
+        // Handle SIGTERM by stopping polling but allowing running jobs to complete
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        process.on("SIGTERM", () => Effect.runPromise(stop()));
+
         return Effect.promise(() =>
           runMigrations(databaseOptions.connectionString),
         ).pipe(
