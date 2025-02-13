@@ -1,4 +1,4 @@
-import { Duration } from "effect";
+import { Data, Duration } from "effect";
 
 import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
@@ -76,10 +76,12 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   queues: SidetrackQueues<Queues>;
 }
 
-export class SidetrackJobRunError {
-  readonly _tag = "SidetrackJobRunError";
-  constructor(readonly error: unknown) {}
-}
+export class SidetrackJobRunError extends Data.TaggedError(
+  "SidetrackJobRunError",
+)<{
+  cause: unknown;
+  message: string;
+}> {}
 
 export type SidetrackJob<Payload> = Omit<SidetrackJobs, "payload"> & {
   payload: Payload;

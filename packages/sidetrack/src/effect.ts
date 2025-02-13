@@ -317,9 +317,12 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       options?: { dbClient?: SidetrackDatabaseClient },
     ) =>
       Effect.tryPromise({
-        catch: (e) => {
-          return new SidetrackJobRunError(e);
-        },
+        catch: (e) =>
+          new SidetrackJobRunError({
+            cause: e,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            message: (e as any).message,
+          }),
         try: () =>
           queues[job.queue].run(
             payloadDeserializer(job.queue, job.payload as Queues[string]),
@@ -361,8 +364,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   job.id,
                   // TODO make sure we handle cases where this is not an Error, and also not serializable?
                   JSON.stringify(
-                    jobRunError.error,
-                    Object.getOwnPropertyNames(jobRunError.error),
+                    jobRunError.cause,
+                    Object.getOwnPropertyNames(jobRunError.cause),
                   ),
                 ],
               );
@@ -377,8 +380,8 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
                   job.id,
                   // TODO make sure we handle cases where this is not an Error, and also not serializable?
                   JSON.stringify(
-                    jobRunError.error,
-                    Object.getOwnPropertyNames(jobRunError.error),
+                    jobRunError.cause,
+                    Object.getOwnPropertyNames(jobRunError.cause),
                   ),
                 ],
               );
