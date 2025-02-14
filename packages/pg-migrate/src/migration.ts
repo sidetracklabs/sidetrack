@@ -133,7 +133,7 @@ export class Migration implements RunMigration {
     await new Promise((resolve, reject) => {
       fs.createReadStream(templateFileName)
         .pipe(fs.createWriteStream(newFile))
-        .on("close", resolve)
+        .on("close", () => resolve(void 0))
         .on("error", reject);
     });
 
