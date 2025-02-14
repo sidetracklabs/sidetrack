@@ -1,7 +1,7 @@
 import * as Effect from "effect/Effect";
 import * as ManagedRuntime from "effect/ManagedRuntime";
 
-import { createSidetrackServiceTag, layer, SidetrackService } from "./effect";
+import { getSidetrackService, layer, SidetrackService } from "./effect";
 import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
@@ -26,7 +26,7 @@ import {
  */
 export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
-  protected sidetrackService = createSidetrackServiceTag<Queues>();
+  protected sidetrackService = getSidetrackService<Queues>();
   /** @internal */
   protected managedRuntime: ManagedRuntime.ManagedRuntime<
     SidetrackService<Queues>,

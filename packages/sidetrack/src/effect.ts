@@ -138,7 +138,7 @@ const pollingIntervalMs = (
       ? Duration.millis(pollingInterval)
       : Duration.millis(defaultValue);
 
-export const createSidetrackServiceTag = <
+export const getSidetrackService = <
   Queues extends SidetrackQueuesGenericType,
 >() =>
   Context.GenericTag<SidetrackService<Queues>>(
@@ -148,7 +148,7 @@ export const createSidetrackServiceTag = <
 export function layer<Queues extends SidetrackQueuesGenericType>(
   layerOptions: SidetrackOptions<Queues>,
 ): Layer.Layer<SidetrackService<Queues>> {
-  return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
+  return Layer.sync(getSidetrackService<Queues>(), () => {
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
     const pool =

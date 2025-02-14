@@ -22,8 +22,7 @@ describe("Effect API", () => {
         test: { id: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -56,8 +55,7 @@ describe("Effect API", () => {
         test: { id: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -95,8 +93,7 @@ describe("Effect API", () => {
         test: { id: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -131,8 +128,7 @@ describe("Effect API", () => {
         test: { message: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -173,8 +169,7 @@ describe("Effect API", () => {
         test: { id: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -214,8 +209,7 @@ describe("Effect API", () => {
         queue2: { value: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -263,8 +257,7 @@ describe("Effect API", () => {
         test: { date: Date };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -315,8 +308,7 @@ describe("Effect API", () => {
         test: { message: string };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
@@ -363,8 +355,7 @@ describe("Effect API", () => {
         user: { id: string; type: "user" };
       }
 
-      const SidetrackService =
-        SidetrackEffect.createSidetrackServiceTag<Queues>();
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
 
       const sidetrackLayer = SidetrackEffect.layer<Queues>({
         dbClient: usePg(client),
