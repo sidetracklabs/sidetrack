@@ -145,7 +145,7 @@ export const createSidetrackServiceTag = <
     "@sidetracklabs/sidetrack/effect/service",
   );
 
-export function makeLayer<Queues extends SidetrackQueuesGenericType>(
+export function layer<Queues extends SidetrackQueuesGenericType>(
   layerOptions: SidetrackOptions<Queues>,
 ): Layer.Layer<SidetrackService<Queues>> {
   return Layer.sync(createSidetrackServiceTag<Queues>(), () => {

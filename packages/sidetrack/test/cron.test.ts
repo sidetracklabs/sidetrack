@@ -1,7 +1,7 @@
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { SidetrackJobStatusEnum, SidetrackTest, usePg } from "../src";
+import { SidetrackTest, usePg } from "../src";
 import { createTestPool, runInTransaction } from "./utils";
 
 describe("cron jobs", () => {
@@ -179,23 +179,15 @@ describe("cron jobs", () => {
       });
 
       // Verify at least one job from each queue was completed
-      expect(
-        queue1Jobs.some(
-          (job) => job.status === SidetrackJobStatusEnum.completed,
-        ),
-      ).toBe(true);
-      expect(
-        queue2Jobs.some(
-          (job) => job.status === SidetrackJobStatusEnum.completed,
-        ),
-      ).toBe(true);
+      expect(queue1Jobs.some((job) => job.status === "completed")).toBe(true);
+      expect(queue2Jobs.some((job) => job.status === "completed")).toBe(true);
 
       // Find completed jobs
       const completedQueue1Job = queue1Jobs.find(
-        (job) => job.status === SidetrackJobStatusEnum.completed,
+        (job) => job.status === "completed",
       );
       const completedQueue2Job = queue2Jobs.find(
-        (job) => job.status === SidetrackJobStatusEnum.completed,
+        (job) => job.status === "completed",
       );
 
       // Verify jobs ran close together (within 1.5s)

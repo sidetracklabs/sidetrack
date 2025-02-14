@@ -1,12 +1,7 @@
 import * as Effect from "effect/Effect";
-import * as Layer from "effect/Layer";
-import * as Runtime from "effect/Runtime";
+import * as ManagedRuntime from "effect/ManagedRuntime";
 
-import {
-  createSidetrackServiceTag,
-  makeLayer,
-  SidetrackService,
-} from "./effect";
+import { createSidetrackServiceTag, layer, SidetrackService } from "./effect";
 import SidetrackCronJobs from "./models/generated/public/SidetrackCronJobs";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 import SidetrackJobStatusEnum from "./models/generated/public/SidetrackJobStatusEnum";
@@ -33,28 +28,17 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /** @internal */
   protected sidetrackService = createSidetrackServiceTag<Queues>();
   /** @internal */
-  private sidetrackLayer: Layer.Layer<SidetrackService<Queues>>;
-  /** @internal */
-  private runtime: Runtime.Runtime<SidetrackService<Queues>>;
-  /** @internal */
-  protected customRunPromise: <R extends SidetrackService<Queues>, E, A>(
-    self: Effect.Effect<A, E, R>,
-  ) => Promise<A>;
+  protected managedRuntime: ManagedRuntime.ManagedRuntime<
+    SidetrackService<Queues>,
+    never
+  >;
 
   constructor(options: SidetrackOptions<Queues>) {
-    this.sidetrackLayer = makeLayer(options);
-
-    this.runtime = Effect.runSync(
-      Effect.scoped(Layer.toRuntime(this.sidetrackLayer)),
-    );
-
-    this.customRunPromise = <R extends SidetrackService<Queues>, E, A>(
-      self: Effect.Effect<A, E, R>,
-    ) => Runtime.runPromise(this.runtime)(self);
+    this.managedRuntime = ManagedRuntime.make(layer(options));
   }
 
   async cancelJob(jobId: string, options?: SidetrackCancelJobOptions) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.cancelJob(jobId, options),
       ),
@@ -62,7 +46,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   }
 
   async deleteJob(jobId: string, options?: SidetrackDeleteJobOptions) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.deleteJob(jobId, options),
       ),
@@ -73,7 +57,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     jobId: string,
     options?: SidetrackGetJobOptions,
   ): Promise<SidetrackJobs> {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.getJob(jobId, options),
       ),
@@ -85,7 +69,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     payload: Queues[K],
     options?: SidetrackInsertJobOptions,
   ): Promise<SidetrackJobs> {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.insertJob(queueName, payload, options),
       ),
@@ -103,7 +87,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     payload: Queues[K],
     options?: SidetrackCronJobOptions,
   ): Promise<SidetrackCronJobs> {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.scheduleCron(queueName, cronExpression, payload, options),
       ),
@@ -120,7 +104,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     cronExpression: string,
     options?: SidetrackDeactivateCronScheduleOptions,
   ) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.deactivateCronSchedule(queueName, cronExpression, options),
       ),
@@ -137,7 +121,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     cronExpression: string,
     options?: SidetrackDeleteCronScheduleOptions,
   ) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.deleteCronSchedule(queueName, cronExpression, options),
       ),
@@ -148,7 +132,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
    * Automatically run migrations and start polling the DB for jobs
    */
   async start() {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) => service.start()),
     );
   }
@@ -157,7 +141,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
    * Turn off polling
    */
   async stop() {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) => service.stop()),
     );
   }
@@ -176,7 +160,7 @@ export class SidetrackTest<
   async listJobs<K extends keyof Queues>(
     options?: SidetrackListJobsOptions<Queues, K>,
   ) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.testUtils.listJobs(options),
       ),
@@ -189,7 +173,7 @@ export class SidetrackTest<
   async listJobStatuses<K extends keyof Queues>(
     options?: SidetrackListJobStatusesOptions<Queues, K>,
   ) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.testUtils.listJobStatuses(options),
       ),
@@ -200,7 +184,7 @@ export class SidetrackTest<
    * Test utility to run a job manually without polling
    */
   async runJob(jobId: string, options?: SidetrackRunJobOptions) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.testUtils.runJob(jobId, options),
       ),
@@ -213,7 +197,7 @@ export class SidetrackTest<
   async runJobs<K extends keyof Queues>(
     options?: SidetrackRunJobsOptions<Queues, K>,
   ) {
-    return this.customRunPromise(
+    return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) =>
         service.testUtils.runJobs(options),
       ),
