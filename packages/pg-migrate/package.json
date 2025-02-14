@@ -1,6 +1,6 @@
 {
   "name": "@sidetrack/pg-migrate",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "Sidetrack internal postgres database migration tool",
   "keywords": [
     "background",

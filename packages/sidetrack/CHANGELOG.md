@@ -1,5 +1,23 @@
 # sidetrack
 
+## 0.1.0
+
+### Minor Changes
+
+- [`6dd13fa`](https://github.com/sidetracklabs/sidetrack/commit/6dd13fab5c424f41d289e4b8065eaac3918e72ef) Thanks [@aniravi24](https://github.com/aniravi24)! - Initial batch of improvements
+
+  - Cron support with timezone
+  - Support payload transformers (serialize/deserialize payloads in a custom manner, e.g. superjson)
+  - Change default polling interval to 2000ms and allow it to be configured globally or per-queue
+  - run functions take two args, payload and context
+  - Rename `handler` to `run`
+  - Handle SIGTERM by turning off polling/cron and allow existing jobs to finish gracefully
+
+### Patch Changes
+
+- Updated dependencies [[`6dd13fa`](https://github.com/sidetracklabs/sidetrack/commit/6dd13fab5c424f41d289e4b8065eaac3918e72ef)]:
+  - @sidetrack/pg-migrate@0.1.0
+
 ## 0.0.18
 
 ### Patch Changes
