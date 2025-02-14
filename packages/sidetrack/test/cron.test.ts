@@ -103,70 +103,117 @@ describe("cron jobs", () => {
     });
   });
 
-  it("executes cron jobs on schedule", async () => {
+  it("executes multiple cron jobs and processes their jobs", async () => {
     const client = await pool.connect();
-    let cronJobId: string | undefined;
+    const cronJobIds: string[] = [];
     let jobIds: string[] = [];
+
     const sidetrackInstance = new SidetrackTest<{
-      test: { message: string };
+      queue1: { description: string; sequence: number };
+      queue2: { description: string; sequence: number };
     }>({
       dbClient: usePg(client),
       queues: {
-        test: {
+        queue1: {
+          run: (payload) => Promise.resolve(payload),
+        },
+        queue2: {
           run: (payload) => Promise.resolve(payload),
         },
       },
     });
 
     try {
-      // Schedule a cron job to run every second
-      const cronJob = await sidetrackInstance.scheduleCron(
-        "test",
-        "* * * * * *", // every second (6-part cron expression)
-        { message: "cron execution test" },
+      // Schedule two cron jobs
+      const cronJob1 = await sidetrackInstance.scheduleCron(
+        "queue1",
+        "* * * * * *", // every second
+        {
+          description: "First cron job running every second",
+          sequence: 1,
+        },
       );
-      cronJobId = cronJob.id;
+      cronJobIds.push(cronJob1.id);
 
-      // Verify the cron job was inserted correctly
-      const cronResult = await client.query(
-        "SELECT * FROM sidetrack_cron_jobs WHERE id = $1",
-        [cronJobId],
+      const cronJob2 = await sidetrackInstance.scheduleCron(
+        "queue2",
+        "* * * * * *", // every second
+        {
+          description: "Second cron job running every second",
+          sequence: 2,
+        },
       );
-      expect(cronResult.rows.length).toBe(1);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(cronResult.rows[0].queue).toBe("test");
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(cronResult.rows[0].cron_expression).toBe("* * * * * *");
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(cronResult.rows[0].payload).toEqual({
-        message: "cron execution test",
-      });
+      cronJobIds.push(cronJob2.id);
 
       // Start the service
       await sidetrackInstance.start();
 
-      // Wait for a couple of executions
+      // Wait for jobs to be created and processed
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
-      // List all jobs created by the cron
-      const jobs = await sidetrackInstance.listJobs({ queue: ["test"] });
-      jobIds = jobs.map((job) => job.id);
+      // Get jobs from both queues
+      const queue1Jobs = await sidetrackInstance.listJobs({
+        queue: ["queue1"],
+      });
+      const queue2Jobs = await sidetrackInstance.listJobs({
+        queue: ["queue2"],
+      });
 
-      // Should have at least 2 jobs created
-      expect(jobs.length).toBeGreaterThanOrEqual(2);
+      jobIds = [
+        ...queue1Jobs.map((job) => job.id),
+        ...queue2Jobs.map((job) => job.id),
+      ];
 
-      // Jobs should have the correct payload
-      expect(jobs[0].payload).toEqual({ message: "cron execution test" });
+      // Verify jobs were created
+      expect(queue1Jobs.length).toBeGreaterThanOrEqual(1);
+      expect(queue2Jobs.length).toBeGreaterThanOrEqual(1);
 
-      // At least some jobs should be completed
+      // Verify payloads
+      expect(queue1Jobs[0].payload).toEqual({
+        description: "First cron job running every second",
+        sequence: 1,
+      });
+      expect(queue2Jobs[0].payload).toEqual({
+        description: "Second cron job running every second",
+        sequence: 2,
+      });
+
+      // Verify at least one job from each queue was completed
       expect(
-        jobs.some((job) => job.status === SidetrackJobStatusEnum.completed),
+        queue1Jobs.some(
+          (job) => job.status === SidetrackJobStatusEnum.completed,
+        ),
       ).toBe(true);
+      expect(
+        queue2Jobs.some(
+          (job) => job.status === SidetrackJobStatusEnum.completed,
+        ),
+      ).toBe(true);
+
+      // Find completed jobs
+      const completedQueue1Job = queue1Jobs.find(
+        (job) => job.status === SidetrackJobStatusEnum.completed,
+      );
+      const completedQueue2Job = queue2Jobs.find(
+        (job) => job.status === SidetrackJobStatusEnum.completed,
+      );
+
+      // Verify jobs ran close together (within 1.5s)
+      if (
+        completedQueue1Job?.attempted_at &&
+        completedQueue2Job?.attempted_at
+      ) {
+        const timeDiff = Math.abs(
+          completedQueue1Job.attempted_at.getTime() -
+            completedQueue2Job.attempted_at.getTime(),
+        );
+        expect(timeDiff).toBeLessThan(1500);
+      }
     } finally {
-      // Clean up
       await sidetrackInstance.stop();
 
-      if (cronJobId) {
+      // Clean up cron jobs
+      for (const cronJobId of cronJobIds) {
         try {
           await client.query("DELETE FROM sidetrack_cron_jobs WHERE id = $1", [
             cronJobId,

@@ -94,6 +94,71 @@ describe("polling", () => {
     }
   });
 
+  it("processes jobs from multiple queues concurrently", async () => {
+    const client = await pool.connect();
+    const jobIds: string[] = [];
+    const sidetrack = new SidetrackTest<{
+      queue1: { description: string; value: number };
+      queue2: { description: string; value: string };
+    }>({
+      dbClient: usePg(client),
+      pollingInterval: 100,
+      queues: {
+        queue1: {
+          run: async (payload) => Promise.resolve(payload),
+        },
+        queue2: {
+          run: async (payload) => Promise.resolve(payload),
+        },
+      },
+    });
+
+    try {
+      await sidetrack.start();
+
+      // Insert jobs to both queues
+      const job1 = await sidetrack.insertJob("queue1", {
+        description: "Job from queue 1",
+        value: 42,
+      });
+      jobIds.push(job1.id);
+
+      const job2 = await sidetrack.insertJob("queue2", {
+        description: "Job from queue 2",
+        value: "test",
+      });
+      jobIds.push(job2.id);
+
+      // Wait for jobs to be processed
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Verify both jobs were processed
+      const processedJob1 = await sidetrack.getJob(job1.id);
+      const processedJob2 = await sidetrack.getJob(job2.id);
+
+      expect(processedJob1.status).toBe("completed");
+      expect(processedJob2.status).toBe("completed");
+
+      // Verify jobs from different queues can be processed around the same time
+      const job1Time = processedJob1.attempted_at!.getTime();
+      const job2Time = processedJob2.attempted_at!.getTime();
+      expect(Math.abs(job1Time - job2Time)).toBeLessThan(100); // Should be processed within the same polling interval
+    } finally {
+      await sidetrack.stop();
+
+      for (const jobId of jobIds) {
+        try {
+          await client.query("DELETE FROM sidetrack_jobs WHERE id = $1", [
+            jobId,
+          ]);
+        } catch (e) {
+          console.error("Failed to clean up job:", e);
+        }
+      }
+      client.release();
+    }
+  });
+
   it("stops processing jobs when polling is stopped", async () => {
     const client = await pool.connect();
     let jobId: string | undefined;
