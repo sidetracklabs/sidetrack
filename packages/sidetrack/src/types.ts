@@ -107,10 +107,8 @@ export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   };
 };
 
-export type SidetrackQueuesGenericType = Record<
-  string,
-  Record<string, unknown>
->;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type SidetrackQueuesGenericType = Record<string, any>;
 
 export interface SidetrackPayloadTransformer {
   /**
