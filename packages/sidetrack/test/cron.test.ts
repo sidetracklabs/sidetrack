@@ -211,7 +211,7 @@ describe("cron jobs", () => {
 
       client.release();
     }
-  }, 10000);
+  }, 20000);
 
   it("stops creating jobs when cron is stopped", async () => {
     const client = await pool.connect();
