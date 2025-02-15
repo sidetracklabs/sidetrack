@@ -1,5 +1,13 @@
 # sidetrack
 
+## 0.1.1
+
+### Patch Changes
+
+- [#270](https://github.com/sidetracklabs/sidetrack/pull/270) [`16ce2e5`](https://github.com/sidetracklabs/sidetrack/commit/16ce2e55caa2fc071151903ecab0053bd70a253f) Thanks [@aniravi24](https://github.com/aniravi24)! - Breaking changes to Effect export
+
+  rename `makeLayer` to `layer` and `createSidetrackServiceTag` to `getSidetrackService`
+
 ## 0.1.0
 
 ### Minor Changes
