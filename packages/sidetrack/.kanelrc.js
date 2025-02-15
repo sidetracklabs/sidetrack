@@ -2,6 +2,11 @@ const { defaultGenerateIdentifierType } = require("kanel");
 /** @type {import('kanel').Config} */
 module.exports = {
   connection: { connectionString: process.env.DATABASE_URL },
+  //   customTypeMap: {
+  //     "pg_catalog.tsvector": "string",
+  //     "pg_catalog.bpchar": "string",
+  //   },
+  enumStyle: "type",
   generateIdentifierType: (c, d, config) => {
     const defaultResult = defaultGenerateIdentifierType(c, d, config);
     // Remove the brand from the type definition
@@ -12,8 +17,4 @@ module.exports = {
   },
   outputPath: "./src/models/generated",
   preDeleteOutputFolder: true,
-  //   customTypeMap: {
-  //     "pg_catalog.tsvector": "string",
-  //     "pg_catalog.bpchar": "string",
-  //   },
 };

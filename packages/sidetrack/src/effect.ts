@@ -105,7 +105,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
      */
     listJobStatuses: <K extends keyof Queues>(
       options?: SidetrackListJobStatusesOptions<Queues, K>,
-    ) => Effect.Effect<Record<SidetrackJobStatusEnum, number>>;
+    ) => Effect.Effect<Partial<Record<SidetrackJobStatusEnum, number>>>;
     /**
      * Test utility to get a list of jobs
      */
@@ -138,17 +138,17 @@ const pollingIntervalMs = (
       ? Duration.millis(pollingInterval)
       : Duration.millis(defaultValue);
 
-export const createSidetrackServiceTag = <
+export const getSidetrackService = <
   Queues extends SidetrackQueuesGenericType,
 >() =>
   Context.GenericTag<SidetrackService<Queues>>(
     "@sidetracklabs/sidetrack/effect/service",
   );
 
-export function makeLayer<Queues extends SidetrackQueuesGenericType>(
+export function layer<Queues extends SidetrackQueuesGenericType>(
   layerOptions: SidetrackOptions<Queues>,
 ): Layer.Layer<SidetrackService<Queues>> {
-  return Layer.sync(createSidetrackServiceTag<Queues>(), () => {
+  return Layer.sync(getSidetrackService<Queues>(), () => {
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
     const pool =
@@ -172,6 +172,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       queueName: K,
       payload: Queues[K],
     ) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       queues[queueName].payloadTransformer
         ? (queues[queueName].payloadTransformer.serialize(payload) as Queues[K])
         : globalPayloadTransformer
@@ -182,6 +183,7 @@ export function makeLayer<Queues extends SidetrackQueuesGenericType>(
       queueName: K,
       payload: Queues[K],
     ) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       queues[queueName].payloadTransformer
         ? (queues[queueName].payloadTransformer.deserialize(
             payload,
