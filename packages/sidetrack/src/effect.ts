@@ -172,6 +172,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       queueName: K,
       payload: Queues[K],
     ) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       queues[queueName].payloadTransformer
         ? (queues[queueName].payloadTransformer.serialize(payload) as Queues[K])
         : globalPayloadTransformer
@@ -182,6 +183,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       queueName: K,
       payload: Queues[K],
     ) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       queues[queueName].payloadTransformer
         ? (queues[queueName].payloadTransformer.deserialize(
             payload,

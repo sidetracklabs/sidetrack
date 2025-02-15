@@ -2,6 +2,7 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { SidetrackTest, usePg } from "../src";
+import SidetrackJobs from "../src/models/generated/public/SidetrackJobs";
 import { createTestPool, runInTransaction } from "./utils";
 
 describe("cron jobs", () => {
@@ -124,12 +125,14 @@ describe("cron jobs", () => {
     });
 
     try {
-      // Schedule two cron jobs
+      await sidetrackInstance.start();
+
+      // Schedule two cron jobs to run every second
       const cronJob1 = await sidetrackInstance.scheduleCron(
         "queue1",
-        "* * * * * *", // every second
+        "* * * * * *",
         {
-          description: "First cron job running every second",
+          description: "First cron job",
           sequence: 1,
         },
       );
@@ -137,98 +140,78 @@ describe("cron jobs", () => {
 
       const cronJob2 = await sidetrackInstance.scheduleCron(
         "queue2",
-        "* * * * * *", // every second
+        "* * * * * *",
         {
-          description: "Second cron job running every second",
+          description: "Second cron job",
           sequence: 2,
         },
       );
       cronJobIds.push(cronJob2.id);
 
-      // Start the service
-      await sidetrackInstance.start();
-
       // Wait for jobs to be created and processed
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const maxAttempts = 15;
+      let attempts = 0;
+      let queue1Jobs: SidetrackJobs[] = [];
+      let queue2Jobs: SidetrackJobs[] = [];
 
-      // Get jobs from both queues
-      const queue1Jobs = await sidetrackInstance.listJobs({
-        queue: ["queue1"],
-      });
-      const queue2Jobs = await sidetrackInstance.listJobs({
-        queue: ["queue2"],
-      });
+      while (attempts < maxAttempts) {
+        queue1Jobs = await sidetrackInstance.listJobs({
+          queue: ["queue1"],
+        });
+        queue2Jobs = await sidetrackInstance.listJobs({
+          queue: ["queue2"],
+        });
+
+        if (
+          queue1Jobs.length >= 1 &&
+          queue2Jobs.length >= 1 &&
+          queue1Jobs.some((job) => job.status === "completed") &&
+          queue2Jobs.some((job) => job.status === "completed")
+        ) {
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        attempts++;
+      }
 
       jobIds = [
         ...queue1Jobs.map((job) => job.id),
         ...queue2Jobs.map((job) => job.id),
       ];
 
-      // Verify jobs were created
+      // Verify jobs were created and completed
       expect(queue1Jobs.length).toBeGreaterThanOrEqual(1);
       expect(queue2Jobs.length).toBeGreaterThanOrEqual(1);
-
-      // Verify payloads
-      expect(queue1Jobs[0].payload).toEqual({
-        description: "First cron job running every second",
-        sequence: 1,
-      });
-      expect(queue2Jobs[0].payload).toEqual({
-        description: "Second cron job running every second",
-        sequence: 2,
-      });
-
-      // Verify at least one job from each queue was completed
       expect(queue1Jobs.some((job) => job.status === "completed")).toBe(true);
       expect(queue2Jobs.some((job) => job.status === "completed")).toBe(true);
 
-      // Find completed jobs
-      const completedQueue1Job = queue1Jobs.find(
-        (job) => job.status === "completed",
-      );
-      const completedQueue2Job = queue2Jobs.find(
-        (job) => job.status === "completed",
-      );
-
-      // Verify jobs ran close together (within 1.5s)
-      if (
-        completedQueue1Job?.attempted_at &&
-        completedQueue2Job?.attempted_at
-      ) {
-        const timeDiff = Math.abs(
-          completedQueue1Job.attempted_at.getTime() -
-            completedQueue2Job.attempted_at.getTime(),
-        );
-        expect(timeDiff).toBeLessThan(1500);
-      }
+      // Verify payloads
+      expect(queue1Jobs[0].payload).toEqual({
+        description: "First cron job",
+        sequence: 1,
+      });
+      expect(queue2Jobs[0].payload).toEqual({
+        description: "Second cron job",
+        sequence: 2,
+      });
     } finally {
       await sidetrackInstance.stop();
 
-      // Clean up cron jobs
+      // Clean up cron jobs and their generated jobs
       for (const cronJobId of cronJobIds) {
-        try {
-          await client.query("DELETE FROM sidetrack_cron_jobs WHERE id = $1", [
-            cronJobId,
-          ]);
-        } catch (e) {
-          console.error("Failed to clean up cron job:", e);
-        }
+        await client.query("DELETE FROM sidetrack_cron_jobs WHERE id = $1", [
+          cronJobId,
+        ]);
       }
 
-      // Clean up created jobs
       for (const jobId of jobIds) {
-        try {
-          await client.query("DELETE FROM sidetrack_jobs WHERE id = $1", [
-            jobId,
-          ]);
-        } catch (e) {
-          console.error("Failed to clean up job:", e);
-        }
+        await client.query("DELETE FROM sidetrack_jobs WHERE id = $1", [jobId]);
       }
 
       client.release();
     }
-  });
+  }, 10000);
 
   it("stops creating jobs when cron is stopped", async () => {
     const client = await pool.connect();

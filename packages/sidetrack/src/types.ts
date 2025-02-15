@@ -107,6 +107,7 @@ export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   };
 };
 
+// TODO making this type more specific causes issues with TypeScript when passing in types/interfaces for the queue types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SidetrackQueuesGenericType = Record<string, any>;
 
