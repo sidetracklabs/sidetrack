@@ -105,7 +105,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
      */
     listJobStatuses: <K extends keyof Queues>(
       options?: SidetrackListJobStatusesOptions<Queues, K>,
-    ) => Effect.Effect<Record<SidetrackJobStatusEnum, number>>;
+    ) => Effect.Effect<Partial<Record<SidetrackJobStatusEnum, number>>>;
     /**
      * Test utility to get a list of jobs
      */
