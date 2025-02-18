@@ -382,36 +382,22 @@ describe.concurrent("jobs", () => {
       }>({
         dbClient: usePg(client),
         payloadTransformer: {
-          deserialize: (payload) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            if (typeof (payload as any).date === "string") {
-              return {
-                ...payload,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-                date: new Date((payload as any).date),
-              };
-            }
-            return payload;
-          },
-          serialize: (payload) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            if ((payload as any).date instanceof Date) {
-              return {
-                ...payload,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-                date: (payload as any).date.toISOString(),
-              };
-            }
-            return payload;
-          },
+          deserialize: (payload) => ({
+            ...payload,
+            date: new Date((payload as { date: string }).date),
+          }),
+          serialize: (payload) => ({
+            ...payload,
+            date: (payload as { date: Date }).date.toISOString(),
+          }),
         },
         queues: {
           test: {
             run: async (payload, { job }) => {
               expect(payload.date).toBeInstanceOf(Date);
-              // The original payload is serialized, so the job payload is a string
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-              expect((job.payload as any).date).toBeTypeOf("string");
+              expect(
+                (job.payload as unknown as { date: string }).date,
+              ).toBeTypeOf("string");
               return payload;
             },
           },
@@ -422,8 +408,123 @@ describe.concurrent("jobs", () => {
       const job = await sidetrack.insertJob("test", { date });
 
       const retrievedJob = await sidetrack.getJob(job.id);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      expect((retrievedJob.payload as any).date).toBeTypeOf("string");
+      expect((retrievedJob.payload as { date: string }).date).toBeTypeOf(
+        "string",
+      );
+
+      await sidetrack.runJob(job.id);
+      expect((await sidetrack.getJob(job.id)).status).toBe("completed");
+    });
+  });
+
+  it("queue level payload transformer works", async () => {
+    await runInTransaction(pool, async (client) => {
+      const sidetrack = new SidetrackTest<{
+        test: { date: Date };
+      }>({
+        dbClient: usePg(client),
+        queues: {
+          test: {
+            payloadTransformer: {
+              deserialize: (payload) => {
+                if (typeof (payload as { date: string }).date === "string") {
+                  return {
+                    ...payload,
+                    date: new Date((payload as { date: string }).date),
+                  };
+                }
+                return payload;
+              },
+              serialize: (payload) => {
+                if ((payload as { date: Date }).date instanceof Date) {
+                  return {
+                    ...payload,
+                    date: (payload as { date: Date }).date.toISOString(),
+                  };
+                }
+                return payload;
+              },
+            },
+            run: async (payload, { job }) => {
+              expect(payload.date).toBeInstanceOf(Date);
+              expect(
+                (job.payload as unknown as { date: string }).date,
+              ).toBeTypeOf("string");
+              return payload;
+            },
+          },
+        },
+      });
+
+      const date = new Date();
+      const job = await sidetrack.insertJob("test", { date });
+
+      const retrievedJob = await sidetrack.getJob(job.id);
+      expect((retrievedJob.payload as { date: string }).date).toBeTypeOf(
+        "string",
+      );
+
+      await sidetrack.runJob(job.id);
+      expect((await sidetrack.getJob(job.id)).status).toBe("completed");
+    });
+  });
+
+  it("queue level payload transformer overrides instance level transformer", async () => {
+    await runInTransaction(pool, async (client) => {
+      const sidetrack = new SidetrackTest<{
+        test: { date: Date };
+      }>({
+        dbClient: usePg(client),
+        payloadTransformer: {
+          deserialize: (_payload) => {
+            // This should not be called
+            throw new Error("Instance level transformer should not be used");
+          },
+          serialize: (_payload) => {
+            // This should not be called
+            throw new Error("Instance level transformer should not be used");
+          },
+        },
+        queues: {
+          test: {
+            payloadTransformer: {
+              deserialize: (payload) => {
+                if (typeof (payload as { date: string }).date === "string") {
+                  return {
+                    ...payload,
+                    date: new Date((payload as { date: string }).date),
+                  };
+                }
+                return payload;
+              },
+              serialize: (payload) => {
+                if ((payload as { date: Date }).date instanceof Date) {
+                  return {
+                    ...payload,
+                    date: (payload as { date: Date }).date.toISOString(),
+                  };
+                }
+                return payload;
+              },
+            },
+            run: async (payload, { job }) => {
+              expect(payload.date).toBeInstanceOf(Date);
+              expect(
+                (job.payload as unknown as { date: string }).date,
+              ).toBeTypeOf("string");
+              return payload;
+            },
+          },
+        },
+      });
+
+      const date = new Date();
+      const job = await sidetrack.insertJob("test", { date });
+
+      const retrievedJob = await sidetrack.getJob(job.id);
+      expect((retrievedJob.payload as { date: string }).date).toBeTypeOf(
+        "string",
+      );
 
       await sidetrack.runJob(job.id);
       expect((await sidetrack.getJob(job.id)).status).toBe("completed");
