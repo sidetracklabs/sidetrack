@@ -1,11 +1,12 @@
 import { Data, Duration } from "effect";
+import { DateTime } from "effect/DateTime";
 
 import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
 
 export interface SidetrackInsertJobOptions {
   dbClient?: SidetrackDatabaseClient;
-  scheduledAt?: Date;
+  scheduledAt?: Date | DateTime;
   suppressDuplicateUniqueKeyErrors?: boolean;
   uniqueKey?: string;
 }

@@ -428,7 +428,11 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             queueName,
             payloadSerializer(queueName, payload),
             queues[queueName]?.maxAttempts,
-            options?.scheduledAt,
+            options?.scheduledAt
+              ? DateTime.isDateTime(options.scheduledAt)
+                ? DateTime.toDateUtc(options.scheduledAt)
+                : options?.scheduledAt
+              : undefined,
             options?.uniqueKey,
           ],
         ),

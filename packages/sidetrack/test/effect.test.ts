@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import * as DateTime from "effect/DateTime";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -327,6 +328,52 @@ describe("Effect API", () => {
           "test",
           { message: "future job" },
           { scheduledAt: futureDate },
+        );
+
+        // Try to run jobs without includeFutureJobs
+        yield* sidetrack.testUtils.runJobs({ queue: "test" });
+        let updatedJob = yield* sidetrack.getJob(job.id);
+        expect(updatedJob.status).toBe("scheduled");
+
+        // Run with includeFutureJobs
+        yield* sidetrack.testUtils.runJobs({
+          includeFutureJobs: true,
+          queue: "test",
+        });
+        updatedJob = yield* sidetrack.getJob(job.id);
+        expect(updatedJob.status).toBe("completed");
+      });
+
+      await Effect.runPromise(program.pipe(Effect.provide(sidetrackLayer)));
+    });
+  });
+
+  it("handles jobs scheduled with DateTime from effect library", async () => {
+    await runInTransaction(pool, async (client) => {
+      interface Queues {
+        test: { message: string };
+      }
+
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
+
+      const sidetrackLayer = SidetrackEffect.layer<Queues>({
+        dbClient: usePg(client),
+        queues: {
+          test: {
+            run: (payload) => Promise.resolve(payload),
+          },
+        },
+      });
+
+      const program = Effect.gen(function* () {
+        const sidetrack = yield* SidetrackService;
+        const now = yield* DateTime.now;
+        const futureDateTime = DateTime.add(now, { minutes: 1 });
+
+        const job = yield* sidetrack.insertJob(
+          "test",
+          { message: "future job with DateTime" },
+          { scheduledAt: futureDateTime },
         );
 
         // Try to run jobs without includeFutureJobs
