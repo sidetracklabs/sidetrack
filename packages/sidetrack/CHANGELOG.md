@@ -1,5 +1,13 @@
 # sidetrack
 
+## 0.1.5
+
+### Patch Changes
+
+- [`66c4960`](https://github.com/sidetracklabs/sidetrack/commit/66c49603fdf6401ac4638045a614fc2b01f41792) Thanks [@aniravi24](https://github.com/aniravi24)! - Add Effect DateTime support for scheduling
+
+- [`f1500c4`](https://github.com/sidetracklabs/sidetrack/commit/f1500c4aa61c3e239180bf3296fc15c2af17952e) Thanks [@aniravi24](https://github.com/aniravi24)! - Support Effect TimeZone for cron timezone input
+
 ## 0.1.4
 
 ### Patch Changes
