@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.4
+
+### Patch Changes
+
+- [`671e771`](https://github.com/sidetracklabs/sidetrack/commit/671e771c733b80a65c96e3d4653e85bc91c6550d) Thanks [@aniravi24](https://github.com/aniravi24)! - use Effect.fn for better tracing of CLI function
+
 ## 0.1.3
 
 ### Patch Changes
