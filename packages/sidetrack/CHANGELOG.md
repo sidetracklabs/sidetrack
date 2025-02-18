@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.2
+
+### Patch Changes
+
+- [#275](https://github.com/sidetracklabs/sidetrack/pull/275) [`9c7c32b`](https://github.com/sidetracklabs/sidetrack/commit/9c7c32b8a9e64b7dae063407cb313576831c3f66) Thanks [@aniravi24](https://github.com/aniravi24)! - Support running migrations from CLI
+
 ## 0.1.1
 
 ### Patch Changes
