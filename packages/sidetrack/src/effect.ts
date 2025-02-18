@@ -455,7 +455,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       Cron.parse(
         cronExpression,
         options?.timezone
-          ? DateTime.zoneUnsafeMakeNamed(options.timezone)
+          ? DateTime.isTimeZone(options.timezone)
+            ? options.timezone
+            : DateTime.zoneUnsafeMakeNamed(options.timezone)
           : undefined,
       ).pipe(
         Effect.flatMap((_cron) =>
@@ -465,7 +467,16 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
            VALUES ($1, $2, $3, $4)
            ON CONFLICT (queue, cron_expression) DO UPDATE
            SET payload = $3 RETURNING *`,
-              [queueName, cronExpression, payload, options?.timezone],
+              [
+                queueName,
+                cronExpression,
+                payload,
+                options?.timezone
+                  ? DateTime.isTimeZone(options.timezone)
+                    ? DateTime.zoneToString(options.timezone)
+                    : options.timezone
+                  : undefined,
+              ],
             ),
           ),
         ),

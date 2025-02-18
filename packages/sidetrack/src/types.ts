@@ -1,5 +1,5 @@
 import { Data, Duration } from "effect";
-import { DateTime } from "effect/DateTime";
+import { DateTime, TimeZone } from "effect/DateTime";
 
 import { SidetrackDatabaseClient } from "./client";
 import SidetrackJobs from "./models/generated/public/SidetrackJobs";
@@ -13,7 +13,7 @@ export interface SidetrackInsertJobOptions {
 
 export interface SidetrackCronJobOptions {
   dbClient?: SidetrackDatabaseClient;
-  timezone?: string;
+  timezone?: TimeZone | string;
 }
 
 export interface SidetrackDeactivateCronScheduleOptions {
