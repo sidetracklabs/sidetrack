@@ -25,8 +25,8 @@ export class StringIdGenerator {
 
   private increment() {
     for (let i = this.ids.length - 1; i >= 0; i -= 1) {
-      this.ids[i] += 1;
-      if (this.ids[i] < this.chars.length) {
+      this.ids[i] = (this.ids[i] ?? 0) + 1;
+      if ((this.ids[i] as number) < this.chars.length) {
         return;
       }
       this.ids[i] = 0;
@@ -88,4 +88,4 @@ export const getSchemas = (schema?: string[] | string): string[] => {
 export const getMigrationTableSchema = (options: RunnerOption): string =>
   options.migrationsSchema !== undefined
     ? options.migrationsSchema
-    : getSchemas(options.schema)[0];
+    : (getSchemas(options.schema)[0] as string);

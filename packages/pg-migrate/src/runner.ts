@@ -172,7 +172,7 @@ const checkOrder = (runNames: string[], migrations: Migration[]) => {
   const len = Math.min(runNames.length, migrations.length);
   for (let i = 0; i < len; i += 1) {
     const runName = runNames[i];
-    const migrationName = migrations[i].name;
+    const migrationName = migrations[i]?.name;
     if (runName !== migrationName) {
       throw new Error(
         `Not run migration ${migrationName} is preceding already run migration ${runName}`,

@@ -72,7 +72,7 @@ describe("cron jobs", () => {
         "SELECT status FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2",
         ["test", "*/5 * * * *"],
       );
-      expect(result.rows[0].status).toBe("inactive");
+      expect(result.rows[0]?.status).toBe("inactive");
     });
   });
 
@@ -187,11 +187,11 @@ describe("cron jobs", () => {
       expect(queue2Jobs.some((job) => job.status === "completed")).toBe(true);
 
       // Verify payloads
-      expect(queue1Jobs[0].payload).toEqual({
+      expect(queue1Jobs[0]?.payload).toEqual({
         description: "First cron job",
         sequence: 1,
       });
-      expect(queue2Jobs[0].payload).toEqual({
+      expect(queue2Jobs[0]?.payload).toEqual({
         description: "Second cron job",
         sequence: 2,
       });

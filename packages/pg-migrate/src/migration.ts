@@ -69,7 +69,7 @@ const getLastSuffix = async (dir: string, ignorePattern?: string) => {
   try {
     const files = await loadMigrationFiles(dir, ignorePattern);
     return files.length > 0
-      ? getSuffixFromFileName(files[files.length - 1])
+      ? getSuffixFromFileName(files[files.length - 1] as string)
       : undefined;
   } catch (err) {
     return undefined;

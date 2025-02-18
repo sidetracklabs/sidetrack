@@ -75,8 +75,8 @@ describe("polling", () => {
       const timestamps = [processedJob1, processedJob2, processedJob3].map(
         (job) => job.attempted_at!.getTime(),
       );
-      expect(timestamps[1] - timestamps[0]).toBeGreaterThanOrEqual(100); // At least one polling interval
-      expect(timestamps[2] - timestamps[1]).toBeGreaterThanOrEqual(100);
+      expect(timestamps[1]! - timestamps[0]!).toBeGreaterThanOrEqual(100); // At least one polling interval
+      expect(timestamps[2]! - timestamps[1]!).toBeGreaterThanOrEqual(100);
     } finally {
       // Clean up
       await sidetrack.stop();

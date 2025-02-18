@@ -280,8 +280,8 @@ describe.concurrent("jobs", () => {
         queue: ["scheduled"],
       });
       expect(jobsBeforeSchedule.length).toBe(1);
-      expect(jobsBeforeSchedule[0].status).toBe("scheduled");
-      expect(jobsBeforeSchedule[0].scheduled_at).toEqual(futureDate);
+      expect(jobsBeforeSchedule[0]?.status).toBe("scheduled");
+      expect(jobsBeforeSchedule[0]?.scheduled_at).toEqual(futureDate);
 
       await sidetrack.runJobs({ queue: ["scheduled"] });
 
@@ -289,8 +289,8 @@ describe.concurrent("jobs", () => {
         queue: ["scheduled"],
       });
       expect(jobsAfterSchedule.length).toBe(1);
-      expect(jobsAfterSchedule[0].status).toBe("scheduled");
-      expect(jobsAfterSchedule[0].payload).toEqual({ message: "Future job" });
+      expect(jobsAfterSchedule[0]?.status).toBe("scheduled");
+      expect(jobsAfterSchedule[0]?.payload).toEqual({ message: "Future job" });
 
       await sidetrack.runJobs({
         includeFutureJobs: true,
@@ -301,8 +301,8 @@ describe.concurrent("jobs", () => {
         queue: ["scheduled"],
       });
       expect(jobsAfterRun.length).toBe(1);
-      expect(jobsAfterRun[0].status).toBe("completed");
-      expect(jobsAfterRun[0].payload).toEqual({ message: "Future job" });
+      expect(jobsAfterRun[0]?.status).toBe("completed");
+      expect(jobsAfterRun[0]?.payload).toEqual({ message: "Future job" });
     });
   });
 
@@ -371,7 +371,7 @@ describe.concurrent("jobs", () => {
 
       const jobs = await sidetrack.listJobs({ queue: ["test"] });
       expect(jobs.length).toBe(1);
-      expect(jobs[0].payload).toEqual({ id: "suppress unique 1" });
+      expect(jobs[0]?.payload).toEqual({ id: "suppress unique 1" });
     });
   });
 

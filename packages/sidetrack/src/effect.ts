@@ -335,7 +335,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             message: (e as any).message,
           }),
         try: () =>
-          queues[job.queue].run(
+          queues[job.queue]!.run(
             payloadDeserializer(job.queue, job.payload as Queues[string]),
             {
               job: job as SidetrackJob<Queues[string]>,
@@ -432,7 +432,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             options?.uniqueKey,
           ],
         ),
-      ).pipe(Effect.map((result) => result.rows[0]));
+      ).pipe(Effect.map((result) => result.rows[0]!));
 
     const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
       Effect.promise(() =>
@@ -440,7 +440,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           `SELECT * FROM sidetrack_jobs WHERE id = $1`,
           [jobId],
         ),
-      ).pipe(Effect.map((result) => result.rows[0]));
+      ).pipe(Effect.map((result) => result.rows[0]!));
 
     const scheduleCron = <K extends keyof Queues>(
       queueName: K,
@@ -465,7 +465,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             ),
           ),
         ),
-        Effect.map((result) => result.rows[0]),
+        Effect.map((result) => result.rows[0]!),
         Effect.tap((cronJob) => startCronJob(cronJob, options)),
       );
 
@@ -579,7 +579,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       )
 
         .pipe(
-          Effect.map((result) => result.rows[0]),
+          Effect.map((result) => result.rows[0]!),
           Effect.flatMap((job) => executeJobRunner(job, options)),
         );
 
