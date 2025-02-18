@@ -306,6 +306,75 @@ describe.concurrent("jobs", () => {
     });
   });
 
+  it("unique key prevents duplicate jobs", async () => {
+    await runInTransaction(pool, async (client) => {
+      const sidetrack = new SidetrackTest<{
+        test: { id: string };
+      }>({
+        dbClient: usePg(client),
+        queues: {
+          test: {
+            run: async (payload) => {
+              return payload;
+            },
+          },
+        },
+      });
+
+      await sidetrack.insertJob(
+        "test",
+        { id: "unique job" },
+        { uniqueKey: "test-unique-key" },
+      );
+
+      // Attempting to insert another job with same unique key should throw
+      await expect(
+        sidetrack.insertJob(
+          "test",
+          { id: "unique job 2" },
+          { uniqueKey: "test-unique-key" },
+        ),
+      ).rejects.toThrow();
+    });
+  });
+
+  it("can suppress unique key errors", async () => {
+    await runInTransaction(pool, async (client) => {
+      const sidetrack = new SidetrackTest<{
+        test: { id: string };
+      }>({
+        dbClient: usePg(client),
+        queues: {
+          test: {
+            run: async (payload) => {
+              return payload;
+            },
+          },
+        },
+      });
+
+      await sidetrack.insertJob(
+        "test",
+        { id: "suppress unique 1" },
+        { uniqueKey: "suppress-key" },
+      );
+
+      // Should not throw when suppressDuplicateUniqueKeyErrors is true
+      await sidetrack.insertJob(
+        "test",
+        { id: "suppress unique 2" },
+        {
+          suppressDuplicateUniqueKeyErrors: true,
+          uniqueKey: "suppress-key",
+        },
+      );
+
+      const jobs = await sidetrack.listJobs({ queue: ["test"] });
+      expect(jobs.length).toBe(1);
+      expect(jobs[0].payload).toEqual({ id: "suppress unique 1" });
+    });
+  });
+
   it("payload transformer works", async () => {
     await runInTransaction(pool, async (client) => {
       const sidetrack = new SidetrackTest<{
