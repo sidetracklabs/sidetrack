@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.3
+
+### Patch Changes
+
+- [#277](https://github.com/sidetracklabs/sidetrack/pull/277) [`87eae18`](https://github.com/sidetracklabs/sidetrack/commit/87eae18e49424d4a8fb52951bc109ca62eefabbb) Thanks [@aniravi24](https://github.com/aniravi24)! - Rename connectionString -> databaseUrl
+
 ## 0.1.2
 
 ### Patch Changes
