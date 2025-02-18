@@ -57,7 +57,7 @@ const command = Command.make("sidetrack").pipe(
 
 const cli = Command.run(command, {
   name: "Sidetrack CLI",
-  version: "IGNORE_VERSION_OUTPUT_HERE_CHECK_YOUR_PACKAGE_JSON",
+  version: "",
 });
 
 Effect.suspend(() => cli(process.argv)).pipe(
