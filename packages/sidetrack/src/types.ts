@@ -68,7 +68,7 @@ export type PollingInterval = Duration.Duration | number;
 
 export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
   databaseOptions?: {
-    connectionString: string;
+    databaseUrl: string;
   };
   dbClient?: SidetrackDatabaseClient;
   payloadTransformer?: SidetrackPayloadTransformer;

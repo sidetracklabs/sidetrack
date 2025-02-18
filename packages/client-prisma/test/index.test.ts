@@ -13,7 +13,7 @@ describe("jobs", () => {
       prismaBasicTest: { description: string; testId: string };
     }>({
       databaseOptions: {
-        connectionString: process.env["DATABASE_URL"]!,
+        databaseUrl: process.env["DATABASE_URL"]!,
       },
       dbClient: usePrisma(new PrismaClient()),
       queues: {
@@ -76,7 +76,7 @@ describe("jobs", () => {
       };
     }>({
       databaseOptions: {
-        connectionString: process.env["DATABASE_URL"]!,
+        databaseUrl: process.env["DATABASE_URL"]!,
       },
       dbClient: usePrisma(new PrismaClient()),
       queues: {
@@ -153,7 +153,7 @@ describe("jobs", () => {
       prismaBatchTwo: { description: string; testId: string };
     }>({
       databaseOptions: {
-        connectionString: process.env["DATABASE_URL"]!,
+        databaseUrl: process.env["DATABASE_URL"]!,
       },
       dbClient: usePrisma(new PrismaClient()),
       queues: {

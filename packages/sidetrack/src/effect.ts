@@ -153,7 +153,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
     const databaseOptions = layerOptions.databaseOptions;
     const pool =
       !layerOptions.dbClient && databaseOptions
-        ? new pg.Pool(databaseOptions)
+        ? new pg.Pool({ connectionString: databaseOptions.databaseUrl })
         : undefined;
 
     const dbClient: SidetrackDatabaseClient =
@@ -275,7 +275,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
 
     const start = () =>
       pipe(
-        !!databaseOptions?.connectionString,
+        !!databaseOptions?.databaseUrl,
         Effect.if({
           onFalse: () =>
             // TODO migrations can't be performed with a custom client currently
@@ -284,8 +284,8 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             ),
           onTrue: () =>
             Effect.promise(() =>
-              databaseOptions?.connectionString
-                ? runMigrations(databaseOptions.connectionString)
+              databaseOptions?.databaseUrl
+                ? runMigrations(databaseOptions.databaseUrl)
                 : Promise.resolve(),
             ),
         }),
