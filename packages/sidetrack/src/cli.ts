@@ -26,26 +26,25 @@ const databaseUrlFlag = Options.text("database-url")
 const runCommand = Command.make(
   "run",
   { databaseUrlFlag },
-  ({ databaseUrlFlag }) => {
-    const databaseUrl = Option.match(databaseUrlFlag, {
-      onNone: () => Config.string("DATABASE_URL"),
-      onSome: (value) => Config.succeed(value),
-    });
+  ({ databaseUrlFlag }) =>
+    Effect.fn("sidetrack.cli.migrations.run")(function* () {
+      const databaseUrlConfig = Option.match(databaseUrlFlag, {
+        onNone: () => Config.string("DATABASE_URL"),
+        onSome: (value) => Config.succeed(value),
+      });
+      const databaseUrl = yield* databaseUrlConfig.pipe(
+        Effect.mapError(
+          (error) =>
+            new MissingEnvError({
+              cause: error,
+              message:
+                "If a database url is not provided, the DATABASE_URL environment variable must be set.",
+            }),
+        ),
+      );
 
-    return Effect.flatMap(databaseUrl, (dbUrl) =>
-      Effect.promise(() => runMigrations(dbUrl)),
-    ).pipe(
-      Effect.catchTag(
-        "ConfigError",
-        (error) =>
-          new MissingEnvError({
-            cause: error,
-            message:
-              "If a database url is not provided, the DATABASE_URL environment variable must be set.",
-          }),
-      ),
-    );
-  },
+      return yield* Effect.promise(() => runMigrations(databaseUrl));
+    })(),
 );
 
 const migrationsCommand = Command.make("migrations").pipe(
