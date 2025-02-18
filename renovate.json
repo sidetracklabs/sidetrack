@@ -15,7 +15,7 @@
   "packageRules": [
     {
       "groupName": "effect",
-      "matchPackageNames": ["@effect/{/,}**"]
+      "matchPackageNames": ["effect", "@effect**"]
     },
     {
       "groupName": "all patches",
