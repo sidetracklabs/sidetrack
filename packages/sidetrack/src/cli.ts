@@ -16,7 +16,7 @@ class MissingEnvError extends Data.TaggedError("MissingEnvError")<{
 
 const databaseUrlFlag = Options.text("database-url")
   .pipe(Options.optional)
-  .pipe(Options.withAlias("c"))
+  .pipe(Options.withAlias("d"))
   .pipe(
     Options.withDescription(
       "The database url to the database. If one is not provided, we will look for a DATABASE_URL environment variable.",
