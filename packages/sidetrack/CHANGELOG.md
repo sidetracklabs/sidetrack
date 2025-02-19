@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.6
+
+### Patch Changes
+
+- [`25ec20f`](https://github.com/sidetracklabs/sidetrack/commit/25ec20ff18a8b4cba00465c553a20f941084212c) Thanks [@aniravi24](https://github.com/aniravi24)! - Fix alias for CLI command
+
 ## 0.1.5
 
 ### Patch Changes
