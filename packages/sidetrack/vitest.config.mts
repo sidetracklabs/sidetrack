@@ -9,8 +9,11 @@ export default defineConfig(() => {
     },
     plugins: [tsconfigPaths()],
     test: {
+      coverage: {
+        exclude: ['./src/cli.ts', '.kanelrc.js', '*.config*']
+      },
       include: ["./test/**/*.test.ts"],
-      setupFiles: ["./test/setup.ts"],
+      setupFiles: ["./test/setup.ts"]
     },
   };
 });
