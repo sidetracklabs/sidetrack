@@ -92,6 +92,10 @@ export type SidetrackJob<Payload> = Omit<SidetrackJobs, "payload"> & {
   payload: Payload;
 };
 
+export interface SidetrackJobContext<Payload> {
+  job: SidetrackJob<Payload>;
+}
+
 export type SidetrackQueues<Queues extends Record<string, unknown>> = {
   [K in keyof Queues]: {
     maxAttempts?: number;
@@ -103,7 +107,7 @@ export type SidetrackQueues<Queues extends Record<string, unknown>> = {
     pollingInterval?: PollingInterval;
     run: (
       payload: Queues[K],
-      context: { job: SidetrackJob<Queues[K]> },
+      context: SidetrackJobContext<Queues[K]>,
     ) => Promise<unknown>;
   };
 };
