@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.9
+
+### Patch Changes
+
+- [`6360c77`](https://github.com/sidetracklabs/sidetrack/commit/6360c77d8b90a9b47b38698c0d58551304e262a1) Thanks [@aniravi24](https://github.com/aniravi24)! - Make sure class export also has synchronous stop
+
 ## 0.1.8
 
 ### Patch Changes
