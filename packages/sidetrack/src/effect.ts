@@ -148,86 +148,84 @@ export const getSidetrackService = <
 export function layer<Queues extends SidetrackQueuesGenericType>(
   layerOptions: SidetrackOptions<Queues>,
 ): Layer.Layer<SidetrackService<Queues>> {
-  return Layer.sync(getSidetrackService<Queues>(), () => {
-    const queues = layerOptions.queues;
-    const databaseOptions = layerOptions.databaseOptions;
-    const pool =
-      !layerOptions.dbClient &&
-      !layerOptions.disableDbClientInitialization &&
-      databaseOptions
-        ? new pg.Pool({ connectionString: databaseOptions.databaseUrl })
-        : undefined;
+  return Layer.scoped(
+    getSidetrackService<Queues>(),
+    Effect.gen(function* () {
+      const layerScope = yield* Effect.scope;
+      const queues = layerOptions.queues;
+      const databaseOptions = layerOptions.databaseOptions;
+      const pool =
+        !layerOptions.dbClient &&
+        !layerOptions.disableDbClientInitialization &&
+        databaseOptions
+          ? new pg.Pool({ connectionString: databaseOptions.databaseUrl })
+          : undefined;
 
-    const dbClient: SidetrackDatabaseClient =
-      layerOptions.dbClient ??
-      (pool
-        ? usePg(pool)
-        : (() => {
-            if (layerOptions.disableDbClientInitialization) {
-              return {
-                execute: () => {
-                  throw new Error(
-                    "You are trying to execute a sidetrack method without a database client passed in or initialized.",
-                  );
-                },
-              };
-            } else {
-              throw new Error(
-                "No database client set for sidetrack, you must pass in a connection string or a custom db client",
-              );
-            }
-          })());
+      const dbClient: SidetrackDatabaseClient =
+        layerOptions.dbClient ??
+        (pool
+          ? usePg(pool)
+          : (() => {
+              if (layerOptions.disableDbClientInitialization) {
+                return {
+                  execute: () => {
+                    throw new Error(
+                      "You are trying to execute a sidetrack method without a database client passed in or initialized.",
+                    );
+                  },
+                };
+              } else {
+                throw new Error(
+                  "No database client set for sidetrack, you must pass in a connection string or a custom db client",
+                );
+              }
+            })());
 
-    const globalPayloadTransformer = layerOptions.payloadTransformer;
+      const globalPayloadTransformer = layerOptions.payloadTransformer;
 
-    const payloadSerializer = <K extends keyof Queues>(
-      queueName: K,
-      payload: Queues[K],
-    ) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      queues[queueName].payloadTransformer
-        ? (queues[queueName].payloadTransformer.serialize(payload) as Queues[K])
-        : globalPayloadTransformer
-          ? (globalPayloadTransformer.serialize(payload) as Queues[K])
-          : payload;
+      const payloadSerializer = <K extends keyof Queues>(
+        queueName: K,
+        payload: Queues[K],
+      ) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        queues[queueName].payloadTransformer
+          ? (queues[queueName].payloadTransformer.serialize(
+              payload,
+            ) as Queues[K])
+          : globalPayloadTransformer
+            ? (globalPayloadTransformer.serialize(payload) as Queues[K])
+            : payload;
 
-    const payloadDeserializer = <K extends keyof Queues>(
-      queueName: K,
-      payload: Queues[K],
-    ) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      queues[queueName].payloadTransformer
-        ? (queues[queueName].payloadTransformer.deserialize(
-            payload,
-          ) as Queues[K])
-        : globalPayloadTransformer
-          ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
-          : payload;
+      const payloadDeserializer = <K extends keyof Queues>(
+        queueName: K,
+        payload: Queues[K],
+      ) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        queues[queueName].payloadTransformer
+          ? (queues[queueName].payloadTransformer.deserialize(
+              payload,
+            ) as Queues[K])
+          : globalPayloadTransformer
+            ? (globalPayloadTransformer.deserialize(payload) as Queues[K])
+            : payload;
 
-    const pollingInterval = pollingIntervalMs(layerOptions.pollingInterval);
+      const pollingInterval = pollingIntervalMs(layerOptions.pollingInterval);
 
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    const pollingFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    const cronFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
+      // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+      const pollingFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
+      // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+      const cronFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
 
-    // Handle SIGTERM by stopping polling but allowing running jobs to complete
-    const stopListener = () => {
-      process.removeListener("SIGTERM", stopListener);
-      process.removeListener("SIGINT", stopListener);
-      stop();
-    };
-
-    /**
-     * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
-     */
-    const startPolling = () =>
-      Effect.forEach(
-        Record.toEntries(queues),
-        ([queueName, queue]) =>
-          Effect.promise(() =>
-            dbClient.execute<SidetrackJobs>(
-              `WITH next_jobs AS (
+      /**
+       * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
+       */
+      const startPolling = () =>
+        Effect.forEach(
+          Record.toEntries(queues),
+          ([queueName, queue]) =>
+            Effect.promise(() =>
+              dbClient.execute<SidetrackJobs>(
+                `WITH next_jobs AS (
         SELECT
           id
         FROM
@@ -252,176 +250,174 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           FROM
             next_jobs
         ) RETURNING *`,
-              [queueName],
-            ),
-          ).pipe(
-            Effect.map((result) => result.rows),
-            Effect.flatMap((result) =>
-              Effect.forEach(
-                result,
-                (job) =>
-                  executeJobRunner(job).pipe(
-                    Effect.catchAllCause(Effect.logError),
-                    Effect.forkDaemon,
-                  ),
-                {
-                  concurrency: "inherit",
-                },
+                [queueName],
+              ),
+            ).pipe(
+              Effect.map((result) => result.rows),
+              Effect.flatMap((result) =>
+                Effect.forEach(
+                  result,
+                  (job) =>
+                    executeJobRunner(job).pipe(
+                      Effect.catchAllCause(Effect.logError),
+                      Effect.forkDaemon,
+                    ),
+                  {
+                    concurrency: "inherit",
+                  },
+                ),
+              ),
+              Effect.repeat(
+                Schedule.spaced(
+                  queue.pollingInterval
+                    ? pollingIntervalMs(queue.pollingInterval)
+                    : pollingInterval,
+                ),
+              ),
+              Effect.catchAllCause(Effect.logError),
+              Effect.forkIn(layerScope),
+              Effect.tap((fiber) =>
+                Effect.sync(() => {
+                  pollingFibers.push(fiber);
+                }),
               ),
             ),
-            Effect.repeat(
-              Schedule.spaced(
-                queue.pollingInterval
-                  ? pollingIntervalMs(queue.pollingInterval)
-                  : pollingInterval,
+          { concurrency: "inherit" },
+        );
+
+      const start = () =>
+        pipe(
+          !!databaseOptions?.databaseUrl,
+          Effect.if({
+            onFalse: () =>
+              // TODO migrations can't be performed with a custom client currently
+              Effect.logWarning(
+                "No connection string provided, cannot run sidetrack migrations",
               ),
-            ),
-            Effect.catchAllCause(Effect.logError),
-            Effect.forkDaemon,
-            Effect.tap((fiber) =>
-              Effect.sync(() => {
-                pollingFibers.push(fiber);
-              }),
-            ),
-          ),
-        { concurrency: "inherit" },
-      );
-
-    const start = () =>
-      pipe(
-        !!databaseOptions?.databaseUrl,
-        Effect.if({
-          onFalse: () =>
-            // TODO migrations can't be performed with a custom client currently
-            Effect.logWarning(
-              "No connection string provided, cannot run sidetrack migrations",
-            ),
-          onTrue: () =>
-            Effect.promise(() =>
-              databaseOptions?.databaseUrl
-                ? runMigrations(databaseOptions.databaseUrl)
-                : Promise.resolve(),
-            ),
-        }),
-        Effect.flatMap(() => startPolling()),
-        Effect.flatMap(() => startCronSchedules()),
-        Effect.tap(() => {
-          process.on("SIGTERM", stopListener);
-          process.on("SIGINT", stopListener);
-        }),
-      );
-
-    const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute(
-          `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
-          [jobId],
-        ),
-      ).pipe(Effect.asVoid);
-
-    // TODO should we return the deleted job or the number of rows deleted? There is a difference between a job actually being deleted and a job not being found
-    const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute(
-          `DELETE FROM sidetrack_jobs WHERE id = $1`,
-          [jobId],
-        ),
-      ).pipe(Effect.asVoid);
-
-    const stop = () => {
-      pollingFibers.forEach((fiber) => fiber.unsafeInterruptAsFork(fiber.id()));
-      cronFibers.forEach((fiber) => fiber.unsafeInterruptAsFork(fiber.id()));
-      pollingFibers.length = 0;
-      cronFibers.length = 0;
-    };
-
-    const executeJobRunner = (
-      job: SidetrackJobs,
-      options?: { dbClient?: SidetrackDatabaseClient },
-    ) =>
-      Effect.tryPromise({
-        catch: (e) =>
-          new SidetrackJobRunError({
-            cause: e,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            message: (e as any).message,
+            onTrue: () =>
+              Effect.promise(() =>
+                databaseOptions?.databaseUrl
+                  ? runMigrations(databaseOptions.databaseUrl)
+                  : Promise.resolve(),
+              ),
           }),
-        try: () =>
-          queues[job.queue]!.run(
-            payloadDeserializer(job.queue, job.payload as Queues[string]),
-            {
-              job: job as SidetrackJob<Queues[string]>,
-            },
+          Effect.flatMap(() => startPolling()),
+          Effect.flatMap(() => startCronSchedules()),
+        );
+
+      const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute(
+            `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
+            [jobId],
           ),
-      }).pipe(
-        Effect.flatMap(() =>
-          Effect.promise(() =>
-            (options?.dbClient ?? dbClient).execute(
-              `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
-              [job.id],
+        ).pipe(Effect.asVoid);
+
+      // TODO should we return the deleted job or the number of rows deleted? There is a difference between a job actually being deleted and a job not being found
+      const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute(
+            `DELETE FROM sidetrack_jobs WHERE id = $1`,
+            [jobId],
+          ),
+        ).pipe(Effect.asVoid);
+
+      const stop = () => {
+        pollingFibers.forEach((fiber) =>
+          fiber.unsafeInterruptAsFork(fiber.id()),
+        );
+        cronFibers.forEach((fiber) => fiber.unsafeInterruptAsFork(fiber.id()));
+        pollingFibers.length = 0;
+        cronFibers.length = 0;
+      };
+
+      const executeJobRunner = (
+        job: SidetrackJobs,
+        options?: { dbClient?: SidetrackDatabaseClient },
+      ) =>
+        Effect.tryPromise({
+          catch: (e) =>
+            new SidetrackJobRunError({
+              cause: e,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+              message: (e as any).message,
+            }),
+          try: () =>
+            queues[job.queue]!.run(
+              payloadDeserializer(job.queue, job.payload as Queues[string]),
+              {
+                job: job as SidetrackJob<Queues[string]>,
+              },
+            ),
+        }).pipe(
+          Effect.flatMap(() =>
+            Effect.promise(() =>
+              (options?.dbClient ?? dbClient).execute(
+                `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
+                [job.id],
+              ),
             ),
           ),
-        ),
-        Effect.catchTag("SidetrackJobRunError", (jobRunError) =>
-          Effect.promise(() => {
-            if (job.current_attempt + 1 < job.max_attempts) {
-              // Exponential backoff with jitter
-              // Based of the historic Resque/Sidekiq algorithm
+          Effect.catchTag("SidetrackJobRunError", (jobRunError) =>
+            Effect.promise(() => {
+              if (job.current_attempt + 1 < job.max_attempts) {
+                // Exponential backoff with jitter
+                // Based of the historic Resque/Sidekiq algorithm
 
-              const backoff = Math.trunc(
-                Math.pow(job.current_attempt + 1, 4) +
-                  15 +
-                  // Number between 1 and 30
-                  Math.floor(Math.random() * (30 - 1 + 1) + 1) *
-                    job.current_attempt +
-                  1,
-              );
+                const backoff = Math.trunc(
+                  Math.pow(job.current_attempt + 1, 4) +
+                    15 +
+                    // Number between 1 and 30
+                    Math.floor(Math.random() * (30 - 1 + 1) + 1) *
+                      job.current_attempt +
+                    1,
+                );
 
-              return (options?.dbClient ?? dbClient).execute(
-                `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
+                return (options?.dbClient ?? dbClient).execute(
+                  `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
                           (CASE
                               WHEN errors IS NULL THEN '[]'::JSONB
                               ELSE errors
                           END) || $2::jsonb WHERE id = $1`,
-                [
-                  job.id,
-                  // TODO make sure we handle cases where this is not an Error, and also not serializable?
-                  JSON.stringify(
-                    jobRunError.cause,
-                    Object.getOwnPropertyNames(jobRunError.cause),
-                  ),
-                ],
-              );
-            } else {
-              return (options?.dbClient ?? dbClient).execute(
-                `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
+                  [
+                    job.id,
+                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                    JSON.stringify(
+                      jobRunError.cause,
+                      Object.getOwnPropertyNames(jobRunError.cause),
+                    ),
+                  ],
+                );
+              } else {
+                return (options?.dbClient ?? dbClient).execute(
+                  `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
                             (CASE
                             WHEN errors IS NULL THEN '[]'::JSONB
                             ELSE errors
                         END) || $2::jsonb WHERE id = $1`,
-                [
-                  job.id,
-                  // TODO make sure we handle cases where this is not an Error, and also not serializable?
-                  JSON.stringify(
-                    jobRunError.cause,
-                    Object.getOwnPropertyNames(jobRunError.cause),
-                  ),
-                ],
-              );
-            }
-          }),
-        ),
-        Effect.asVoid,
-      );
+                  [
+                    job.id,
+                    // TODO make sure we handle cases where this is not an Error, and also not serializable?
+                    JSON.stringify(
+                      jobRunError.cause,
+                      Object.getOwnPropertyNames(jobRunError.cause),
+                    ),
+                  ],
+                );
+              }
+            }),
+          ),
+          Effect.asVoid,
+        );
 
-    const insertJob = <K extends keyof Queues>(
-      queueName: K,
-      payload: Queues[K],
-      options?: SidetrackInsertJobOptions,
-    ) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute<SidetrackJobs>(
-          `INSERT INTO sidetrack_jobs (
+      const insertJob = <K extends keyof Queues>(
+        queueName: K,
+        payload: Queues[K],
+        options?: SidetrackInsertJobOptions,
+      ) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute<SidetrackJobs>(
+            `INSERT INTO sidetrack_jobs (
       status,
       queue,
       payload,
@@ -436,147 +432,147 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               : ""
           }
           RETURNING *`,
-          [
-            queueName,
-            payloadSerializer(queueName, payload),
-            queues[queueName]?.maxAttempts,
-            options?.scheduledAt
-              ? DateTime.isDateTime(options.scheduledAt)
-                ? DateTime.toDateUtc(options.scheduledAt)
-                : options?.scheduledAt
-              : undefined,
-            options?.uniqueKey,
-          ],
-        ),
-      ).pipe(Effect.map((result) => result.rows[0]!));
+            [
+              queueName,
+              payloadSerializer(queueName, payload),
+              queues[queueName]?.maxAttempts,
+              options?.scheduledAt
+                ? DateTime.isDateTime(options.scheduledAt)
+                  ? DateTime.toDateUtc(options.scheduledAt)
+                  : options?.scheduledAt
+                : undefined,
+              options?.uniqueKey,
+            ],
+          ),
+        ).pipe(Effect.map((result) => result.rows[0]!));
 
-    const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute<SidetrackJobs>(
-          `SELECT * FROM sidetrack_jobs WHERE id = $1`,
-          [jobId],
-        ),
-      ).pipe(Effect.map((result) => result.rows[0]!));
+      const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute<SidetrackJobs>(
+            `SELECT * FROM sidetrack_jobs WHERE id = $1`,
+            [jobId],
+          ),
+        ).pipe(Effect.map((result) => result.rows[0]!));
 
-    const scheduleCron = <K extends keyof Queues>(
-      queueName: K,
-      cronExpression: string,
-      payload: Queues[K],
-      options?: SidetrackCronJobOptions,
-    ) =>
-      Cron.parse(
-        cronExpression,
-        options?.timezone
-          ? DateTime.isTimeZone(options.timezone)
-            ? options.timezone
-            : DateTime.zoneUnsafeMakeNamed(options.timezone)
-          : undefined,
-      ).pipe(
-        Effect.flatMap((_cron) =>
-          Effect.promise(() =>
-            (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
-              `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload, timezone)
+      const scheduleCron = <K extends keyof Queues>(
+        queueName: K,
+        cronExpression: string,
+        payload: Queues[K],
+        options?: SidetrackCronJobOptions,
+      ) =>
+        Cron.parse(
+          cronExpression,
+          options?.timezone
+            ? DateTime.isTimeZone(options.timezone)
+              ? options.timezone
+              : DateTime.zoneUnsafeMakeNamed(options.timezone)
+            : undefined,
+        ).pipe(
+          Effect.flatMap((_cron) =>
+            Effect.promise(() =>
+              (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
+                `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload, timezone)
            VALUES ($1, $2, $3, $4)
            ON CONFLICT (queue, cron_expression) DO UPDATE
            SET payload = $3 RETURNING *`,
-              [
-                queueName,
-                cronExpression,
-                payload,
-                options?.timezone
-                  ? DateTime.isTimeZone(options.timezone)
-                    ? DateTime.zoneToString(options.timezone)
-                    : options.timezone
-                  : undefined,
-              ],
+                [
+                  queueName,
+                  cronExpression,
+                  payload,
+                  options?.timezone
+                    ? DateTime.isTimeZone(options.timezone)
+                      ? DateTime.zoneToString(options.timezone)
+                      : options.timezone
+                    : undefined,
+                ],
+              ),
             ),
           ),
-        ),
-        Effect.map((result) => result.rows[0]!),
-        Effect.tap((cronJob) => startCronJob(cronJob, options)),
-      );
+          Effect.map((result) => result.rows[0]!),
+          Effect.tap((cronJob) => startCronJob(cronJob, options)),
+        );
 
-    /**
-     * @internal
-     */
-    const startCronSchedules = () =>
-      Effect.promise(() =>
-        dbClient.execute<SidetrackCronJobs>(
-          `SELECT * FROM sidetrack_cron_jobs`,
-        ),
-      ).pipe(
-        Effect.flatMap((result) =>
-          Effect.forEach(result.rows, (cronJob) => startCronJob(cronJob), {
-            concurrency: "inherit",
-          }),
-        ),
-      );
+      /**
+       * @internal
+       */
+      const startCronSchedules = () =>
+        Effect.promise(() =>
+          dbClient.execute<SidetrackCronJobs>(
+            `SELECT * FROM sidetrack_cron_jobs`,
+          ),
+        ).pipe(
+          Effect.flatMap((result) =>
+            Effect.forEach(result.rows, (cronJob) => startCronJob(cronJob), {
+              concurrency: "inherit",
+            }),
+          ),
+        );
 
-    /**
-     * @internal
-     */
-    const startCronJob = (
-      cronJob: SidetrackCronJobs,
-      options?: SidetrackCronJobOptions,
-    ) => {
-      // This grabs the interval within which the cron job is running, and uses that as a unique key so multiple cron jobs on the same schedule don't conflict
-      // alternatively, we could explore using cron.next and just using Effect.schedule instead of draining a stream
-      return Cron.parse(
-        cronJob.cron_expression,
-        cronJob.timezone
-          ? DateTime.zoneUnsafeMakeNamed(cronJob.timezone)
-          : undefined,
-      ).pipe(
-        Stream.flatMap((cron) => Stream.fromSchedule(Schedule.cron(cron))),
-        Stream.mapEffect((value) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-          insertJob(cronJob.queue, cronJob.payload as any, {
-            ...options,
-            suppressDuplicateUniqueKeyErrors: true,
-            uniqueKey: value.toString(),
-          }),
-        ),
-        Stream.catchAllCause(Effect.logError),
-        Stream.runDrain,
-        Effect.forkDaemon,
-        Effect.tap((fiber) =>
-          Effect.sync(() => {
-            cronFibers.push(fiber);
-          }),
-        ),
-      );
-    };
+      /**
+       * @internal
+       */
+      const startCronJob = (
+        cronJob: SidetrackCronJobs,
+        options?: SidetrackCronJobOptions,
+      ) => {
+        // This grabs the interval within which the cron job is running, and uses that as a unique key so multiple cron jobs on the same schedule don't conflict
+        // alternatively, we could explore using cron.next and just using Effect.schedule instead of draining a stream
+        return Cron.parse(
+          cronJob.cron_expression,
+          cronJob.timezone
+            ? DateTime.zoneUnsafeMakeNamed(cronJob.timezone)
+            : undefined,
+        ).pipe(
+          Stream.flatMap((cron) => Stream.fromSchedule(Schedule.cron(cron))),
+          Stream.mapEffect((value) =>
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+            insertJob(cronJob.queue, cronJob.payload as any, {
+              ...options,
+              suppressDuplicateUniqueKeyErrors: true,
+              uniqueKey: value.toString(),
+            }),
+          ),
+          Stream.catchAllCause(Effect.logError),
+          Stream.runDrain,
+          Effect.forkIn(layerScope),
+          Effect.tap((fiber) =>
+            Effect.sync(() => {
+              cronFibers.push(fiber);
+            }),
+          ),
+        );
+      };
 
-    // TODO should we return the updated cron job or the number of rows updated? There is a difference between a cron job actually being updated and a cron job not being found
-    const deactivateCronSchedule = <K extends keyof Queues>(
-      queueName: K,
-      cronExpression: string,
-      options?: SidetrackDeactivateCronScheduleOptions,
-    ) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute(
-          `UPDATE sidetrack_cron_jobs SET status = 'inactive' WHERE queue = $1 AND cron_expression = $2`,
-          [queueName, cronExpression],
-        ),
-      ).pipe(Effect.asVoid);
+      // TODO should we return the updated cron job or the number of rows updated? There is a difference between a cron job actually being updated and a cron job not being found
+      const deactivateCronSchedule = <K extends keyof Queues>(
+        queueName: K,
+        cronExpression: string,
+        options?: SidetrackDeactivateCronScheduleOptions,
+      ) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute(
+            `UPDATE sidetrack_cron_jobs SET status = 'inactive' WHERE queue = $1 AND cron_expression = $2`,
+            [queueName, cronExpression],
+          ),
+        ).pipe(Effect.asVoid);
 
-    // TODO should we return the deleted cron job or the number of rows deleted? There is a difference between a cron job actually being deleted and a cron job not being found
-    const deleteCronSchedule = <K extends keyof Queues>(
-      queueName: K,
-      cronExpression: string,
-      options?: SidetrackDeleteCronScheduleOptions,
-    ) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute(
-          `DELETE FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2`,
-          [queueName, cronExpression],
-        ),
-      ).pipe(Effect.asVoid);
+      // TODO should we return the deleted cron job or the number of rows deleted? There is a difference between a cron job actually being deleted and a cron job not being found
+      const deleteCronSchedule = <K extends keyof Queues>(
+        queueName: K,
+        cronExpression: string,
+        options?: SidetrackDeleteCronScheduleOptions,
+      ) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute(
+            `DELETE FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2`,
+            [queueName, cronExpression],
+          ),
+        ).pipe(Effect.asVoid);
 
-    const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute<SidetrackJobs>(
-          `WITH next_job AS (
+      const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute<SidetrackJobs>(
+            `WITH next_job AS (
               SELECT
                 id
               FROM
@@ -601,21 +597,21 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                 FROM
                   next_job
               ) RETURNING *`,
-          [jobId],
-        ),
-      )
+            [jobId],
+          ),
+        )
 
-        .pipe(
-          Effect.map((result) => result.rows[0]!),
-          Effect.flatMap((job) => executeJobRunner(job, options)),
-        );
+          .pipe(
+            Effect.map((result) => result.rows[0]!),
+            Effect.flatMap((job) => executeJobRunner(job, options)),
+          );
 
-    const runJobs = <K extends keyof Queues>(
-      options?: SidetrackRunJobsOptions<Queues, K>,
-    ) =>
-      Effect.promise(() =>
-        (options?.dbClient ?? dbClient).execute<SidetrackJobs>(
-          `WITH next_jobs AS (
+      const runJobs = <K extends keyof Queues>(
+        options?: SidetrackRunJobsOptions<Queues, K>,
+      ) =>
+        Effect.promise(() =>
+          (options?.dbClient ?? dbClient).execute<SidetrackJobs>(
+            `WITH next_jobs AS (
               SELECT
                 id
               FROM
@@ -647,78 +643,79 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                 FROM
                   next_jobs
               ) RETURNING *`,
-          options?.queue ? [options?.queue] : undefined,
-        ),
-      )
+            options?.queue ? [options?.queue] : undefined,
+          ),
+        )
 
-        .pipe(
-          Effect.map((result) => result.rows),
-          Effect.flatMap((result) =>
-            Effect.forEach(result, (job) => executeJobRunner(job, options), {
-              concurrency: "inherit",
-              discard: true,
-            }),
+          .pipe(
+            Effect.map((result) => result.rows),
+            Effect.flatMap((result) =>
+              Effect.forEach(result, (job) => executeJobRunner(job, options), {
+                concurrency: "inherit",
+                discard: true,
+              }),
+            ),
+          );
+
+      const listJobs = <K extends keyof Queues>(
+        options?: SidetrackListJobsOptions<Queues, K>,
+      ) =>
+        // get jobs
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute<SidetrackJobs>(
+            `SELECT * FROM sidetrack_jobs ${
+              options?.queue
+                ? typeof options.queue === "string"
+                  ? "WHERE queue = $1"
+                  : "WHERE queue = ANY($1)"
+                : ""
+            }`,
+            options?.queue ? [options?.queue] : undefined,
+          ),
+        ).pipe(Effect.map((result) => result.rows));
+
+      const listJobStatuses = <K extends keyof Queues>(
+        options?: SidetrackListJobStatusesOptions<Queues, K>,
+      ) =>
+        // get jobs and group by status
+        Effect.promise(() =>
+          (options?.dbClient || dbClient).execute<{
+            count: number;
+            status: SidetrackJobStatusEnum;
+          }>(
+            // unsafely cast to int for now because you probably won't have 2 billion jobs
+            `SELECT status, count(*)::integer FROM sidetrack_jobs ${
+              options?.queue
+                ? typeof options.queue === "string"
+                  ? "WHERE queue = $1"
+                  : "WHERE queue = ANY($1)"
+                : ""
+            } GROUP BY status`,
+            options?.queue ? [options?.queue] : undefined,
+          ),
+        ).pipe(
+          Effect.map((result) =>
+            fromIterableWith(result.rows, (row) => [row.status, row.count]),
           ),
         );
 
-    const listJobs = <K extends keyof Queues>(
-      options?: SidetrackListJobsOptions<Queues, K>,
-    ) =>
-      // get jobs
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute<SidetrackJobs>(
-          `SELECT * FROM sidetrack_jobs ${
-            options?.queue
-              ? typeof options.queue === "string"
-                ? "WHERE queue = $1"
-                : "WHERE queue = ANY($1)"
-              : ""
-          }`,
-          options?.queue ? [options?.queue] : undefined,
-        ),
-      ).pipe(Effect.map((result) => result.rows));
-
-    const listJobStatuses = <K extends keyof Queues>(
-      options?: SidetrackListJobStatusesOptions<Queues, K>,
-    ) =>
-      // get jobs and group by status
-      Effect.promise(() =>
-        (options?.dbClient || dbClient).execute<{
-          count: number;
-          status: SidetrackJobStatusEnum;
-        }>(
-          // unsafely cast to int for now because you probably won't have 2 billion jobs
-          `SELECT status, count(*)::integer FROM sidetrack_jobs ${
-            options?.queue
-              ? typeof options.queue === "string"
-                ? "WHERE queue = $1"
-                : "WHERE queue = ANY($1)"
-              : ""
-          } GROUP BY status`,
-          options?.queue ? [options?.queue] : undefined,
-        ),
-      ).pipe(
-        Effect.map((result) =>
-          fromIterableWith(result.rows, (row) => [row.status, row.count]),
-        ),
-      );
-
-    return {
-      cancelJob,
-      deactivateCronSchedule,
-      deleteCronSchedule,
-      deleteJob,
-      getJob,
-      insertJob,
-      scheduleCron,
-      start,
-      stop,
-      testUtils: {
-        listJobStatuses,
-        listJobs,
-        runJob,
-        runJobs,
-      },
-    };
-  });
+      return {
+        cancelJob,
+        deactivateCronSchedule,
+        deleteCronSchedule,
+        deleteJob,
+        getJob,
+        insertJob,
+        scheduleCron,
+        start,
+        stop,
+        testUtils: {
+          listJobStatuses,
+          listJobs,
+          runJob,
+          runJobs,
+        },
+      };
+    }),
+  );
 }

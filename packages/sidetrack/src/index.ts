@@ -32,6 +32,14 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
     SidetrackService<Queues>,
     never
   >;
+  /** @internal */
+  protected signalHandlersAttached = false;
+
+  /** @internal */
+  protected stopListener = () => {
+    this.signalHandlersAttached = false;
+    this.stop();
+  };
 
   constructor(options: SidetrackOptions<Queues>) {
     this.managedRuntime = ManagedRuntime.make(layer(options));
@@ -132,6 +140,11 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
    * Automatically run migrations and start polling the DB for jobs
    */
   async start() {
+    if (!this.signalHandlersAttached) {
+      process.once("SIGTERM", this.stopListener);
+      process.once("SIGINT", this.stopListener);
+      this.signalHandlersAttached = true;
+    }
     return this.managedRuntime.runPromise(
       Effect.flatMap(this.sidetrackService, (service) => service.start()),
     );
