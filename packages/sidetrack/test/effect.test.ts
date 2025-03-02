@@ -454,4 +454,51 @@ describe("Effect API", () => {
       await Effect.runPromise(program.pipe(Effect.provide(sidetrackLayer)));
     });
   });
+
+  it("automatically starts job processing when startOnInitialization is true", async () => {
+    await runInTransaction(pool, async (client) => {
+      interface Queues {
+        test: { id: string };
+      }
+
+      const SidetrackService = SidetrackEffect.getSidetrackService<Queues>();
+      let jobProcessed = false;
+
+      const sidetrackLayer = SidetrackEffect.layer<Queues>({
+        dbClient: usePg(client),
+        pollingInterval: 100,
+        queues: {
+          test: {
+            run: (payload) => {
+              jobProcessed = true;
+              expect(payload.id).toBe("auto-start");
+              return Promise.resolve(payload);
+            },
+          },
+        },
+        startOnInitialization: true,
+      });
+
+      const program = Effect.gen(function* () {
+        const sidetrack = yield* SidetrackService;
+
+        // Insert a job that should be automatically processed
+        const job = yield* sidetrack.insertJob("test", { id: "auto-start" });
+
+        // Allow some time for the job to be processed by the automatic polling
+        yield* Effect.sleep("300 millis");
+
+        // We shouldn't need to call start() or runJob() explicitly
+        const completedJob = yield* sidetrack.getJob(job.id);
+
+        expect(jobProcessed).toBe(true);
+        expect(completedJob.status).toBe("completed");
+
+        // Clean up by stopping the service
+        sidetrack.stop();
+      });
+
+      await Effect.runPromise(program.pipe(Effect.provide(sidetrackLayer)));
+    });
+  });
 });

@@ -504,7 +504,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                 `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload, timezone)
            VALUES ($1, $2, $3, $4)
            ON CONFLICT (queue, cron_expression) DO UPDATE
-           SET payload = $3 RETURNING *`,
+           SET payload = $3, timezone = $4 RETURNING *`,
                 [
                   queueName,
                   cronExpression,
@@ -769,6 +769,10 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             },
           }),
         );
+
+      if (layerOptions.startOnInitialization) {
+        yield* start();
+      }
 
       return {
         cancelJob,

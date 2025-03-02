@@ -83,6 +83,12 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
    */
   pollingInterval?: PollingInterval;
   queues: SidetrackQueues<Queues>;
+  /**
+   * This is useful if you want it to automatically start polling when you initialize sidetrack instead of waiting to call start.
+   * Particularly useful if you are running sidetrack in a long running process on its own.
+   * e.g. if you are using Layer.launch with Effect (@link https://effect.website/docs/requirements-management/layers/#converting-a-layer-to-an-effect)
+   */
+  startOnInitialization?: boolean;
 }
 
 export class SidetrackJobRunError extends Data.TaggedError(
