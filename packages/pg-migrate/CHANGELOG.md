@@ -1,5 +1,11 @@
 # @sidetrack/pg-migrate
 
+## 0.1.1
+
+### Patch Changes
+
+- [`c510039`](https://github.com/sidetracklabs/sidetrack/commit/c51003920a7059b846e41188552fb9580497b04d) Thanks [@aniravi24](https://github.com/aniravi24)! - export sidetrack context type, bump deps
+
 ## 0.1.0
 
 ### Minor Changes
