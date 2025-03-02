@@ -53,7 +53,7 @@
     "@vitest/coverage-v8": "3.0.7",
     "dotenv-cli": "8.0.0",
     "pg": "8.13.3",
-    "vite": "6.1.1",
+    "vite": "6.2.0",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.0.7"
   },
