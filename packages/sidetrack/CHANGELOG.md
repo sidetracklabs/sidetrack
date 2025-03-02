@@ -1,5 +1,13 @@
 # sidetrack
 
+## 0.1.8
+
+### Patch Changes
+
+- [`d27fb33`](https://github.com/sidetracklabs/sidetrack/commit/d27fb33175bad3ad6c2a8d4c41b4d27c18d121fe) Thanks [@aniravi24](https://github.com/aniravi24)! - Try making stop synchronous
+
+- [`0e5163f`](https://github.com/sidetracklabs/sidetrack/commit/0e5163f8756759cad69c0b2a5df9b261c3d7322b) Thanks [@aniravi24](https://github.com/aniravi24)! - Fix SidetrackQueues export generic
+
 ## 0.1.7
 
 ### Patch Changes
