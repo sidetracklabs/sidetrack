@@ -72,6 +72,10 @@ export interface SidetrackOptions<Queues extends SidetrackQueuesGenericType> {
     databaseUrl: string;
   };
   dbClient?: SidetrackDatabaseClient;
+  /**
+   * Disable the initialization of the database client (Sidetrack initializes one by default if not provided)
+   */
+  disableDbClientInitialization?: boolean;
   payloadTransformer?: SidetrackPayloadTransformer;
   /**
    * Number of milliseconds to wait between polling for new jobs

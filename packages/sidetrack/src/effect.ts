@@ -152,7 +152,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
     const queues = layerOptions.queues;
     const databaseOptions = layerOptions.databaseOptions;
     const pool =
-      !layerOptions.dbClient && databaseOptions
+      !layerOptions.dbClient &&
+      !layerOptions.disableDbClientInitialization &&
+      databaseOptions
         ? new pg.Pool({ connectionString: databaseOptions.databaseUrl })
         : undefined;
 
@@ -161,9 +163,19 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       (pool
         ? usePg(pool)
         : (() => {
-            throw new Error(
-              "No database client set for sidetrack, you must pass in a connection string or a custom db client",
-            );
+            if (layerOptions.disableDbClientInitialization) {
+              return {
+                execute: () => {
+                  throw new Error(
+                    "You are trying to execute a sidetrack method without a database client passed in or initialized.",
+                  );
+                },
+              };
+            } else {
+              throw new Error(
+                "No database client set for sidetrack, you must pass in a connection string or a custom db client",
+              );
+            }
           })());
 
     const globalPayloadTransformer = layerOptions.payloadTransformer;

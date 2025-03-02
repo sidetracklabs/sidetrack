@@ -530,4 +530,23 @@ describe.concurrent("jobs", () => {
       expect((await sidetrack.getJob(job.id)).status).toBe("completed");
     });
   });
+
+  it("throws helpful error when no database client is provided", async () => {
+    const sidetrack = new SidetrackTest<{
+      test: { id: string };
+    }>({
+      disableDbClientInitialization: true,
+      queues: {
+        test: {
+          run: async (payload) => {
+            return payload;
+          },
+        },
+      },
+    });
+
+    await expect(() =>
+      sidetrack.insertJob("test", { id: "this should throw" }),
+    ).rejects.toThrow();
+  });
 });
