@@ -1,5 +1,13 @@
 # sidetrack
 
+## 0.1.11
+
+### Patch Changes
+
+- [`a7332b6`](https://github.com/sidetracklabs/sidetrack/commit/a7332b6e7173c701980ea5a0462c22dc131c7a3f) Thanks [@aniravi24](https://github.com/aniravi24)! - do not setup termination listeners until polling is actually enabled
+
+- [`5405e12`](https://github.com/sidetracklabs/sidetrack/commit/5405e12e993e138ce536e2518394fb2ffd93b935) Thanks [@aniravi24](https://github.com/aniravi24)! - Allow disabling initialization of database client
+
 ## 0.1.10
 
 ### Patch Changes
