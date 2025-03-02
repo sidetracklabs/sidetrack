@@ -196,7 +196,7 @@ describe("cron jobs", () => {
         sequence: 2,
       });
     } finally {
-      await sidetrackInstance.stop();
+      sidetrackInstance.stop();
 
       // Clean up cron jobs and their generated jobs
       for (const cronJobId of cronJobIds) {
@@ -247,7 +247,7 @@ describe("cron jobs", () => {
       const beforeCount = beforeJobs.length;
 
       // Stop the service
-      await sidetrackInstance.stop();
+      sidetrackInstance.stop();
 
       // Wait to ensure no more jobs are created
       await new Promise((resolve) => setTimeout(resolve, 2000));

@@ -79,7 +79,7 @@ describe("polling", () => {
       expect(timestamps[2]! - timestamps[1]!).toBeGreaterThanOrEqual(100);
     } finally {
       // Clean up
-      await sidetrack.stop();
+      sidetrack.stop();
 
       for (const jobId of jobIds) {
         try {
@@ -144,7 +144,7 @@ describe("polling", () => {
       const job2Time = processedJob2.attempted_at!.getTime();
       expect(Math.abs(job1Time - job2Time)).toBeLessThan(100); // Should be processed within the same polling interval
     } finally {
-      await sidetrack.stop();
+      sidetrack.stop();
 
       for (const jobId of jobIds) {
         try {
@@ -176,7 +176,7 @@ describe("polling", () => {
 
     try {
       await sidetrack.start();
-      await sidetrack.stop();
+      sidetrack.stop();
 
       const job = await sidetrack.insertJob("pollStopTest", {
         description: "Job inserted after polling stopped",
@@ -188,7 +188,7 @@ describe("polling", () => {
       const immediateStatus = await sidetrack.getJob(job.id);
       expect(immediateStatus.status).toBe("scheduled");
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Check job status - should still be scheduled
       const unprocessedJob = await sidetrack.getJob(job.id);

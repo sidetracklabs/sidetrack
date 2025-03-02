@@ -140,8 +140,8 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
   /**
    * Turn off polling
    */
-  async stop() {
-    return this.managedRuntime.runPromise(
+  stop() {
+    return this.managedRuntime.runSync(
       Effect.map(this.sidetrackService, (service) => service.stop()),
     );
   }
