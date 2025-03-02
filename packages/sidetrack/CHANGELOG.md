@@ -1,5 +1,11 @@
 # sidetrack
 
+## 0.1.12
+
+### Patch Changes
+
+- [`2d7cb41`](https://github.com/sidetracklabs/sidetrack/commit/2d7cb417887f1c980f059ffdd5876280f9b338c9) Thanks [@aniravi24](https://github.com/aniravi24)! - Manage lifetime of layer with effect scope
+
 ## 0.1.11
 
 ### Patch Changes

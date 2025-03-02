@@ -1,6 +1,6 @@
 {
   "name": "@sidetrack/client-prisma",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "files": [
     "dist",
     "README.md"
