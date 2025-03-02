@@ -1,5 +1,7 @@
 # @sidetrack/client-prisma
 
+## 0.1.12
+
 ## 0.1.11
 
 ## 0.1.10
