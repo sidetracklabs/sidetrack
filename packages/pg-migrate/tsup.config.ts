@@ -6,5 +6,4 @@ export default defineConfig((opts) => ({
   entry: ["src/index.ts"],
   external: ["pg-native"],
   format: ["cjs", "esm"],
-  minify: !opts.watch,
 }));

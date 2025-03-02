@@ -5,5 +5,4 @@ export default defineConfig((opts) => ({
   dts: true,
   entry: ["src/index.ts", "src/effect.ts", "src/cli.ts"],
   format: ["cjs", "esm"],
-  minify: !opts.watch,
 }));
