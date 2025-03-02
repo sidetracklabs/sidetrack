@@ -1,5 +1,13 @@
 # sidetrack
 
+## 0.1.13
+
+### Patch Changes
+
+- [`cf14d67`](https://github.com/sidetracklabs/sidetrack/commit/cf14d670ebc48d7eb701441a9981466aa5db73d5) Thanks [@aniravi24](https://github.com/aniravi24)! - Support initializing sidetrack on layer creation
+
+- [`f27e11d`](https://github.com/sidetracklabs/sidetrack/commit/f27e11d209325e799b2a3011b8792183b341843a) Thanks [@aniravi24](https://github.com/aniravi24)! - Add spans for functions
+
 ## 0.1.12
 
 ### Patch Changes
