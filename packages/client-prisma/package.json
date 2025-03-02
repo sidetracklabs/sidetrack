@@ -62,5 +62,6 @@
   },
   "peerDependencies": {
     "@prisma/client": ">= 4"
-  }
+  },
+  "sideEffects": false
 }
