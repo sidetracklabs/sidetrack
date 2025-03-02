@@ -203,7 +203,8 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
     // TODO we may want to handle this differently in the future so this side effect is not setup until you start polling
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     process.on("SIGTERM", () => Effect.runPromise(stop()));
-
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    process.on("SIGINT", () => Effect.runPromise(stop()));
     /**
      * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
      */
