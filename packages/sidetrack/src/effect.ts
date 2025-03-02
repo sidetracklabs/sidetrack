@@ -281,6 +281,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                   pollingFibers.push(fiber);
                 }),
               ),
+              Effect.withSpan("sidetrack.startPolling", {
+                attributes: { queue: queueName },
+              }),
             ),
           { concurrency: "inherit" },
         );
@@ -303,6 +306,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           }),
           Effect.flatMap(() => startPolling()),
           Effect.flatMap(() => startCronSchedules()),
+          Effect.withSpan("sidetrack.start"),
         );
 
       const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
@@ -311,7 +315,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
             [jobId],
           ),
-        ).pipe(Effect.asVoid);
+        ).pipe(
+          Effect.asVoid,
+          Effect.withSpan("sidetrack.cancelJob", {
+            attributes: { jobId },
+          }),
+        );
 
       // TODO should we return the deleted job or the number of rows deleted? There is a difference between a job actually being deleted and a job not being found
       const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
@@ -320,7 +329,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             `DELETE FROM sidetrack_jobs WHERE id = $1`,
             [jobId],
           ),
-        ).pipe(Effect.asVoid);
+        ).pipe(
+          Effect.asVoid,
+          Effect.withSpan("sidetrack.deleteJob", {
+            attributes: { jobId },
+          }),
+        );
 
       const stop = () => {
         pollingFibers.forEach((fiber) =>
@@ -408,6 +422,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             }),
           ),
           Effect.asVoid,
+          Effect.withSpan("sidetrack.executeJobRunner", {
+            attributes: { jobId: job.id, queue: job.queue },
+          }),
         );
 
       const insertJob = <K extends keyof Queues>(
@@ -444,7 +461,15 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               options?.uniqueKey,
             ],
           ),
-        ).pipe(Effect.map((result) => result.rows[0]!));
+        ).pipe(
+          Effect.map((result) => result.rows[0]!),
+          Effect.withSpan("sidetrack.insertJob", {
+            attributes: {
+              queue: queueName,
+              uniqueKey: options?.uniqueKey,
+            },
+          }),
+        );
 
       const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
         Effect.promise(() =>
@@ -452,7 +477,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             `SELECT * FROM sidetrack_jobs WHERE id = $1`,
             [jobId],
           ),
-        ).pipe(Effect.map((result) => result.rows[0]!));
+        ).pipe(
+          Effect.map((result) => result.rows[0]!),
+          Effect.withSpan("sidetrack.getJob", {
+            attributes: { jobId },
+          }),
+        );
 
       const scheduleCron = <K extends keyof Queues>(
         queueName: K,
@@ -490,6 +520,13 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           ),
           Effect.map((result) => result.rows[0]!),
           Effect.tap((cronJob) => startCronJob(cronJob, options)),
+          Effect.withSpan("sidetrack.scheduleCron", {
+            attributes: {
+              cronExpression,
+              queue: queueName,
+              timezone: options?.timezone,
+            },
+          }),
         );
 
       /**
@@ -506,6 +543,7 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               concurrency: "inherit",
             }),
           ),
+          Effect.withSpan("sidetrack.startCronSchedules"),
         );
 
       /**
@@ -540,6 +578,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               cronFibers.push(fiber);
             }),
           ),
+          Effect.withSpan("sidetrack.startCronJob", {
+            attributes: {
+              cronExpression: cronJob.cron_expression,
+              queue: cronJob.queue,
+            },
+          }),
         );
       };
 
@@ -554,7 +598,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             `UPDATE sidetrack_cron_jobs SET status = 'inactive' WHERE queue = $1 AND cron_expression = $2`,
             [queueName, cronExpression],
           ),
-        ).pipe(Effect.asVoid);
+        ).pipe(
+          Effect.asVoid,
+          Effect.withSpan("sidetrack.deactivateCronSchedule", {
+            attributes: { cronExpression, queue: queueName },
+          }),
+        );
 
       // TODO should we return the deleted cron job or the number of rows deleted? There is a difference between a cron job actually being deleted and a cron job not being found
       const deleteCronSchedule = <K extends keyof Queues>(
@@ -567,7 +616,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             `DELETE FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2`,
             [queueName, cronExpression],
           ),
-        ).pipe(Effect.asVoid);
+        ).pipe(
+          Effect.asVoid,
+          Effect.withSpan("sidetrack.deleteCronSchedule", {
+            attributes: { cronExpression, queue: queueName },
+          }),
+        );
 
       const runJob = (jobId: string, options?: SidetrackRunJobOptions) =>
         Effect.promise(() =>
@@ -599,12 +653,13 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               ) RETURNING *`,
             [jobId],
           ),
-        )
-
-          .pipe(
-            Effect.map((result) => result.rows[0]!),
-            Effect.flatMap((job) => executeJobRunner(job, options)),
-          );
+        ).pipe(
+          Effect.map((result) => result.rows[0]!),
+          Effect.flatMap((job) => executeJobRunner(job, options)),
+          Effect.withSpan("sidetrack.runJob", {
+            attributes: { jobId },
+          }),
+        );
 
       const runJobs = <K extends keyof Queues>(
         options?: SidetrackRunJobsOptions<Queues, K>,
@@ -645,17 +700,21 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
               ) RETURNING *`,
             options?.queue ? [options?.queue] : undefined,
           ),
-        )
-
-          .pipe(
-            Effect.map((result) => result.rows),
-            Effect.flatMap((result) =>
-              Effect.forEach(result, (job) => executeJobRunner(job, options), {
-                concurrency: "inherit",
-                discard: true,
-              }),
-            ),
-          );
+        ).pipe(
+          Effect.map((result) => result.rows),
+          Effect.flatMap((result) =>
+            Effect.forEach(result, (job) => executeJobRunner(job, options), {
+              concurrency: "inherit",
+              discard: true,
+            }),
+          ),
+          Effect.withSpan("sidetrack.runJobs", {
+            attributes: {
+              includeFutureJobs: options?.includeFutureJobs,
+              queue: options?.queue,
+            },
+          }),
+        );
 
       const listJobs = <K extends keyof Queues>(
         options?: SidetrackListJobsOptions<Queues, K>,
@@ -672,7 +731,14 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             }`,
             options?.queue ? [options?.queue] : undefined,
           ),
-        ).pipe(Effect.map((result) => result.rows));
+        ).pipe(
+          Effect.map((result) => result.rows),
+          Effect.withSpan("sidetrack.listJobs", {
+            attributes: {
+              queue: options?.queue,
+            },
+          }),
+        );
 
       const listJobStatuses = <K extends keyof Queues>(
         options?: SidetrackListJobStatusesOptions<Queues, K>,
@@ -697,6 +763,11 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           Effect.map((result) =>
             fromIterableWith(result.rows, (row) => [row.status, row.count]),
           ),
+          Effect.withSpan("sidetrack.listJobStatuses", {
+            attributes: {
+              queue: options?.queue,
+            },
+          }),
         );
 
       return {

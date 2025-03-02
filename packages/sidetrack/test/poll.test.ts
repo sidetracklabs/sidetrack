@@ -79,7 +79,7 @@ describe("polling", () => {
       expect(timestamps[2]! - timestamps[1]!).toBeGreaterThanOrEqual(100);
     } finally {
       // Clean up
-      sidetrack.stop();
+      await sidetrack.stop();
 
       for (const jobId of jobIds) {
         try {
@@ -144,7 +144,7 @@ describe("polling", () => {
       const job2Time = processedJob2.attempted_at!.getTime();
       expect(Math.abs(job1Time - job2Time)).toBeLessThan(100); // Should be processed within the same polling interval
     } finally {
-      sidetrack.stop();
+      await sidetrack.stop();
 
       for (const jobId of jobIds) {
         try {
@@ -176,7 +176,7 @@ describe("polling", () => {
 
     try {
       await sidetrack.start();
-      sidetrack.stop();
+      await sidetrack.stop();
 
       const job = await sidetrack.insertJob("pollStopTest", {
         description: "Job inserted after polling stopped",
