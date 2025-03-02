@@ -1,5 +1,14 @@
 # sidetrack
 
+## 0.1.10
+
+### Patch Changes
+
+- [`152b864`](https://github.com/sidetracklabs/sidetrack/commit/152b864d9ea72425f9879c07ff7676ac2d8c4483) Thanks [@aniravi24](https://github.com/aniravi24)! - don't minify the library
+
+- Updated dependencies [[`152b864`](https://github.com/sidetracklabs/sidetrack/commit/152b864d9ea72425f9879c07ff7676ac2d8c4483)]:
+  - @sidetrack/pg-migrate@0.1.2
+
 ## 0.1.9
 
 ### Patch Changes
