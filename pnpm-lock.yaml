@@ -90,8 +90,8 @@ importers:
   packages/client-prisma:
     dependencies:
       uuid:
-        specifier: ^11.0.0
-        version: 11.0.5
+        specifier: ^11.1.0
+        version: 11.1.0
     devDependencies:
       '@prisma/client':
         specifier: 6.4.1
@@ -152,11 +152,11 @@ importers:
   packages/sidetrack:
     dependencies:
       '@effect/cli':
-        specifier: ^0.56.1
-        version: 0.56.1(@effect/platform@0.77.1(effect@3.13.4))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(effect@3.13.4)
+        specifier: ^0.56.4
+        version: 0.56.4(@effect/platform@0.77.1(effect@3.13.4))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(effect@3.13.4)
       '@effect/platform-node':
-        specifier: ^0.73.1
-        version: 0.73.1(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)
+        specifier: ^0.73.4
+        version: 0.73.4(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)
       '@sidetrack/pg-migrate':
         specifier: workspace:*
         version: link:../pg-migrate
@@ -354,25 +354,25 @@ packages:
     resolution: {integrity: sha512-DSHae2obMSMkAtTBSOulg5X7/z+rGLxcXQIkg3OmWvY6wifojge5uVMydfhUvs7yQj+V7jNmRZ2Xzl8GJyqRgg==}
     engines: {node: '>=v18'}
 
-  '@effect/cli@0.56.1':
-    resolution: {integrity: sha512-7/wkPqil0p8YnGa6J4f59cwXWlJQQuoRlflT2FQvFbhnmPbdxraDhUSA5rAvQ1yivSVcV1IBo1TWC001b7sNww==}
+  '@effect/cli@0.56.4':
+    resolution: {integrity: sha512-1xEqfo4T53gEdwq9gTQkEA8qwTxrV3bP+2X/jmZIDHziQhV29ZB6RhdLHRH336KdPQ8VesQ5fpqsAParTWF+Xw==}
     peerDependencies:
-      '@effect/platform': ^0.77.1
-      '@effect/printer': ^0.41.1
-      '@effect/printer-ansi': ^0.41.1
-      effect: ^3.13.1
+      '@effect/platform': ^0.77.4
+      '@effect/printer': ^0.41.4
+      '@effect/printer-ansi': ^0.41.4
+      effect: ^3.13.4
 
-  '@effect/platform-node-shared@0.27.1':
-    resolution: {integrity: sha512-z3zQTwLiH3S/TcFv736F7ncAwqHU/PGW4VJeHy3ptwgaXq4QZGabn7pdE1Plx3eTcQaFNqVgeSgLoGlEKAo4rw==}
+  '@effect/platform-node-shared@0.27.4':
+    resolution: {integrity: sha512-j1Rk9BQt32c//tG6yRggbrLVYS7cFno/xpKsD7e+uYNYAjLNiSOKDi2Cl8+C4g4zpeMO81+iWQJ8giOQc8Mqpw==}
     peerDependencies:
-      '@effect/platform': ^0.77.1
-      effect: ^3.13.1
+      '@effect/platform': ^0.77.4
+      effect: ^3.13.4
 
-  '@effect/platform-node@0.73.1':
-    resolution: {integrity: sha512-gQQDb8vPBBPl7QEtzYvvD+DDj7dfkMzkP4jaekCB+LezwcwITRexSZdNglFyeOk+0wbzYle1JwJiXQkoVut6Bw==}
+  '@effect/platform-node@0.73.4':
+    resolution: {integrity: sha512-mIsOxD3mmbwDjSrsRbxYYCzmSztQSRk4Bu/wej2E3c3pKQq5nwBtob8+H+idC1ugtTyuzJs7lJGSSuACiDjTnA==}
     peerDependencies:
-      '@effect/platform': ^0.77.1
-      effect: ^3.13.1
+      '@effect/platform': ^0.77.4
+      effect: ^3.13.4
 
   '@effect/platform@0.77.1':
     resolution: {integrity: sha512-3oHbKiOLN7AIjyucZW+kH5ebG1PhEEBrsdd+HWbDQbAG0gVZfgOUmXR9cyM6M9L+9oVPgOW5mIgcEi6RvD02Cw==}
@@ -3475,8 +3475,8 @@ packages:
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
-  undici@7.3.0:
-    resolution: {integrity: sha512-Qy96NND4Dou5jKoSJ2gm8ax8AJM/Ey9o9mz7KN1bb9GP+G0l20Zw8afxTnY2f4b7hmhn/z8aC2kfArVQlAhFBw==}
+  undici@7.4.0:
+    resolution: {integrity: sha512-PUQM3/es3noM24oUn10u3kNNap0AbxESOmnssmW+dOi9yGwlUSi5nTNYl3bNbTkWOF8YZDkx2tCmj9OtQ3iGGw==}
     engines: {node: '>=20.18.1'}
 
   unicorn-magic@0.1.0:
@@ -3497,8 +3497,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@11.0.5:
-    resolution: {integrity: sha512-508e6IcKLrhxKdBbcA2b4KQZlLVp2+J5UwQ6F7Drckkc5N9ZJwFa4TgWtsww9UG8fGHbm6gbV19TdM5pQ4GaIA==}
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
 
   validate-npm-package-name@5.0.1:
@@ -3646,8 +3646,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+  ws@8.18.1:
+    resolution: {integrity: sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -3986,7 +3986,7 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.1
       chalk: 5.4.1
 
-  '@effect/cli@0.56.1(@effect/platform@0.77.1(effect@3.13.4))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(effect@3.13.4)':
+  '@effect/cli@0.56.4(@effect/platform@0.77.1(effect@3.13.4))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4))(effect@3.13.4)':
     dependencies:
       '@effect/platform': 0.77.1(effect@3.13.4)
       '@effect/printer': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.4))(effect@3.13.4)
@@ -3996,21 +3996,21 @@ snapshots:
       toml: 3.0.0
       yaml: 2.7.0
 
-  '@effect/platform-node-shared@0.27.1(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)':
+  '@effect/platform-node-shared@0.27.4(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)':
     dependencies:
       '@effect/platform': 0.77.1(effect@3.13.4)
       '@parcel/watcher': 2.5.1
       effect: 3.13.4
       multipasta: 0.2.5
 
-  '@effect/platform-node@0.73.1(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)':
+  '@effect/platform-node@0.73.4(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)':
     dependencies:
       '@effect/platform': 0.77.1(effect@3.13.4)
-      '@effect/platform-node-shared': 0.27.1(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)
+      '@effect/platform-node-shared': 0.27.4(@effect/platform@0.77.1(effect@3.13.4))(effect@3.13.4)
       effect: 3.13.4
       mime: 3.0.0
-      undici: 7.3.0
-      ws: 8.18.0
+      undici: 7.4.0
+      ws: 8.18.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -7141,7 +7141,7 @@ snapshots:
 
   undici-types@6.20.0: {}
 
-  undici@7.3.0: {}
+  undici@7.4.0: {}
 
   unicorn-magic@0.1.0: {}
 
@@ -7155,7 +7155,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  uuid@11.0.5: {}
+  uuid@11.1.0: {}
 
   validate-npm-package-name@5.0.1: {}
 
@@ -7328,7 +7328,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.18.0: {}
+  ws@8.18.1: {}
 
   xtend@4.0.2: {}
 
