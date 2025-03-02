@@ -1,5 +1,11 @@
 # @sidetrack/client-prisma
 
+## 0.1.14
+
+### Patch Changes
+
+- [`432b2e8`](https://github.com/sidetracklabs/sidetrack/commit/432b2e8bc91643ab7e6acf2f1cbe84384520833d) Thanks [@aniravi24](https://github.com/aniravi24)! - update deps
+
 ## 0.1.13
 
 ## 0.1.12
