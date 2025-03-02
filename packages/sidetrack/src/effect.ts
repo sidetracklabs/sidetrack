@@ -200,14 +200,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
     const cronFibers: Array<Fiber.RuntimeFiber<number | void, never>> = [];
 
     // Handle SIGTERM by stopping polling but allowing running jobs to complete
-    // TODO we may want to handle this differently in the future so this side effect is not setup until you start polling
     const stopListener = () => {
       process.removeListener("SIGTERM", stopListener);
       process.removeListener("SIGINT", stopListener);
       stop();
     };
-    process.on("SIGTERM", stopListener);
-    process.on("SIGINT", stopListener);
+
     /**
      * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
      */
@@ -295,6 +293,10 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         }),
         Effect.flatMap(() => startPolling()),
         Effect.flatMap(() => startCronSchedules()),
+        Effect.tap(() => {
+          process.on("SIGTERM", stopListener);
+          process.on("SIGINT", stopListener);
+        }),
       );
 
     const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
