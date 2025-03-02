@@ -96,13 +96,13 @@ export interface SidetrackJobContext<Payload> {
   job: SidetrackJob<Payload>;
 }
 
-export type SidetrackQueues<Queues extends Record<string, unknown>> = {
+export type SidetrackQueues<Queues extends SidetrackQueuesGenericType> = {
   [K in keyof Queues]: {
     maxAttempts?: number;
     payloadTransformer?: SidetrackPayloadTransformer;
     /**
      * Number of milliseconds to wait between polling for new jobs
-     * Alternatively, pass in an Duration (@link https://effect-ts.github.io/effect/effect/Duration.ts.html)
+     * Alternatively, pass in a Duration (@link https://effect-ts.github.io/effect/effect/Duration.ts.html)
      */
     pollingInterval?: PollingInterval;
     run: (
