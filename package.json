@@ -49,5 +49,5 @@
     "typedoc-github-theme": "0.2.1",
     "typescript": "5.7.3"
   },
-  "packageManager": "pnpm@10.4.1"
+  "packageManager": "pnpm@10.5.2"
 }
