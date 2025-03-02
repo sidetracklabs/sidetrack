@@ -245,7 +245,7 @@ describe("Effect API", () => {
         expect(completedJob2.status).toBe("completed");
 
         // Stop the service
-        yield* sidetrack.stop();
+        sidetrack.stop();
       });
 
       await Effect.runPromise(program.pipe(Effect.provide(sidetrackLayer)));

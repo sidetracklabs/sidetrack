@@ -94,7 +94,7 @@ export interface SidetrackService<Queues extends SidetrackQueuesGenericType> {
   /**
    * Turn off polling
    */
-  stop: () => Effect.Effect<void>;
+  stop: () => void;
 
   /**
    * Utilities meant to be used with tests only
@@ -201,10 +201,13 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
 
     // Handle SIGTERM by stopping polling but allowing running jobs to complete
     // TODO we may want to handle this differently in the future so this side effect is not setup until you start polling
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    process.on("SIGTERM", () => Effect.runPromise(stop()));
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    process.on("SIGINT", () => Effect.runPromise(stop()));
+    const stopListener = () => {
+      process.removeListener("SIGTERM", stopListener);
+      process.removeListener("SIGINT", stopListener);
+      stop();
+    };
+    process.on("SIGTERM", stopListener);
+    process.on("SIGINT", stopListener);
     /**
      * Each queue is polled separately for new jobs, and the polling interval can be configured per queue
      */
@@ -311,18 +314,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         ),
       ).pipe(Effect.asVoid);
 
-    const stop = () =>
-      Effect.all(
-        [Fiber.interruptAll(pollingFibers), Fiber.interruptAll(cronFibers)],
-        { concurrency: "inherit", discard: true },
-      ).pipe(
-        Effect.tap(() =>
-          Effect.sync(() => {
-            pollingFibers.length = 0;
-            cronFibers.length = 0;
-          }),
-        ),
-      );
+    const stop = () => {
+      pollingFibers.forEach((fiber) => fiber.unsafeInterruptAsFork(fiber.id()));
+      cronFibers.forEach((fiber) => fiber.unsafeInterruptAsFork(fiber.id()));
+      pollingFibers.length = 0;
+      cronFibers.length = 0;
+    };
 
     const executeJobRunner = (
       job: SidetrackJobs,

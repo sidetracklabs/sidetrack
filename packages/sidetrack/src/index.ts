@@ -142,7 +142,7 @@ export class Sidetrack<Queues extends SidetrackQueuesGenericType> {
    */
   async stop() {
     return this.managedRuntime.runPromise(
-      Effect.flatMap(this.sidetrackService, (service) => service.stop()),
+      Effect.map(this.sidetrackService, (service) => service.stop()),
     );
   }
 }
