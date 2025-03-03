@@ -226,30 +226,25 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             Effect.promise(() =>
               dbClient.execute<SidetrackJobs>(
                 `WITH next_jobs AS (
-        SELECT
-          id
-        FROM
-          sidetrack_jobs
-        WHERE
-          (status = 'scheduled' or status = 'retrying')
-          AND scheduled_at <= NOW()
-          AND queue = $1
-        ORDER BY
-          scheduled_at
-        FOR UPDATE SKIP LOCKED
-      )
-      UPDATE
-        sidetrack_jobs
-      SET
-        status = 'running',
-        attempted_at = NOW()
-      WHERE
-        id IN (
-          SELECT
-            id
-          FROM
-            next_jobs
-        ) RETURNING *`,
+                  SELECT
+                    id
+                  FROM
+                    sidetrack_jobs
+                  WHERE
+                    (status = 'scheduled' OR status = 'retrying')
+                    AND scheduled_at <= NOW()
+                    AND queue = $1
+                  ORDER BY
+                    scheduled_at
+                  FOR UPDATE SKIP LOCKED
+                )
+                UPDATE sidetrack_jobs
+                SET
+                  status = 'running',
+                  attempted_at = NOW()
+                WHERE
+                  id IN (SELECT id FROM next_jobs)
+                RETURNING *`,
                 [queueName],
               ),
             ).pipe(
@@ -312,7 +307,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       const cancelJob = (jobId: string, options?: SidetrackCancelJobOptions) =>
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute(
-            `UPDATE sidetrack_jobs SET status = 'cancelled', cancelled_at = NOW() WHERE id = $1`,
+            `UPDATE sidetrack_jobs
+             SET status = 'cancelled', cancelled_at = NOW()
+             WHERE id = $1`,
             [jobId],
           ),
         ).pipe(
@@ -326,7 +323,8 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       const deleteJob = (jobId: string, options?: SidetrackDeleteJobOptions) =>
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute(
-            `DELETE FROM sidetrack_jobs WHERE id = $1`,
+            `DELETE FROM sidetrack_jobs
+             WHERE id = $1`,
             [jobId],
           ),
         ).pipe(
@@ -367,7 +365,12 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           Effect.flatMap(() =>
             Effect.promise(() =>
               (options?.dbClient ?? dbClient).execute(
-                `UPDATE sidetrack_jobs SET status = 'completed', current_attempt = current_attempt + 1, completed_at = NOW() WHERE id = $1`,
+                `UPDATE sidetrack_jobs
+                 SET
+                   status = 'completed',
+                   current_attempt = current_attempt + 1,
+                   completed_at = NOW()
+                 WHERE id = $1`,
                 [job.id],
               ),
             ),
@@ -388,11 +391,18 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                 );
 
                 return (options?.dbClient ?? dbClient).execute(
-                  `UPDATE sidetrack_jobs SET status = 'retrying', scheduled_at = NOW() + interval '${backoff} seconds', current_attempt = current_attempt + 1, errors =
-                          (CASE
-                              WHEN errors IS NULL THEN '[]'::JSONB
-                              ELSE errors
-                          END) || $2::jsonb WHERE id = $1`,
+                  `UPDATE sidetrack_jobs
+                   SET
+                     status = 'retrying',
+                     scheduled_at = NOW() + interval '${backoff} seconds',
+                     current_attempt = current_attempt + 1,
+                     errors = (
+                       CASE
+                         WHEN errors IS NULL THEN '[]'::JSONB
+                         ELSE errors
+                       END
+                     ) || $2::jsonb
+                   WHERE id = $1`,
                   [
                     job.id,
                     // TODO make sure we handle cases where this is not an Error, and also not serializable?
@@ -404,11 +414,19 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
                 );
               } else {
                 return (options?.dbClient ?? dbClient).execute(
-                  `UPDATE sidetrack_jobs SET status = 'failed', attempted_at = NOW(), failed_at = NOW(), current_attempt = current_attempt + 1, errors =
-                            (CASE
-                            WHEN errors IS NULL THEN '[]'::JSONB
-                            ELSE errors
-                        END) || $2::jsonb WHERE id = $1`,
+                  `UPDATE sidetrack_jobs
+                   SET
+                     status = 'failed',
+                     attempted_at = NOW(),
+                     failed_at = NOW(),
+                     current_attempt = current_attempt + 1,
+                     errors = (
+                       CASE
+                         WHEN errors IS NULL THEN '[]'::JSONB
+                         ELSE errors
+                       END
+                     ) || $2::jsonb
+                   WHERE id = $1`,
                   [
                     job.id,
                     // TODO make sure we handle cases where this is not an Error, and also not serializable?
@@ -435,20 +453,29 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute<SidetrackJobs>(
             `INSERT INTO sidetrack_jobs (
-      status,
-      queue,
-      payload,
-      current_attempt,
-      max_attempts,
-      scheduled_at,
-      unique_key
-          ) VALUES ('scheduled', $1, $2, 0, COALESCE($3, 1), COALESCE($4, NOW()), $5)
-          ${
-            options?.suppressDuplicateUniqueKeyErrors
-              ? "ON CONFLICT (unique_key) DO NOTHING"
-              : ""
-          }
-          RETURNING *`,
+               status,
+               queue,
+               payload,
+               current_attempt,
+               max_attempts,
+               scheduled_at,
+               unique_key
+             )
+             VALUES (
+               'scheduled',
+               $1,
+               $2,
+               0,
+               COALESCE($3, 1),
+               COALESCE($4, NOW()),
+               $5
+             )
+             ${
+               options?.suppressDuplicateUniqueKeyErrors
+                 ? "ON CONFLICT (unique_key) DO NOTHING"
+                 : ""
+             }
+             RETURNING *`,
             [
               queueName,
               payloadSerializer(queueName, payload),
@@ -474,7 +501,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       const getJob = (jobId: string, options?: SidetrackGetJobOptions) =>
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute<SidetrackJobs>(
-            `SELECT * FROM sidetrack_jobs WHERE id = $1`,
+            `SELECT *
+             FROM sidetrack_jobs
+             WHERE id = $1`,
             [jobId],
           ),
         ).pipe(
@@ -501,10 +530,18 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
           Effect.flatMap((_cron) =>
             Effect.promise(() =>
               (options?.dbClient || dbClient).execute<SidetrackCronJobs>(
-                `INSERT INTO sidetrack_cron_jobs (queue, cron_expression, payload, timezone)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (queue, cron_expression) DO UPDATE
-           SET payload = $3, timezone = $4 RETURNING *`,
+                `INSERT INTO sidetrack_cron_jobs (
+                   queue,
+                   cron_expression,
+                   payload,
+                   timezone
+                 )
+                 VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (queue, cron_expression)
+                 DO UPDATE SET
+                   payload = $3,
+                   timezone = $4
+                 RETURNING *`,
                 [
                   queueName,
                   cronExpression,
@@ -535,7 +572,8 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       const startCronSchedules = () =>
         Effect.promise(() =>
           dbClient.execute<SidetrackCronJobs>(
-            `SELECT * FROM sidetrack_cron_jobs`,
+            `SELECT *
+             FROM sidetrack_cron_jobs`,
           ),
         ).pipe(
           Effect.flatMap((result) =>
@@ -595,7 +633,10 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       ) =>
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute(
-            `UPDATE sidetrack_cron_jobs SET status = 'inactive' WHERE queue = $1 AND cron_expression = $2`,
+            `UPDATE sidetrack_cron_jobs
+             SET status = 'inactive'
+             WHERE queue = $1
+             AND cron_expression = $2`,
             [queueName, cronExpression],
           ),
         ).pipe(
@@ -613,7 +654,9 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
       ) =>
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute(
-            `DELETE FROM sidetrack_cron_jobs WHERE queue = $1 AND cron_expression = $2`,
+            `DELETE FROM sidetrack_cron_jobs
+             WHERE queue = $1
+             AND cron_expression = $2`,
             [queueName, cronExpression],
           ),
         ).pipe(
@@ -627,30 +670,21 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute<SidetrackJobs>(
             `WITH next_job AS (
-              SELECT
-                id
-              FROM
-                sidetrack_jobs
-              WHERE
-                (status = 'scheduled' or status = 'retrying')
-                AND id = $1
-              ORDER BY
-                scheduled_at
-                FOR UPDATE
-                SKIP LOCKED
-            )
-            UPDATE
-              sidetrack_jobs
-            SET
-              status = 'running',
-              attempted_at = NOW()
-            WHERE
-              id IN (
-                SELECT
-                  id
-                FROM
-                  next_job
-              ) RETURNING *`,
+               SELECT id
+               FROM sidetrack_jobs
+               WHERE
+                 (status = 'scheduled' OR status = 'retrying')
+                 AND id = $1
+               ORDER BY scheduled_at
+               FOR UPDATE SKIP LOCKED
+             )
+             UPDATE sidetrack_jobs
+             SET
+               status = 'running',
+               attempted_at = NOW()
+             WHERE
+               id IN (SELECT id FROM next_job)
+             RETURNING *`,
             [jobId],
           ),
         ).pipe(
@@ -667,37 +701,28 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         Effect.promise(() =>
           (options?.dbClient ?? dbClient).execute<SidetrackJobs>(
             `WITH next_jobs AS (
-              SELECT
-                id
-              FROM
-                sidetrack_jobs
-              WHERE
-              (status = 'scheduled' or status = 'retrying')
-                ${options?.includeFutureJobs ? "" : "AND scheduled_at <= NOW()"}
-                ${
-                  options?.queue
-                    ? typeof options.queue === "string"
-                      ? "AND queue = $1"
-                      : "AND queue = ANY($1)"
-                    : ""
-                }
-              ORDER BY
-                scheduled_at
-                FOR UPDATE
-                SKIP LOCKED
-            )
-            UPDATE
-              sidetrack_jobs
-            SET
-              status = 'running',
-              attempted_at = NOW()
-            WHERE
-              id IN (
-                SELECT
-                  id
-                FROM
-                  next_jobs
-              ) RETURNING *`,
+               SELECT id
+               FROM sidetrack_jobs
+               WHERE
+                 (status = 'scheduled' OR status = 'retrying')
+                 ${options?.includeFutureJobs ? "" : "AND scheduled_at <= NOW()"}
+                 ${
+                   options?.queue
+                     ? typeof options.queue === "string"
+                       ? "AND queue = $1"
+                       : "AND queue = ANY($1)"
+                     : ""
+                 }
+               ORDER BY scheduled_at
+               FOR UPDATE SKIP LOCKED
+             )
+             UPDATE sidetrack_jobs
+             SET
+               status = 'running',
+               attempted_at = NOW()
+             WHERE
+               id IN (SELECT id FROM next_jobs)
+             RETURNING *`,
             options?.queue ? [options?.queue] : undefined,
           ),
         ).pipe(
@@ -722,13 +747,15 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
         // get jobs
         Effect.promise(() =>
           (options?.dbClient || dbClient).execute<SidetrackJobs>(
-            `SELECT * FROM sidetrack_jobs ${
-              options?.queue
-                ? typeof options.queue === "string"
-                  ? "WHERE queue = $1"
-                  : "WHERE queue = ANY($1)"
-                : ""
-            }`,
+            `SELECT *
+             FROM sidetrack_jobs
+             ${
+               options?.queue
+                 ? typeof options.queue === "string"
+                   ? "WHERE queue = $1"
+                   : "WHERE queue = ANY($1)"
+                 : ""
+             }`,
             options?.queue ? [options?.queue] : undefined,
           ),
         ).pipe(
@@ -750,13 +777,18 @@ export function layer<Queues extends SidetrackQueuesGenericType>(
             status: SidetrackJobStatusEnum;
           }>(
             // unsafely cast to int for now because you probably won't have 2 billion jobs
-            `SELECT status, count(*)::integer FROM sidetrack_jobs ${
-              options?.queue
-                ? typeof options.queue === "string"
-                  ? "WHERE queue = $1"
-                  : "WHERE queue = ANY($1)"
-                : ""
-            } GROUP BY status`,
+            `SELECT
+               status,
+               count(*)::integer
+             FROM sidetrack_jobs
+             ${
+               options?.queue
+                 ? typeof options.queue === "string"
+                   ? "WHERE queue = $1"
+                   : "WHERE queue = ANY($1)"
+                 : ""
+             }
+             GROUP BY status`,
             options?.queue ? [options?.queue] : undefined,
           ),
         ).pipe(
