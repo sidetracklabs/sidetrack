@@ -14,14 +14,14 @@
   },
   "packageRules": [
     {
-      "groupName": "effect",
-      "matchPackageNames": ["effect", "@effect/{/,}**"]
-    },
-    {
       "groupName": "all patches",
       "groupSlug": "all-patch",
       "matchPackageNames": ["*"],
       "matchUpdateTypes": ["patch"]
+    },
+    {
+      "groupName": "effect",
+      "matchPackageNames": ["effect", "@effect/{/,}**"]
     }
   ],
   "platformAutomerge": true
