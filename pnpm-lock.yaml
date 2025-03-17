@@ -112,11 +112,11 @@ importers:
         specifier: workspace:*
         version: link:../sidetrack
       vite:
-        specifier: 6.2.1
-        version: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+        specifier: 6.2.2
+        version: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
       vite-tsconfig-paths:
         specifier: 5.1.4
-        version: 5.1.4(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
+        version: 5.1.4(typescript@5.8.2)(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
       vitest:
         specifier: 3.0.8
         version: 3.0.8(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
@@ -140,11 +140,11 @@ importers:
         specifier: 8.13.3
         version: 8.13.3
       vite:
-        specifier: 6.2.1
-        version: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+        specifier: 6.2.2
+        version: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
       vite-tsconfig-paths:
         specifier: 5.1.4
-        version: 5.1.4(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
+        version: 5.1.4(typescript@5.8.2)(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
       vitest:
         specifier: 3.0.8
         version: 3.0.8(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
@@ -153,16 +153,16 @@ importers:
     dependencies:
       '@effect/cli':
         specifier: ^0.56.4
-        version: 0.56.4(@effect/platform@0.77.1(effect@3.13.8))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8))(effect@3.13.8)
+        version: 0.56.4(@effect/platform@0.77.1(effect@3.13.11))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)
       '@effect/platform-node':
         specifier: ^0.73.4
-        version: 0.73.4(@effect/platform@0.77.1(effect@3.13.8))(effect@3.13.8)
+        version: 0.73.4(@effect/platform@0.77.1(effect@3.13.11))(effect@3.13.11)
       '@sidetrack/pg-migrate':
         specifier: workspace:*
         version: link:../pg-migrate
       effect:
-        specifier: 3.13.8
-        version: 3.13.8
+        specifier: 3.13.11
+        version: 3.13.11
       pg:
         specifier: ^8.13.3
         version: 8.13.3
@@ -180,11 +180,11 @@ importers:
         specifier: 3.11.1
         version: 3.11.1
       vite:
-        specifier: 6.2.1
-        version: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+        specifier: 6.2.2
+        version: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
       vite-tsconfig-paths:
         specifier: 5.1.4
-        version: 5.1.4(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
+        version: 5.1.4(typescript@5.8.2)(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
       vitest:
         specifier: 3.0.8
         version: 3.0.8(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
@@ -1655,8 +1655,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.13.8:
-    resolution: {integrity: sha512-v4659n0zzu9UEbbs7wrsQyrWl4yaqSPQDVVMCUVtiOp54zqzIw3HK4FUr7peOkmx63aXRHofiXpmY8GXDeez+g==}
+  effect@3.13.11:
+    resolution: {integrity: sha512-SOUwX2E1ciNDPZDbSfx+YszGfIIg90sluKyx0BB6VwLIt8+NOA6tEAR3N2XI9MEOWfO/EpWzbARLnXI2hXcvaQ==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -3538,8 +3538,8 @@ packages:
       vite:
         optional: true
 
-  vite@6.2.1:
-    resolution: {integrity: sha512-n2GnqDb6XPhlt9B8olZPrgMD/es/Nd1RdChF6CBD/fHW6pUyUTt2sQW2fPRX5GiD9XEa6+8A6A4f2vT6pSsE7Q==}
+  vite@6.2.2:
+    resolution: {integrity: sha512-yW7PeMM+LkDzc7CgJuRLMW2Jz0FxMOsVJ8Lv3gpgW9WLcb9cTW+121UEr1hvmfR7w3SegR5ItvYyzVz1vxNJgQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
     peerDependencies:
@@ -4048,28 +4048,28 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.1
       chalk: 5.4.1
 
-  '@effect/cli@0.56.4(@effect/platform@0.77.1(effect@3.13.8))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8))(effect@3.13.8)':
+  '@effect/cli@0.56.4(@effect/platform@0.77.1(effect@3.13.11))(@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)':
     dependencies:
-      '@effect/platform': 0.77.1(effect@3.13.8)
-      '@effect/printer': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8)
-      '@effect/printer-ansi': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8)
-      effect: 3.13.8
+      '@effect/platform': 0.77.1(effect@3.13.11)
+      '@effect/printer': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11)
+      '@effect/printer-ansi': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11)
+      effect: 3.13.11
       ini: 4.1.3
       toml: 3.0.0
       yaml: 2.7.0
 
-  '@effect/platform-node-shared@0.27.4(@effect/platform@0.77.1(effect@3.13.8))(effect@3.13.8)':
+  '@effect/platform-node-shared@0.27.4(@effect/platform@0.77.1(effect@3.13.11))(effect@3.13.11)':
     dependencies:
-      '@effect/platform': 0.77.1(effect@3.13.8)
+      '@effect/platform': 0.77.1(effect@3.13.11)
       '@parcel/watcher': 2.5.1
-      effect: 3.13.8
+      effect: 3.13.11
       multipasta: 0.2.5
 
-  '@effect/platform-node@0.73.4(@effect/platform@0.77.1(effect@3.13.8))(effect@3.13.8)':
+  '@effect/platform-node@0.73.4(@effect/platform@0.77.1(effect@3.13.11))(effect@3.13.11)':
     dependencies:
-      '@effect/platform': 0.77.1(effect@3.13.8)
-      '@effect/platform-node-shared': 0.27.4(@effect/platform@0.77.1(effect@3.13.8))(effect@3.13.8)
-      effect: 3.13.8
+      '@effect/platform': 0.77.1(effect@3.13.11)
+      '@effect/platform-node-shared': 0.27.4(@effect/platform@0.77.1(effect@3.13.11))(effect@3.13.11)
+      effect: 3.13.11
       mime: 3.0.0
       undici: 7.4.0
       ws: 8.18.1
@@ -4077,26 +4077,26 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform@0.77.1(effect@3.13.8)':
+  '@effect/platform@0.77.1(effect@3.13.11)':
     dependencies:
-      effect: 3.13.8
+      effect: 3.13.11
       find-my-way-ts: 0.1.5
       multipasta: 0.2.5
 
-  '@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8)':
+  '@effect/printer-ansi@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11)':
     dependencies:
-      '@effect/printer': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8)
-      '@effect/typeclass': 0.32.1(effect@3.13.8)
-      effect: 3.13.8
+      '@effect/printer': 0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11)
+      '@effect/typeclass': 0.32.1(effect@3.13.11)
+      effect: 3.13.11
 
-  '@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.8))(effect@3.13.8)':
+  '@effect/printer@0.41.1(@effect/typeclass@0.32.1(effect@3.13.11))(effect@3.13.11)':
     dependencies:
-      '@effect/typeclass': 0.32.1(effect@3.13.8)
-      effect: 3.13.8
+      '@effect/typeclass': 0.32.1(effect@3.13.11)
+      effect: 3.13.11
 
-  '@effect/typeclass@0.32.1(effect@3.13.8)':
+  '@effect/typeclass@0.32.1(effect@3.13.11)':
     dependencies:
-      effect: 3.13.8
+      effect: 3.13.11
 
   '@electric-sql/pglite@0.2.17': {}
 
@@ -4761,13 +4761,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.0.8(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))':
+  '@vitest/mocker@3.0.8(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))':
     dependencies:
       '@vitest/spy': 3.0.8
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+      vite: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
 
   '@vitest/pretty-format@3.0.8':
     dependencies:
@@ -5223,7 +5223,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.13.8:
+  effect@3.13.11:
     dependencies:
       '@standard-schema/spec': 1.0.0
       fast-check: 3.23.2
@@ -7227,7 +7227,7 @@ snapshots:
       debug: 4.4.0
       es-module-lexer: 1.6.0
       pathe: 2.0.3
-      vite: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+      vite: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -7242,18 +7242,18 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@5.1.4(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)):
+  vite-tsconfig-paths@5.1.4(typescript@5.8.2)(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)):
     dependencies:
       debug: 4.4.0
       globrex: 0.1.2
       tsconfck: 3.1.5(typescript@5.8.2)
     optionalDependencies:
-      vite: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+      vite: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0):
+  vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0):
     dependencies:
       esbuild: 0.25.0
       postcss: 8.5.3
@@ -7267,7 +7267,7 @@ snapshots:
   vitest@3.0.8(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 3.0.8
-      '@vitest/mocker': 3.0.8(vite@6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
+      '@vitest/mocker': 3.0.8(vite@6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0))
       '@vitest/pretty-format': 3.0.8
       '@vitest/runner': 3.0.8
       '@vitest/snapshot': 3.0.8
@@ -7283,7 +7283,7 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 2.0.0
-      vite: 6.2.1(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
+      vite: 6.2.2(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
       vite-node: 3.0.8(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
