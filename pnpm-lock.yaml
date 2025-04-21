@@ -78,11 +78,11 @@ importers:
         specifier: 2.4.4
         version: 2.4.4
       typedoc:
-        specifier: 0.28.2
-        version: 0.28.2(typescript@5.8.3)
+        specifier: 0.28.3
+        version: 0.28.3(typescript@5.8.3)
       typedoc-github-theme:
         specifier: 0.2.1
-        version: 0.2.1(typedoc@0.28.2(typescript@5.8.3))
+        version: 0.2.1(typedoc@0.28.3(typescript@5.8.3))
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -128,8 +128,8 @@ importers:
         version: 3.0.1
     devDependencies:
       '@types/pg':
-        specifier: 8.11.12
-        version: 8.11.12
+        specifier: 8.11.13
+        version: 8.11.13
       '@vitest/coverage-v8':
         specifier: 3.0.9
         version: 3.0.9(vitest@3.0.9(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.1))
@@ -168,8 +168,8 @@ importers:
         version: 8.13.3
     devDependencies:
       '@types/pg':
-        specifier: 8.11.12
-        version: 8.11.12
+        specifier: 8.11.13
+        version: 8.11.13
       '@vitest/coverage-v8':
         specifier: 3.0.9
         version: 3.0.9(vitest@3.0.9(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.1))
@@ -1012,8 +1012,8 @@ packages:
   '@types/node@22.13.4':
     resolution: {integrity: sha512-ywP2X0DYtX3y08eFVx5fNIw7/uIv8hYUKgXoK8oayJlLnKcRfEYCxWMVE1XagUdVtCJlZT1AU4LXEABW+L1Peg==}
 
-  '@types/pg@8.11.12':
-    resolution: {integrity: sha512-D8qPxnq0rgpvZPYwMxAZffxvlk2mtgimLC5kos8uM7+3wPKfTESxtpD49cfB5w1UnodZL7oYnjFHT5+cB3Gw9Q==}
+  '@types/pg@8.11.13':
+    resolution: {integrity: sha512-6kXByGkvRvwXLuyaWzsebs2du6+XuAB2CuMsuzP7uaihQahshVgSmB22Pmh0vQMkQ1h5+PZU0d+Di1o+WpVWJg==}
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -3389,8 +3389,8 @@ packages:
     peerDependencies:
       typedoc: ^0.27.6
 
-  typedoc@0.28.2:
-    resolution: {integrity: sha512-9Giuv+eppFKnJ0oi+vxqLM817b/IrIsEMYgy3jj6zdvppAfDqV3d6DXL2vXUg2TnlL62V48th25Zf/tcQKAJdg==}
+  typedoc@0.28.3:
+    resolution: {integrity: sha512-5svOCTfXvVSh6zbZKSQluZhR8yN2tKpTeHZxlmWpE6N5vc3R8k/jhg9nnD6n5tN9/ObuQTojkONrOxFdUFUG9w==}
     engines: {node: '>= 18', pnpm: '>= 10'}
     hasBin: true
     peerDependencies:
@@ -4504,7 +4504,7 @@ snapshots:
     dependencies:
       undici-types: 6.20.0
 
-  '@types/pg@8.11.12':
+  '@types/pg@8.11.13':
     dependencies:
       '@types/node': 22.13.4
       pg-protocol: 1.8.0
@@ -7069,11 +7069,11 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-github-theme@0.2.1(typedoc@0.28.2(typescript@5.8.3)):
+  typedoc-github-theme@0.2.1(typedoc@0.28.3(typescript@5.8.3)):
     dependencies:
-      typedoc: 0.28.2(typescript@5.8.3)
+      typedoc: 0.28.3(typescript@5.8.3)
 
-  typedoc@0.28.2(typescript@5.8.3):
+  typedoc@0.28.3(typescript@5.8.3):
     dependencies:
       '@gerrit0/mini-shiki': 3.2.2
       lunr: 2.3.9
