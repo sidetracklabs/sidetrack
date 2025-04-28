@@ -128,8 +128,8 @@ importers:
         version: 3.0.1
     devDependencies:
       '@types/pg':
-        specifier: 8.11.13
-        version: 8.11.13
+        specifier: 8.11.14
+        version: 8.11.14
       '@vitest/coverage-v8':
         specifier: 3.0.9
         version: 3.0.9(vitest@3.0.9(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.1))
@@ -168,8 +168,8 @@ importers:
         version: 8.13.3
     devDependencies:
       '@types/pg':
-        specifier: 8.11.13
-        version: 8.11.13
+        specifier: 8.11.14
+        version: 8.11.14
       '@vitest/coverage-v8':
         specifier: 3.0.9
         version: 3.0.9(vitest@3.0.9(@types/node@22.13.4)(jiti@2.4.2)(yaml@2.7.1))
@@ -1012,8 +1012,8 @@ packages:
   '@types/node@22.13.4':
     resolution: {integrity: sha512-ywP2X0DYtX3y08eFVx5fNIw7/uIv8hYUKgXoK8oayJlLnKcRfEYCxWMVE1XagUdVtCJlZT1AU4LXEABW+L1Peg==}
 
-  '@types/pg@8.11.13':
-    resolution: {integrity: sha512-6kXByGkvRvwXLuyaWzsebs2du6+XuAB2CuMsuzP7uaihQahshVgSmB22Pmh0vQMkQ1h5+PZU0d+Di1o+WpVWJg==}
+  '@types/pg@8.11.14':
+    resolution: {integrity: sha512-qyD11E5R3u0eJmd1lB0WnWKXJGA7s015nyARWljfz5DcX83TKAIlY+QrmvzQTsbIe+hkiFtkyL2gHC6qwF6Fbg==}
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -4504,7 +4504,7 @@ snapshots:
     dependencies:
       undici-types: 6.20.0
 
-  '@types/pg@8.11.13':
+  '@types/pg@8.11.14':
     dependencies:
       '@types/node': 22.13.4
       pg-protocol: 1.8.0
