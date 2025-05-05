@@ -26,7 +26,7 @@
     "@changesets/cli": "2.29.2",
     "@commitlint/cli": "19.8.0",
     "@commitlint/config-conventional": "19.8.0",
-    "@eslint/compat": "1.2.8",
+    "@eslint/compat": "1.2.9",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.23.0",
     "@manypkg/cli": "0.24.0",
@@ -45,7 +45,7 @@
     "prettier-plugin-sort-json": "4.1.1",
     "tsup": "8.4.0",
     "turbo": "2.4.4",
-    "typedoc": "0.28.3",
+    "typedoc": "0.28.4",
     "typedoc-github-theme": "0.2.1",
     "typescript": "5.8.3"
   },
