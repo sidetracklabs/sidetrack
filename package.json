@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.5.1",
-    "@changesets/cli": "2.29.3",
+    "@changesets/cli": "2.29.4",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@eslint/compat": "1.2.9",
@@ -45,7 +45,7 @@
     "prettier-plugin-sort-json": "4.1.1",
     "tsup": "8.4.0",
     "turbo": "2.4.4",
-    "typedoc": "0.28.4",
+    "typedoc": "0.28.5",
     "typedoc-github-theme": "0.2.1",
     "typescript": "5.8.3"
   },
