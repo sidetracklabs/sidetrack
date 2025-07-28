@@ -30,8 +30,8 @@ importers:
         specifier: 9.31.0
         version: 9.31.0
       '@manypkg/cli':
-        specifier: 0.24.0
-        version: 0.24.0
+        specifier: 0.25.0
+        version: 0.25.0
       '@typescript-eslint/eslint-plugin':
         specifier: 8.29.1
         version: 8.29.1(@typescript-eslint/parser@8.29.1(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3)
@@ -708,27 +708,27 @@ packages:
   '@kristiandupont/recase@1.4.0':
     resolution: {integrity: sha512-73wONbV4OhCCs7wKytDNKY0VMw5GbzdiqeovViockpBbKy7GYLdqoT/8T80jptn/E3HccEV1oJ33cSw6/ggIlg==}
 
-  '@manypkg/cli@0.24.0':
-    resolution: {integrity: sha512-O1vbx4TnwaeeDXlNaa+N0LIKg3JmI2gEG8JaGn97UuXgiXJIYlAhfepJTykICV0i0oQHvb0xNfNmvYhwJ/cGgA==}
+  '@manypkg/cli@0.25.0':
+    resolution: {integrity: sha512-qohYlbfx4RdQX6OqRR0yW7duYzSxgzB/gfHuJA+RDOrbNXhLh/3KQxcH9FxyRqr69OP+CjuEeWZVRfLhfJjqfw==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
 
-  '@manypkg/find-root@3.0.0':
-    resolution: {integrity: sha512-uO3Rag7b0upqBGTJyZN2dPwaBdbGBZwT892RkUxzEgxgWccHGM5hZnXAy13Es95CVpsJ/QuEb2uNJ8pYBK0ZlA==}
+  '@manypkg/find-root@3.1.0':
+    resolution: {integrity: sha512-BcSqCyKhBVZ5YkSzOiheMCV41kqAFptW6xGqYSTjkVTl9XQpr+pqHhwgGCOHQtjDCv7Is6EFyA14Sm5GVbVABA==}
     engines: {node: '>=20.0.0'}
 
   '@manypkg/get-packages@1.1.3':
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
 
-  '@manypkg/get-packages@3.0.0':
-    resolution: {integrity: sha512-C5TGJoG/MaVGt0HDij+RYQxVw/O/GDNJc4+qwv8g6wtbGEE8wawCcrQns8+qaNsZJybTTHYgdw7eD3wQhuxTng==}
+  '@manypkg/get-packages@3.1.0':
+    resolution: {integrity: sha512-0TbBVyvPrP7xGYBI/cP8UP+yl/z+HtbTttAD7FMAJgn/kXOTwh5/60TsqP9ZYY710forNfyV0N8P/IE/ujGZJg==}
     engines: {node: '>=20.0.0'}
 
-  '@manypkg/tools@2.0.0':
-    resolution: {integrity: sha512-o4ZC8J9OmFT6Ar8hhObWrFe7M7TRFuskm8ROhroZZWdQ+/V1+RswP74wJkkDKY/VDcteKYCACq2PblifRRnj1g==}
+  '@manypkg/tools@2.1.0':
+    resolution: {integrity: sha512-0FOIepYR4ugPYaHwK7hDeHDkfPOBVvayt9QpvRbi2LT/h2b0GaE/gM9Gag7fsnyYyNaTZ2IGyOuVg07IYepvYQ==}
     engines: {node: '>=20.0.0'}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -4245,9 +4245,9 @@ snapshots:
     dependencies:
       ramda: 0.30.1
 
-  '@manypkg/cli@0.24.0':
+  '@manypkg/cli@0.25.0':
     dependencies:
-      '@manypkg/get-packages': 3.0.0
+      '@manypkg/get-packages': 3.1.0
       detect-indent: 7.0.1
       normalize-path: 3.0.0
       p-limit: 6.2.0
@@ -4266,9 +4266,9 @@ snapshots:
       find-up: 4.1.0
       fs-extra: 8.1.0
 
-  '@manypkg/find-root@3.0.0':
+  '@manypkg/find-root@3.1.0':
     dependencies:
-      '@manypkg/tools': 2.0.0
+      '@manypkg/tools': 2.1.0
 
   '@manypkg/get-packages@1.1.3':
     dependencies:
@@ -4279,12 +4279,12 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@manypkg/get-packages@3.0.0':
+  '@manypkg/get-packages@3.1.0':
     dependencies:
-      '@manypkg/find-root': 3.0.0
-      '@manypkg/tools': 2.0.0
+      '@manypkg/find-root': 3.1.0
+      '@manypkg/tools': 2.1.0
 
-  '@manypkg/tools@2.0.0':
+  '@manypkg/tools@2.1.0':
     dependencies:
       jju: 1.4.0
       js-yaml: 4.1.0
