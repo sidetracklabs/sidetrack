@@ -11,8 +11,9 @@ env:
   HUSKY: 0
 
 permissions:
-  id-token: write  # Required for OIDC trusted publishing
-  contents: read
+  id-token: write
+  contents: write
+  pull-requests: write
 
 jobs:
   run:
