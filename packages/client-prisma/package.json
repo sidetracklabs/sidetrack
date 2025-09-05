@@ -56,7 +56,7 @@
     "dotenv-cli": "10.0.0",
     "prisma": "6.15.0",
     "sidetrack": "workspace:*",
-    "vite": "6.3.5",
+    "vite": "7.1.4",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4"
   },
