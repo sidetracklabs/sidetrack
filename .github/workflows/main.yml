@@ -10,6 +10,10 @@ on:
 env:
   HUSKY: 0
 
+permissions:
+  id-token: write  # Required for OIDC trusted publishing
+  contents: read
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -26,6 +30,10 @@ jobs:
         with:
           node-version: 18
           cache: "pnpm"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
 
       - name: Install deps
         run: pnpm install && pnpm postinstall-steps
@@ -38,7 +46,7 @@ jobs:
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ''
 
       - name: Generate docs
         if: steps.changesets.outputs.published == 'true'
