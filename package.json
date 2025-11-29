@@ -22,12 +22,12 @@
     }
   },
   "devDependencies": {
-    "@changesets/changelog-github": "0.5.1",
-    "@changesets/cli": "2.29.7",
+    "@changesets/changelog-github": "0.5.2",
+    "@changesets/cli": "2.29.8",
     "@commitlint/cli": "20.1.0",
     "@commitlint/config-conventional": "20.0.0",
     "@eslint/compat": "1.4.1",
-    "@eslint/eslintrc": "3.3.1",
+    "@eslint/eslintrc": "3.3.3",
     "@eslint/js": "9.39.1",
     "@manypkg/cli": "0.25.1",
     "@typescript-eslint/eslint-plugin": "8.46.3",
@@ -43,9 +43,9 @@
     "husky": "9.1.7",
     "prettier": "3.6.2",
     "prettier-plugin-sort-json": "4.1.1",
-    "tsup": "8.5.0",
+    "tsup": "8.5.1",
     "turbo": "2.5.6",
-    "typedoc": "0.28.14",
+    "typedoc": "0.28.15",
     "typedoc-github-theme": "0.3.1",
     "typescript": "5.9.3"
   },
