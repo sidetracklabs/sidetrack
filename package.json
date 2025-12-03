@@ -41,7 +41,7 @@
     "eslint-plugin-sort-keys": "2.3.5",
     "eslint-plugin-typescript-sort-keys": "3.3.0",
     "husky": "9.1.7",
-    "prettier": "3.6.2",
+    "prettier": "3.7.4",
     "prettier-plugin-sort-json": "4.1.1",
     "tsup": "8.5.0",
     "turbo": "2.5.6",
